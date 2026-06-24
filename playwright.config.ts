@@ -7,6 +7,8 @@ export default defineConfig({
   testDir: './e2e',
   timeout: 60_000,
   fullyParallel: false,
+  // list für die Konsole, html als hochladbares CI-Artefakt.
+  reporter: [['list'], ['html', { open: 'never' }]],
   // Ein Worker: die Tests teilen sich den Demo-Disponenten; paralleles
   // Neu-Einrichten der 2FA würde die TOTP-Secrets überschreiben (Race).
   workers: 1,
