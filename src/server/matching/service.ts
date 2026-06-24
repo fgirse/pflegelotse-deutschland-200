@@ -1,0 +1,55 @@
+import { HaversineRoutingProvider } from '@/server/routing/HaversineRoutingProvider'
+import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
+import { fitScore } from './fitScore'
+import type { FitScoreRequest, FitMatch, Tour } from '@/shared/domain'
+
+// Verdrahtet den Routing-Adapter (aktuell Haversine) mit dem Matrix-Cache.
+// Austausch gegen OSRM/VROOM betrifft nur diese eine Zeile.
+const routing = new CachedRoutingProvider(
+  new HaversineRoutingProvider(),
+  new InMemoryMatrixCache(),
+)
+
+// Berechnet den Fit-Score eines Kandidaten gegen mehrere Touren.
+export async function berechneFitScore(
+  touren: Tour[],
+  kandidat: FitScoreRequest['kandidat'],
+): Promise<{ matches: FitMatch[]; geprueft: number; rechenzeitMs: number }> {
+  const start = performance.now()
+  const matches = await fitScore(touren, kandidat, routing)
+  return {
+    matches,
+    geprueft: touren.length,
+    rechenzeitMs: Math.round((performance.now() - start) * 10) / 10,
+  }
+}
+
+// Plant eine Tour: berechnet je Einsatz die Ankunftszeit und liefert
+// zusätzlich die Kennzahlen (Gesamtfahrzeit, Auslastung in Prozent der
+// verfügbaren Zeit). Wird nach dem Aufnehmen eines Klienten aufgerufen.
+export async function planeTour(tour: Tour): Promise<{
+  einsaetze: Tour['einsaetze']
+  fahrzeitMin: number
+  auslastungProzent: number
+}> {
+  const punkte = [tour.start, ...tour.einsaetze.map((e) => e.geo)]
+  const matrix = await routing.travelMatrix(punkte)
+
+  let t = tour.startZeit
+  let fahrzeit = 0
+  let pflege = 0
+  const einsaetze = tour.einsaetze.map((e, i) => {
+    const reise = matrix[i][i + 1] // von vorherigem Punkt zu diesem Einsatz
+    fahrzeit += reise
+    const ankunft = t + reise
+    const beginn = Math.max(ankunft, e.zeitfenster.von)
+    t = beginn + e.dauerMin
+    pflege += e.dauerMin
+    return { ...e, ankunft: Math.round(ankunft) }
+  })
+
+  // Auslastung = Pflegezeit / (Pflegezeit + Fahrzeit), grob als Effizienzmaß.
+  const gesamt = pflege + fahrzeit
+  const auslastung = gesamt > 0 ? Math.round((pflege / gesamt) * 100) : 0
+  return { einsaetze, fahrzeitMin: Math.round(fahrzeit), auslastungProzent: auslastung }
+}

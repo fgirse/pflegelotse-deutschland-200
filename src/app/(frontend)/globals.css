@@ -1,0 +1,33 @@
+@import 'tailwindcss';
+
+/* Design-Tokens für PflegeLotse. Bewusst ruhig und kontraststark
+   (WCAG 2.1 AA, /Q400/) — keine Farbe als alleiniger Bedeutungsträger. */
+:root {
+  --hintergrund: #f8fafc;
+  --vordergrund: #0f172a;
+}
+
+body {
+  background: var(--hintergrund);
+  color: var(--vordergrund);
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+}
+
+/* Bewegungsreduktion respektieren (/Q400/). */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Sichtbarer Fokusring für Tastaturbedienung. */
+:focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 2px;
+}

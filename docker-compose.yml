@@ -1,0 +1,29 @@
+# Lokale Entwicklung: MongoDB als Single-Node-Replica-Set.
+# Das Replica-Set ist Pflicht, weil Payload/Mongo Transaktionen nutzen
+# (u. a. für den atomaren Crypto-Shredding-Pfad: Löschung + Audit-Eintrag).
+services:
+  mongo:
+    image: mongo:7
+    container_name: pflegelotse-mongo
+    command: ['--replSet', 'rs0', '--bind_ip_all']
+    ports:
+      # Host-Port 27018, um einer evtl. vorhandenen lokalen Mongo (27017)
+      # nicht in die Quere zu kommen. Im Container bleibt es 27017.
+      - '27018:27017'
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      # Initialisiert das Replica-Set beim ersten Hochfahren (idempotent).
+      test: >
+        mongosh --quiet --eval "
+          try { rs.status() } catch (e) {
+            rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]})
+          }
+        "
+      interval: 5s
+      timeout: 10s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  mongo-data:

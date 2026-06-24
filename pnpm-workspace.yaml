@@ -1,0 +1,18 @@
+# pnpm-Workspace-Konfiguration. Payloads Tooling ist pnpm-orientiert.
+# verifyDepsBeforeRun: false verhindert, dass pnpm vor jedem Skript die
+# Abhängigkeiten erneut prüft (spart Zeit im Dev-Loop).
+verifyDepsBeforeRun: false
+
+# Build-Skripte, denen wir das Ausführen während der Installation erlauben
+# (pnpm 10+ blockt sie sonst aus Sicherheitsgründen).
+onlyBuiltDependencies:
+  - sharp
+  - esbuild
+  - unrs-resolver
+  - mongodb-client-encryption
+
+allowBuilds:
+  esbuild: set this to true or false
+  mongodb-client-encryption: set this to true or false
+  sharp: set this to true or false
+  unrs-resolver: set this to true or false
