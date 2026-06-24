@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "pnpm install --frozen-lockfile --ignore-scripts",
   "crons": [
     {
       "path": "/api/v1/cron/sla",
