@@ -1,0 +1,67 @@
+name: CI
+
+# Typecheck, Lint und Unit-/Integrationstests bei jedem Push auf main und bei PRs.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Laufende Läufe für denselben Ref abbrechen, wenn ein neuer kommt.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # Standalone-MongoDB für die Typgenerierung und den $jsonSchema-PII-Test.
+    # (Kein Replica-Set nötig — die Integrationstests nutzen keine Transaktionen.)
+    services:
+      mongo:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Dummy-Secrets für die Env-Validierung (src/lib/env.ts) — keine echten Werte.
+      DATABASE_URI: mongodb://localhost:27017/pflege_test
+      PAYLOAD_SECRET: ci-dummy-secret
+      ENCRYPTION_MASTER_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      AUDIT_PEPPER: ci-dummy-pepper
+      AUDIT_PEPPER_VERSION: ci
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: pnpm einrichten
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.0.8
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Abhängigkeiten installieren
+        run: pnpm install --frozen-lockfile
+
+      - name: Payload-Typen generieren
+        run: pnpm run generate:types
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Unit- & Integrationstests (vitest)
+        run: pnpm run test:unit
