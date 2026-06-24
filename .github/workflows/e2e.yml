@@ -1,0 +1,89 @@
+name: E2E
+
+# Manuell auslösbar (Actions-Tab → „Run workflow"). Die Playwright-E2E-Tests
+# brauchen die laufende App + ein MongoDB-Replica-Set (Payload nutzt Transaktionen).
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      # Lokales Single-Node-Replica-Set (directConnection für RS mit einem Knoten).
+      DATABASE_URI: mongodb://localhost:27017/pflege_e2e?replicaSet=rs0&directConnection=true
+      PAYLOAD_SECRET: ci-dummy-secret
+      ENCRYPTION_MASTER_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      AUDIT_PEPPER: ci-dummy-pepper
+      AUDIT_PEPPER_VERSION: ci
+      NEXT_PUBLIC_SERVER_URL: http://localhost:3000
+      # CSFLE aus → lokaler App-Crypto-Adapter (kein natives mongocrypt nötig).
+      CSFLE_ENABLED: 'false'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: MongoDB-Replica-Set starten (Docker)
+        run: |
+          docker run -d --name mongo -p 27017:27017 mongo:7 --replSet rs0 --bind_ip_all
+          echo "Warte auf mongod …"
+          for i in $(seq 1 30); do
+            if docker exec mongo mongosh --quiet --eval "db.adminCommand({ ping: 1 })" >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+          docker exec mongo mongosh --quiet --eval "try { rs.status() } catch (e) { rs.initiate({_id:'rs0',members:[{_id:0,host:'localhost:27017'}]}) }"
+          echo "Warte auf Primary …"
+          for i in $(seq 1 30); do
+            if [ "$(docker exec mongo mongosh --quiet --eval 'rs.status().myState' 2>/dev/null)" = "1" ]; then echo "Primary bereit"; break; fi
+            sleep 2
+          done
+
+      - name: pnpm einrichten
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.0.8
+
+      - name: Node einrichten
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Abhängigkeiten installieren
+        run: pnpm install --frozen-lockfile --ignore-scripts
+
+      - name: .env schreiben (für db:init/db:seed/dev)
+        run: |
+          cat > .env <<EOF
+          DATABASE_URI=${DATABASE_URI}
+          PAYLOAD_SECRET=${PAYLOAD_SECRET}
+          ENCRYPTION_MASTER_KEY=${ENCRYPTION_MASTER_KEY}
+          AUDIT_PEPPER=${AUDIT_PEPPER}
+          AUDIT_PEPPER_VERSION=${AUDIT_PEPPER_VERSION}
+          NEXT_PUBLIC_SERVER_URL=${NEXT_PUBLIC_SERVER_URL}
+          CSFLE_ENABLED=${CSFLE_ENABLED}
+          EOF
+
+      - name: Payload-Typen generieren
+        run: pnpm run generate:types
+
+      - name: Playwright-Browser installieren
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: DB initialisieren & seeden
+        run: |
+          pnpm run db:init
+          # Seed mit einem Retry (transienter LockTimeout direkt nach RS-Init möglich).
+          pnpm run db:seed || (sleep 5 && pnpm run db:seed)
+
+      - name: E2E-Tests (Playwright)
+        run: pnpm run test:e2e
+
+      - name: Playwright-Report hochladen
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
