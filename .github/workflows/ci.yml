@@ -52,7 +52,10 @@ jobs:
           cache: pnpm
 
       - name: Abhängigkeiten installieren
-        run: pnpm install --frozen-lockfile
+        # --ignore-scripts: native Build-Skripte (mongocrypt, sharp, esbuild,
+        # unrs-resolver) überspringen. Sie werden für Typecheck/Lint/vitest nicht
+        # benötigt; ohne das Flag bricht pnpm im CI mit ERR_PNPM_IGNORED_BUILDS ab.
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Payload-Typen generieren
         run: pnpm run generate:types
