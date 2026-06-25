@@ -18,7 +18,8 @@ function haversineKm(a: Geo, b: Geo): number {
 // Heuristischer Routing-Adapter: Luftlinie × Umwegfaktor / Geschwindigkeit.
 // Der Umwegfaktor (1.3) nähert reale Straßenführung an; die
 // Durchschnittsgeschwindigkeit (~30 km/h) entspricht Stadt-/Vorortverkehr.
-// Bewusst grob — als Platzhalter, bis OSRM echte Fahrzeiten liefert.
+// Bewusst grob: Standard ohne Infrastruktur und Sicherheitsnetz, wenn der
+// OsrmRoutingProvider (echtes Straßenrouting) ausfällt.
 export class HaversineRoutingProvider implements RoutingProvider {
   constructor(
     private readonly umwegFaktor = 1.3,

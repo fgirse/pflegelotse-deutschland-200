@@ -10,6 +10,12 @@ const schema = z.object({
   AUDIT_PEPPER: z.string().min(1, 'AUDIT_PEPPER fehlt'),
   AUDIT_PEPPER_VERSION: z.string().default('2026-v1'),
   NEXT_PUBLIC_SERVER_URL: z.string().default('http://localhost:3000'),
+  // Routing: 'haversine' (Heuristik, keine Infra) oder 'osrm' (echtes
+  // Straßenrouting über einen OSRM-Server). Bei 'osrm' muss OSRM_BASE_URL
+  // gesetzt sein; fällt bei Ausfall automatisch auf Haversine zurück.
+  ROUTING_PROVIDER: z.enum(['haversine', 'osrm']).default('haversine'),
+  OSRM_BASE_URL: z.string().optional(), // z. B. https://router.project-osrm.org
+  OSRM_PROFILE: z.string().default('driving'),
   // SLA / Benachrichtigungen (optional).
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default('Pflegelotse <info@example.de>'),

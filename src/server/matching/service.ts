@@ -1,14 +1,26 @@
 import { HaversineRoutingProvider } from '@/server/routing/HaversineRoutingProvider'
+import { OsrmRoutingProvider } from '@/server/routing/OsrmRoutingProvider'
+import { FallbackRoutingProvider } from '@/server/routing/FallbackRoutingProvider'
+import type { RoutingProvider } from '@/server/routing/RoutingProvider'
 import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
 import { fitScore } from './fitScore'
+import { env } from '@/lib/env'
 import type { FitScoreRequest, FitMatch, Tour } from '@/shared/domain'
 
-// Verdrahtet den Routing-Adapter (aktuell Haversine) mit dem Matrix-Cache.
-// Austausch gegen OSRM/VROOM betrifft nur diese eine Zeile.
-const routing = new CachedRoutingProvider(
-  new HaversineRoutingProvider(),
-  new InMemoryMatrixCache(),
-)
+// Composition Root des Routings: wählt den Adapter anhand der Env. Bei 'osrm'
+// echtes Straßenrouting mit Haversine als Sicherheitsnetz; sonst die
+// Heuristik. Alles wird in den Matrix-Cache gehüllt (interaktive Antwort).
+function baueRouting(): RoutingProvider {
+  const haversine = new HaversineRoutingProvider()
+  let inner: RoutingProvider = haversine
+  if (env.ROUTING_PROVIDER === 'osrm' && env.OSRM_BASE_URL) {
+    const osrm = new OsrmRoutingProvider(env.OSRM_BASE_URL, env.OSRM_PROFILE)
+    inner = new FallbackRoutingProvider(osrm, haversine)
+  }
+  return new CachedRoutingProvider(inner, new InMemoryMatrixCache())
+}
+
+const routing = baueRouting()
 
 // Berechnet den Fit-Score eines Kandidaten gegen mehrere Touren.
 export async function berechneFitScore(
