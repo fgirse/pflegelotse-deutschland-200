@@ -3,6 +3,8 @@ import { Figtree, Noto_Sans } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { notFound } from 'next/navigation'
 import { setRequestLocale, getMessages } from 'next-intl/server'
+import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { routing } from '@/i18n/routing'
 import { SiteHeader, SiteFooter } from './SiteChrome'
 import '../globals.css'
@@ -47,6 +49,10 @@ export default async function LocaleLayout({
           <div id="inhalt">{children}</div>
           <SiteFooter />
         </NextIntlClientProvider>
+        {/* Vercel Monitoring: Traffic (Analytics) + Web-Vitals (Speed Insights).
+            Cookielos, ohne PII; senden nur in der Vercel-Produktion. */}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   )

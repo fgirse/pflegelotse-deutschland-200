@@ -13,3 +13,6 @@ node_modules
 # OSRM-Routing: Kartendaten und gebaute Graphen (groß, nicht versionieren)
 infra/osrm/data/
 infra/osrm/.env
+
+# Lokale Env-Dateien (z. B. von `vercel env pull`), aber .env.example bleibt versioniert.
+.env*.local
