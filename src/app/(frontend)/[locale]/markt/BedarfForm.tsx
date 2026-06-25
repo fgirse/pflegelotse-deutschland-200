@@ -87,16 +87,16 @@ export function BedarfForm() {
     }
   }
 
-  const inputCls = 'mt-1 w-full rounded-md border border-slate-300 px-3 py-2'
+  const inputCls = 'input'
 
   return (
-    <div className="mt-6 rounded-lg border bg-white p-5">
-      <p className="mb-4 rounded-md bg-blue-50 p-3 text-sm text-blue-900">{t('hinweisAnonym')}</p>
+    <div className="card mt-6 p-5 sm:p-6">
+      <p className="mb-5 rounded-lg bg-[var(--color-accent-soft)] p-3 text-sm text-[var(--color-accent)]">{t('hinweisAnonym')}</p>
 
       {schritt === 1 && (
         <div className="flex flex-col gap-4">
-          <h2 className="font-semibold">{t('step1')}</h2>
-          <label className="block text-sm">
+          <h2 className="font-display text-lg font-semibold">{t('step1')}</h2>
+          <label className="label">
             {t('ort')}
             <select value={ort} onChange={(e) => setOrt(e.target.value as keyof typeof ORTE)} className={inputCls}>
               {Object.keys(ORTE).map((o) => (
@@ -104,7 +104,7 @@ export function BedarfForm() {
               ))}
             </select>
           </label>
-          <label className="block text-sm">
+          <label className="label">
             {t('pflegegrad')}
             <select value={pflegegrad} onChange={(e) => setPflegegrad(Number(e.target.value))} className={inputCls}>
               {[1, 2, 3, 4, 5].map((g) => (
@@ -112,36 +112,36 @@ export function BedarfForm() {
               ))}
             </select>
           </label>
-          <label className="block text-sm">
+          <label className="label">
             {t('qualifikation')}
             <select value={qualifikation} onChange={(e) => setQualifikation(e.target.value)} className={inputCls}>
               <option value="grundpflege">{t('grundpflege')}</option>
               <option value="behandlungspflege">{t('behandlungspflege')}</option>
             </select>
           </label>
-          <label className="block text-sm">
+          <label className="label">
             {t('leistungen')}
             <input value={leistungen} onChange={(e) => setLeistungen(e.target.value)} className={inputCls} />
           </label>
           <div className="flex gap-3">
-            <label className="block flex-1 text-sm">
+            <label className="label flex-1">
               {t('zeitVon')}
               <input type="time" value={von} onChange={(e) => setVon(e.target.value)} className={inputCls} />
             </label>
-            <label className="block flex-1 text-sm">
+            <label className="label flex-1">
               {t('zeitBis')}
               <input type="time" value={bis} onChange={(e) => setBis(e.target.value)} className={inputCls} />
             </label>
-            <label className="block w-28 text-sm">
+            <label className="label w-28">
               {t('dauer')}
               <input type="number" value={dauer} onChange={(e) => setDauer(Number(e.target.value))} className={inputCls} />
             </label>
           </div>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={express} onChange={(e) => setExpress(e.target.checked)} />
+          <label className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
+            <input type="checkbox" checked={express} onChange={(e) => setExpress(e.target.checked)} className="h-4 w-4 accent-[var(--color-accent-strong)]" />
             {t('express')}
           </label>
-          <button onClick={() => setSchritt(2)} className="rounded-md bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800">
+          <button onClick={() => setSchritt(2)} className="btn btn-primary">
             {t('weiter')}
           </button>
         </div>
@@ -149,29 +149,29 @@ export function BedarfForm() {
 
       {schritt === 2 && (
         <div className="flex flex-col gap-4">
-          <h2 className="font-semibold">{t('step2')}</h2>
-          <label className="block text-sm">{t('vorname')}
+          <h2 className="font-display text-lg font-semibold">{t('step2')}</h2>
+          <label className="label">{t('vorname')}
             <input value={vorname} onChange={(e) => setVorname(e.target.value)} className={inputCls} />
           </label>
-          <label className="block text-sm">{t('nachname')}
+          <label className="label">{t('nachname')}
             <input value={nachname} onChange={(e) => setNachname(e.target.value)} className={inputCls} />
           </label>
-          <label className="block text-sm">{t('telefon')}
+          <label className="label">{t('telefon')}
             <input value={telefon} onChange={(e) => setTelefon(e.target.value)} className={inputCls} />
           </label>
-          <label className="block text-sm">{t('email')}
+          <label className="label">{t('email')}
             <input value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} />
           </label>
-          <label className="block text-sm">{t('adresse')}
+          <label className="label">{t('adresse')}
             <input value={adresse} onChange={(e) => setAdresse(e.target.value)} className={inputCls} />
           </label>
-          {fehler && <p className="text-sm text-red-700">⚠ {fehler}</p>}
+          {fehler && <p className="text-sm text-[var(--color-danger)]">⚠ {fehler}</p>}
           <div className="flex gap-3">
-            <button onClick={() => setSchritt(1)} className="rounded-md border px-4 py-2">{t('zurueck')}</button>
+            <button onClick={() => setSchritt(1)} className="btn btn-outline">{t('zurueck')}</button>
             <button
               onClick={absenden}
               disabled={sende || !vorname || !nachname || !telefon}
-              className="flex-1 rounded-md bg-green-700 px-4 py-2 font-medium text-white hover:bg-green-800 disabled:opacity-50"
+              className="btn btn-accent flex-1"
             >
               {t('absenden')}
             </button>

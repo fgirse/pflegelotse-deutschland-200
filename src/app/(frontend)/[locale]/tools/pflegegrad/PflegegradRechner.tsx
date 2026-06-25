@@ -22,17 +22,17 @@ export function PflegegradRechner() {
     <div className="mt-6 flex flex-col gap-5">
       <fieldset className="flex flex-col gap-4">
         {PFLEGEGRAD_MODULE.map((modul) => (
-          <div key={modul.id} className="rounded-lg border bg-white p-4">
+          <div key={modul.id} className="card p-4">
             <div className="font-semibold">{modul.titel}</div>
-            <div className="text-sm text-slate-500">{modul.beschreibung}</div>
-            <label className="mt-2 block text-sm text-slate-700">
+            <div className="text-sm text-[var(--color-faint)]">{modul.beschreibung}</div>
+            <label className="label mt-2">
               {t('frage')}
               <select
                 value={auswahl[modul.id] ?? 0}
                 onChange={(e) =>
                   setAuswahl((a) => ({ ...a, [modul.id]: Number(e.target.value) as Schweregrad }))
                 }
-                className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2"
+                className="input"
               >
                 {stufen.map((label, i) => (
                   <option key={i} value={i}>
@@ -47,29 +47,23 @@ export function PflegegradRechner() {
 
       {/* Ergebnis */}
       <section
-        className="rounded-lg border-2 border-blue-700 bg-blue-50 p-4"
+        className="card border-2 border-[var(--color-accent-strong)] bg-[var(--color-accent-soft)] p-5"
         aria-live="polite"
       >
-        <div className="text-sm text-slate-600">{t('ergebnis')}</div>
-        <div className="text-2xl font-bold text-blue-900">{ergebnis.label}</div>
-        <div className="text-sm text-slate-600">
+        <div className="text-sm text-[var(--color-muted)]">{t('ergebnis')}</div>
+        <div className="text-2xl font-bold text-[var(--color-accent)]">{ergebnis.label}</div>
+        <div className="text-sm text-[var(--color-muted)]">
           {t('punkte')}: {ergebnis.punkte} / 100
         </div>
-        <p className="mt-2 text-xs text-slate-500">{t('disclaimer')}</p>
+        <p className="mt-2 text-xs text-[var(--color-faint)]">{t('disclaimer')}</p>
       </section>
 
       {/* Nachfrage-Funnel (/F730/) */}
       <div className="flex flex-wrap gap-3">
-        <Link
-          href="/markt"
-          className="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800"
-        >
+        <Link href="/markt" className="btn btn-accent">
           {t('ctaMarkt')}
         </Link>
-        <Link
-          href="/lotse"
-          className="rounded-md border border-blue-700 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50"
-        >
+        <Link href="/lotse" className="btn btn-outline">
           {t('ctaLotse')}
         </Link>
       </div>

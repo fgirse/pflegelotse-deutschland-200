@@ -46,10 +46,10 @@ export default async function DashboardPage({
   const kandidaten = klienten.filter((k) => !zugeordnet.has(k.pseudonymId))
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-6">
+    <main className="container-page max-w-7xl py-8">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold">{t('title')}</h1>
-        <p className="text-slate-600">{t('subtitle')}</p>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
+        <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
       </header>
       <DashboardClient
         tenantId={TENANT}

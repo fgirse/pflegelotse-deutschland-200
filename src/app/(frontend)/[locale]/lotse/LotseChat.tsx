@@ -51,27 +51,30 @@ export function LotseChat({ locale }: { locale: string }) {
 
   return (
     <div className="mt-6">
-      <p className="mb-3 rounded-md bg-amber-50 p-3 text-sm text-amber-900">{t('hinweis')}</p>
+      {/* Dezenter Datenschutz-Hinweis */}
+      <p className="mb-3 text-xs text-[var(--color-faint)]">{t('hinweis')}</p>
 
-      <div className="flex flex-col gap-3 rounded-lg border bg-white p-4" aria-live="polite">
-        {/* Lokale Intro-Nachricht */}
-        <div className="max-w-[85%] self-start rounded-lg bg-slate-100 px-3 py-2 text-sm">
+      <div className="card flex flex-col gap-3 p-4" aria-live="polite">
+        {/* Lokale Intro-Nachricht (Lotse) */}
+        <div className="max-w-[85%] self-start rounded-xl border border-[var(--color-line)] bg-[var(--color-paper)] px-3 py-2 text-sm">
           {t('intro')}
         </div>
         {verlauf.map((n, i) => (
           <div
             key={i}
-            className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+            className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
               n.role === 'user'
-                ? 'self-end bg-blue-700 text-white'
-                : 'self-start bg-slate-100'
+                ? 'self-end bg-[var(--color-ink)] text-white'
+                : 'self-start border border-[var(--color-line)] bg-[var(--color-paper)]'
             }`}
           >
             {n.content}
           </div>
         ))}
-        {busy && <div className="self-start text-sm text-slate-500">{t('denkt')}</div>}
-        {fehler && <div className="self-start text-sm text-red-700">{t('fehler')}</div>}
+        {busy && <div className="self-start text-sm text-[var(--color-faint)]">{t('denkt')}</div>}
+        {fehler && (
+          <div className="self-start text-sm text-[var(--color-danger)]">{t('fehler')}</div>
+        )}
       </div>
 
       {/* Eingabe */}
@@ -81,22 +84,18 @@ export function LotseChat({ locale }: { locale: string }) {
           onChange={(e) => setEingabe(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && senden()}
           placeholder={t('placeholder')}
-          className="flex-1 rounded-md border border-slate-300 px-3 py-2"
+          className="input mt-0 flex-1"
         />
-        <button
-          onClick={senden}
-          disabled={busy || !eingabe.trim()}
-          className="rounded-md bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800 disabled:opacity-50"
-        >
+        <button onClick={senden} disabled={busy || !eingabe.trim()} className="btn btn-primary">
           {t('senden')}
         </button>
       </div>
 
       {/* Vorgeschlagener Bedarf */}
       {entwurf && (
-        <div className="mt-4 rounded-lg border border-green-200 bg-green-50 p-4">
+        <div className="card mt-4 border-l-4 border-l-[var(--color-success)] p-4">
           <h2 className="font-semibold">{t('entwurfTitel')}</h2>
-          <ul className="mt-2 text-sm text-slate-700">
+          <ul className="mt-2 text-sm text-[var(--color-muted)]">
             {entwurf.ort && <li>Ort: {entwurf.ort}</li>}
             {entwurf.pflegegrad && <li>Pflegegrad: {entwurf.pflegegrad}</li>}
             {entwurf.leistungen.length > 0 && <li>Leistungen: {entwurf.leistungen.join(', ')}</li>}
@@ -109,10 +108,7 @@ export function LotseChat({ locale }: { locale: string }) {
               </li>
             )}
           </ul>
-          <button
-            onClick={uebernehmen}
-            className="mt-3 rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800"
-          >
+          <button onClick={uebernehmen} className="btn btn-accent mt-3">
             {t('uebernehmen')}
           </button>
         </div>

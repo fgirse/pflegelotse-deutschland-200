@@ -10,7 +10,24 @@
   "home": {
     "title": "PflegeLotse",
     "subtitle": "Füllen Sie Tourenlücken passgenau — mehr Marge auf bereits gefahrene Routen.",
-    "openDashboard": "Dashboard öffnen"
+    "openDashboard": "Dashboard öffnen",
+    "heroEyebrow": "Ambulante Pflege · Region Freiburg",
+    "heroTitle": "Den passenden Pflegedienst finden — und Touren, die sich rechnen.",
+    "heroSub": "PflegeLotse bringt Angehörige und ambulante Pflegedienste passgenau zusammen — nach Ort, Zeit und Leistung. Datenschutzkonform und barrierearm.",
+    "ctaDienst": "Für Pflegedienste",
+    "trust1Title": "24-Stunden-Rückmeldung",
+    "trust1Text": "Auf jeden Bedarf eine verbindliche Antwort — garantiert.",
+    "trust2Title": "Datenschutz nach Maß",
+    "trust2Text": "2-Säulen-Modell, Verschlüsselung, EU-Hosting (Art. 9 DSGVO).",
+    "trust3Title": "Barrierearm",
+    "trust3Text": "Große Schrift, Tastaturbedienung, klare Kontraste (WCAG).",
+    "relativesTitle": "Für Angehörige",
+    "relativesText": "Bedarf in zwei Schritten einstellen — anonym. Passende Dienste melden sich mit verbindlichen Angeboten. Erst Ihre Auswahl gibt die Kontaktdaten frei.",
+    "servicesTitle": "Für Pflegedienste",
+    "servicesText": "Lückenfüllung per Ein-Klick: Der Fit-Score zeigt, welcher Klient ohne Umweg in eine bestehende Tour passt — zusätzliche Marge auf ohnehin gefahrene Routen.",
+    "mehr": "Mehr erfahren",
+    "toolsTeaserTitle": "Kostenlose Tools für Angehörige",
+    "toolsTeaserText": "Pflegegrad-Rechner und mehr — ohne Anmeldung, ohne Datenweitergabe."
   },
   "dashboard": {
     "title": "Tourenplanung",

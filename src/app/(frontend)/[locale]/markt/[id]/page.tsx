@@ -10,7 +10,7 @@ export default async function BedarfDetailPage({
   const { locale, id } = await params
   setRequestLocale(locale)
   return (
-    <main className="mx-auto max-w-xl px-4 py-8">
+    <main className="container-page max-w-xl py-10 sm:py-14">
       <AngeboteView bedarfId={id} />
     </main>
   )

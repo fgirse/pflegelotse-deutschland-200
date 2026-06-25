@@ -53,8 +53,9 @@ export function TourMap({ tours, selected }: Props) {
           const el = document.createElement('div')
           el.textContent = String(i + 1)
           el.setAttribute('aria-hidden', 'true')
+          // Tour-Marker in Tinte (Designsystem), nummeriert.
           el.style.cssText =
-            'background:#1d4ed8;color:#fff;border-radius:9999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff'
+            'background:#1c1917;color:#fff;border-radius:9999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff'
           new maplibregl.Marker({ element: el })
             .setLngLat([e.geo.lng, e.geo.lat])
             .addTo(map!)
@@ -85,7 +86,7 @@ export function TourMap({ tours, selected }: Props) {
       ref={containerRef}
       role="img"
       aria-label="Karte der Touren und Einsätze. Gleichwertige Daten in der Tabellenansicht."
-      className="h-[360px] w-full overflow-hidden rounded-md border"
+      className="h-[360px] w-full overflow-hidden rounded-lg border border-[var(--color-line)]"
     />
   )
 }

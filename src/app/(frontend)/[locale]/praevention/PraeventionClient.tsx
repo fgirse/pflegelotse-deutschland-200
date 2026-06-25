@@ -121,13 +121,13 @@ export function PraeventionClient({ felder, klienten }: Props) {
     }
   }
 
-  const inputCls = 'mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm'
+  const inputCls = 'input'
   const finalisiert = status === 'finalisiert'
 
   return (
     <div className="mt-6 flex flex-col gap-5">
       {/* Klient */}
-      <label className="block text-sm">
+      <label className="label">
         {t('klientWaehlen')}
         <select
           value={pseudonymId}
@@ -148,11 +148,12 @@ export function PraeventionClient({ felder, klienten }: Props) {
         {felder.map((f) => {
           const fs = feldState(f.id)
           return (
-            <div key={f.id} className="rounded-lg border bg-white p-4">
+            <div key={f.id} className="card p-4">
               <h2 className="font-semibold">
-                {f.titel} <span className="text-xs font-normal text-slate-500">({f.paragraf20})</span>
+                {f.titel}{' '}
+                <span className="text-xs font-normal text-[var(--color-faint)]">({f.paragraf20})</span>
               </h2>
-              <label className="mt-2 block text-sm text-slate-700">
+              <label className="label mt-2">
                 {t('ressourcen')}
                 <input
                   value={fs.ressourcen}
@@ -162,7 +163,7 @@ export function PraeventionClient({ felder, klienten }: Props) {
                 />
               </label>
               <fieldset className="mt-2">
-                <legend className="text-sm text-slate-700">{t('risiken')}</legend>
+                <legend className="label">{t('risiken')}</legend>
                 <div className="mt-1 flex flex-col gap-1">
                   {f.risiken.map((r) => (
                     <label key={r.id} className="flex items-center gap-2 text-sm">
@@ -186,7 +187,7 @@ export function PraeventionClient({ felder, klienten }: Props) {
         <button
           onClick={erzeugen}
           disabled={busy || !pseudonymId}
-          className="self-start rounded-md bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800 disabled:opacity-50"
+          className="btn btn-accent self-start"
         >
           {t('vorschlaegeErzeugen')}
         </button>
@@ -194,25 +195,26 @@ export function PraeventionClient({ felder, klienten }: Props) {
 
       {/* Empfehlungen */}
       {id && (
-        <section className="rounded-lg border bg-white p-4" aria-live="polite">
+        <section className="card p-4" aria-live="polite">
           <h2 className="font-semibold">{t('empfehlungen')}</h2>
           {empfehlungen.length === 0 ? (
-            <p className="mt-1 text-sm text-slate-500">{t('keineEmpfehlungen')}</p>
+            <p className="mt-1 text-sm text-[var(--color-faint)]">{t('keineEmpfehlungen')}</p>
           ) : (
             <ul className="mt-2 flex flex-col gap-2">
               {empfehlungen.map((e, i) => (
-                <li key={i} className="rounded-md border border-slate-200 p-3 text-sm">
+                <li key={i} className="rounded-lg border border-[var(--color-line)] p-3 text-sm">
                   <div className="font-medium">
-                    {e.titel} <span className="text-xs text-slate-500">({e.paragraf20})</span>
+                    {e.titel}{' '}
+                    <span className="text-xs text-[var(--color-faint)]">({e.paragraf20})</span>
                   </div>
-                  <div className="text-slate-600">{e.beschreibung}</div>
-                  <div className="text-slate-500">{e.begruendung}</div>
+                  <div className="text-[var(--color-muted)]">{e.beschreibung}</div>
+                  <div className="text-[var(--color-faint)]">{e.begruendung}</div>
                 </li>
               ))}
             </ul>
           )}
 
-          <label className="mt-4 block text-sm">
+          <label className="label mt-4">
             {t('freitext')}
             <textarea
               value={freitext}
@@ -222,44 +224,29 @@ export function PraeventionClient({ felder, klienten }: Props) {
               disabled={finalisiert}
             />
           </label>
-          <p className="mt-1 text-xs text-slate-500">{t('kiHinweis')}</p>
-          {kiFehler && <p className="text-xs text-red-700">{t('kiFehler')}</p>}
+          <p className="mt-1 text-xs text-[var(--color-faint)]">{t('kiHinweis')}</p>
+          {kiFehler && <p className="text-xs text-[var(--color-danger)]">{t('kiFehler')}</p>}
 
           <div className="mt-3 flex flex-wrap gap-2">
             {!finalisiert && (
               <>
-                <button
-                  onClick={kiHilfe}
-                  disabled={kiBusy}
-                  className="rounded-md border border-blue-700 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-50"
-                >
+                <button onClick={kiHilfe} disabled={kiBusy} className="btn btn-outline">
                   {t('kiHilfe')}
                 </button>
-                <button
-                  onClick={speichern}
-                  disabled={busy}
-                  className="rounded-md border px-3 py-2 text-sm font-medium hover:bg-slate-50 disabled:opacity-50"
-                >
+                <button onClick={speichern} disabled={busy} className="btn btn-outline">
                   {gespeichert ? t('gespeichert') : t('speichern')}
                 </button>
-                <button
-                  onClick={finalisieren}
-                  disabled={busy}
-                  className="rounded-md bg-green-700 px-3 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:opacity-50"
-                >
+                <button onClick={finalisieren} disabled={busy} className="btn btn-primary">
                   {t('finalisieren')}
                 </button>
               </>
             )}
             {finalisiert && (
-              <span className="rounded bg-green-100 px-2 py-1 text-sm font-semibold text-green-800">
+              <span className="chip bg-[var(--color-accent-soft)] text-[var(--color-success)]">
                 ✓ {t('finalisiert')}
               </span>
             )}
-            <a
-              href={`/api/v1/praevention/${id}/export`}
-              className="rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
+            <a href={`/api/v1/praevention/${id}/export`} className="btn btn-outline">
               {t('exportieren')}
             </a>
           </div>

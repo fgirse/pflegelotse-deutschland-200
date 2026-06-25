@@ -10,7 +10,24 @@
   "home": {
     "title": "PflegeLotse",
     "subtitle": "Fill route gaps with a precise fit — more margin on routes you already drive.",
-    "openDashboard": "Open dashboard"
+    "openDashboard": "Open dashboard",
+    "heroEyebrow": "Home care · Freiburg region",
+    "heroTitle": "Find the right care service — and routes that pay off.",
+    "heroSub": "PflegeLotse matches relatives and home-care services precisely — by location, time and service. Privacy-compliant and accessible.",
+    "ctaDienst": "For care services",
+    "trust1Title": "24-hour response",
+    "trust1Text": "A binding answer to every request — guaranteed.",
+    "trust2Title": "Privacy by design",
+    "trust2Text": "Two-pillar model, encryption, EU hosting (Art. 9 GDPR).",
+    "trust3Title": "Accessible",
+    "trust3Text": "Large type, keyboard navigation, clear contrast (WCAG).",
+    "relativesTitle": "For relatives",
+    "relativesText": "Post your need in two steps — anonymously. Matching services respond with binding offers. Only your choice releases your contact details.",
+    "servicesTitle": "For care services",
+    "servicesText": "One-click gap-filling: the fit score shows which client slots into an existing tour without a detour — extra margin on routes you already drive.",
+    "mehr": "Learn more",
+    "toolsTeaserTitle": "Free tools for relatives",
+    "toolsTeaserText": "Care-level calculator and more — no sign-up, no data sharing."
   },
   "dashboard": {
     "title": "Route planning",

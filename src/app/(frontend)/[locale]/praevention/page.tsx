@@ -22,10 +22,12 @@ export default async function PraeventionPage({
   const klienten = await ladeKlientenOperativ(user.tenantId, 'aktiv')
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold">{t('title')}</h1>
-      <p className="mt-1 text-slate-600">{t('subtitle')}</p>
-      <p className="mt-2 rounded-md bg-amber-50 p-3 text-sm text-amber-900">{t('hinweis')}</p>
+    <main className="container-page max-w-3xl py-10 sm:py-14">
+      <h1 className="text-3xl font-bold sm:text-4xl">{t('title')}</h1>
+      <p className="mt-2 text-[var(--color-muted)]">{t('subtitle')}</p>
+      <p className="mt-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-accent-soft)] p-3 text-sm text-[var(--color-accent)]">
+        {t('hinweis')}
+      </p>
       <PraeventionClient
         felder={HANDLUNGSFELDER}
         klienten={klienten.map((k) => ({

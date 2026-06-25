@@ -13,9 +13,9 @@ export default async function LoginPage({ params }: { params: Promise<{ locale: 
 function LoginInner({ locale }: { locale: string }) {
   const t = useTranslations('login')
   return (
-    <main className="mx-auto max-w-md px-4 py-10">
-      <h1 className="text-2xl font-bold">{t('title')}</h1>
-      <p className="mt-1 text-sm text-slate-600">{t('subtitle')}</p>
+    <main className="container-page max-w-md py-12 sm:py-16">
+      <h1 className="text-3xl font-bold">{t('title')}</h1>
+      <p className="mt-2 text-sm text-[var(--color-muted)]">{t('subtitle')}</p>
       <LoginForm locale={locale} />
     </main>
   )

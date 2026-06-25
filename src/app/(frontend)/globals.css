@@ -1,33 +1,172 @@
 @import 'tailwindcss';
 
-/* Design-Tokens für PflegeLotse. Bewusst ruhig und kontraststark
-   (WCAG 2.1 AA, /Q400/) — keine Farbe als alleiniger Bedeutungsträger. */
-:root {
-  --hintergrund: #f8fafc;
-  --vordergrund: #0f172a;
+/* ── Design-Tokens (PflegeLotse) ──────────────────────────────────────────
+   Aesthetik: warm, vertrauenswürdig, barrierearm („Accessible & Ethical").
+   Warmes Stone + Gold-Akzent auf Papier-Hintergrund. Display: Figtree,
+   Body: Noto Sans (über next/font als CSS-Variablen geladen).
+   Bewusst KEIN AI-Lila/Neon, keine bewegungslastigen Effekte. */
+@theme {
+  --color-paper: #faf5f2; /* warmer Seitenhintergrund */
+  --color-surface: #ffffff; /* Karten/Flächen */
+  --color-ink: #1c1917; /* Primärtext + Primär-Button (Kontrast ~14:1) */
+  --color-muted: #57534e; /* Sekundärtext (Kontrast ~7:1 auf Papier) */
+  --color-faint: #78716c; /* dezente Hinweise */
+  --color-line: #e7e2dc; /* warme Rahmen/Trenner */
+  --color-accent: #b45309; /* Akzent für Text/Links (AA auf hell) */
+  --color-accent-strong: #d97706; /* Akzentfüllung (mit fettem hellem Text) */
+  --color-accent-soft: #fdf2e3; /* zarte Akzentfläche */
+  --color-success: #15803d;
+  --color-danger: #b91c1c;
+
+  --font-display: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-noto), ui-sans-serif, system-ui, sans-serif;
+
+  --radius: 0.75rem;
+  --shadow-card: 0 1px 2px rgb(28 25 23 / 0.04), 0 8px 24px -12px rgb(28 25 23 / 0.12);
 }
 
+/* ── Basis ─────────────────────────────────────────────────────────────── */
 body {
-  background: var(--hintergrund);
-  color: var(--vordergrund);
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    sans-serif;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  /* dezente, warme Tiefe statt Volltonfläche */
+  background-image:
+    radial-gradient(60rem 40rem at 110% -10%, #fbe7d2 0%, transparent 55%),
+    radial-gradient(50rem 36rem at -10% 0%, #f3ece6 0%, transparent 50%);
+  background-attachment: fixed;
 }
 
-/* Bewegungsreduktion respektieren (/Q400/). */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+
+/* Sichtbarer, kräftiger Fokusring (Tastaturbedienung, WCAG). */
+:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Bewegungsreduktion respektieren. */
 @media (prefers-reduced-motion: reduce) {
-  * {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
-/* Sichtbarer Fokusring für Tastaturbedienung. */
-:focus-visible {
-  outline: 3px solid #1d4ed8;
-  outline-offset: 2px;
+/* Skip-Link für Tastatur-/Screenreader-Nutzer. */
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  z-index: 100;
+  background: var(--color-ink);
+  color: #fff;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.5rem;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+/* ── Komponentenklassen ───────────────────────────────────────────────── */
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Buttons: 44px Mindesthöhe (Touch), klare Zustände, 150–250ms. */
+  .btn {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5
+      text-sm font-semibold transition-all duration-200;
+    cursor: pointer;
+  }
+  .btn:disabled {
+    @apply cursor-not-allowed opacity-50;
+  }
+  /* Primär: dunkle Tinte, höchster Kontrast. */
+  .btn-primary {
+    background: var(--color-ink);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) {
+    background: #000;
+    transform: translateY(-1px);
+  }
+  /* Akzent: warmes Gold, fetter heller Text. */
+  .btn-accent {
+    background: var(--color-accent-strong);
+    color: #fff;
+  }
+  .btn-accent:hover:not(:disabled) {
+    background: var(--color-accent);
+    transform: translateY(-1px);
+  }
+  /* Sekundär: umrandet. */
+  .btn-outline {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border: 1px solid var(--color-line);
+  }
+  .btn-outline:hover:not(:disabled) {
+    border-color: var(--color-faint);
+    background: #fff;
+  }
+
+  .input {
+    @apply mt-1 w-full rounded-lg px-3 py-2.5 text-sm;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    color: var(--color-ink);
+  }
+  .input:focus {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 1px;
+    border-color: transparent;
+  }
+
+  .label {
+    @apply block text-sm font-medium;
+    color: var(--color-muted);
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  /* Karten-Link mit ruhiger Hover-Anhebung. Eigenständig (kein @apply card,
+     da Tailwind v4 @apply nur Utility-Klassen erlaubt, keine Komponenten). */
+  .tile {
+    @apply block p-5 transition-all duration-200;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+  }
+  .tile:hover {
+    transform: translateY(-2px);
+    border-color: var(--color-faint);
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.18em];
+    color: var(--color-accent);
+  }
 }

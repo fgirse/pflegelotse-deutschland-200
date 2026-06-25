@@ -18,7 +18,7 @@ export function LoginForm({ locale }: { locale: string }) {
   const [fehler, setFehler] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  const inputCls = 'mt-1 w-full rounded-md border border-slate-300 px-3 py-2'
+  const inputCls = 'input'
   const ziel = `/${locale}/dashboard`
 
   async function login() {
@@ -70,20 +70,20 @@ export function LoginForm({ locale }: { locale: string }) {
   }
 
   return (
-    <div className="mt-6 rounded-lg border bg-white p-5">
-      {fehler && <p className="mb-3 text-sm text-red-700">⚠ {fehler}</p>}
+    <div className="card mt-6 p-5">
+      {fehler && <p className="mb-3 text-sm text-[var(--color-danger)]">⚠ {fehler}</p>}
 
       {schritt === 'login' && (
         <div className="flex flex-col gap-3">
-          <label className="block text-sm">
+          <label className="label">
             {t('email')}
             <input value={email} onChange={(e) => setEmail(e.target.value)} className={inputCls} type="email" />
           </label>
-          <label className="block text-sm">
+          <label className="label">
             {t('password')}
             <input value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} type="password" />
           </label>
-          <button onClick={login} disabled={busy || !email || !password} className="rounded-md bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800 disabled:opacity-50">
+          <button onClick={login} disabled={busy || !email || !password} className="btn btn-primary mt-1">
             {t('anmelden')}
           </button>
         </div>
@@ -92,8 +92,8 @@ export function LoginForm({ locale }: { locale: string }) {
       {schritt === 'enroll' && (
         <div className="flex flex-col gap-3">
           <h2 className="font-semibold">{t('enrollTitle')}</h2>
-          <p className="text-sm text-slate-600">{t('enrollHinweis')}</p>
-          <div className="rounded-md bg-slate-50 p-3 text-xs break-all">
+          <p className="text-sm text-[var(--color-muted)]">{t('enrollHinweis')}</p>
+          <div className="rounded-lg border border-[var(--color-line)] bg-[var(--color-paper)] p-3 text-xs break-all">
             <div className="font-medium">{t('secret')}:</div>
             <code>{secret}</code>
             {otpauth && (
@@ -103,11 +103,11 @@ export function LoginForm({ locale }: { locale: string }) {
               </>
             )}
           </div>
-          <label className="block text-sm">
+          <label className="label">
             {t('code')}
             <input value={code} onChange={(e) => setCode(e.target.value)} className={inputCls} inputMode="numeric" />
           </label>
-          <button onClick={() => code2fa('activate')} disabled={busy || code.length < 6} className="rounded-md bg-green-700 px-4 py-2 font-medium text-white hover:bg-green-800 disabled:opacity-50">
+          <button onClick={() => code2fa('activate')} disabled={busy || code.length < 6} className="btn btn-accent mt-1">
             {t('bestaetigen')}
           </button>
         </div>
@@ -115,11 +115,11 @@ export function LoginForm({ locale }: { locale: string }) {
 
       {schritt === 'verify' && (
         <div className="flex flex-col gap-3">
-          <label className="block text-sm">
+          <label className="label">
             {t('code')}
             <input value={code} onChange={(e) => setCode(e.target.value)} className={inputCls} inputMode="numeric" autoFocus />
           </label>
-          <button onClick={() => code2fa('verify')} disabled={busy || code.length < 6} className="rounded-md bg-green-700 px-4 py-2 font-medium text-white hover:bg-green-800 disabled:opacity-50">
+          <button onClick={() => code2fa('verify')} disabled={busy || code.length < 6} className="btn btn-accent mt-1">
             {t('bestaetigen')}
           </button>
         </div>

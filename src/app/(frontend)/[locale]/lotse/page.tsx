@@ -14,9 +14,9 @@ export default async function LotsePage({ params }: { params: Promise<{ locale: 
 function LotseInner({ locale }: { locale: string }) {
   const t = useTranslations('lotse')
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-2xl font-bold">{t('title')}</h1>
-      <p className="mt-1 text-slate-600">{t('subtitle')}</p>
+    <main className="container-page max-w-2xl py-10 sm:py-14">
+      <h1 className="text-3xl font-bold sm:text-4xl">{t('title')}</h1>
+      <p className="mt-2 text-[var(--color-muted)]">{t('subtitle')}</p>
       <LotseChat locale={locale} />
     </main>
   )

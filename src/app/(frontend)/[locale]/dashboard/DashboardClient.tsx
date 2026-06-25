@@ -89,11 +89,11 @@ export function DashboardClient({ tenantId, tours, candidates }: Props) {
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr_320px]">
       {/* Kandidatenliste */}
-      <section aria-labelledby="kandidaten-h" className="rounded-lg border bg-white p-3">
-        <h2 id="kandidaten-h" className="mb-2 font-semibold">
+      <section aria-labelledby="kandidaten-h" className="card p-4">
+        <h2 id="kandidaten-h" className="mb-3 font-semibold">
           {t('candidates')} ({candidates.length})
         </h2>
-        <ul className="flex flex-col gap-1">
+        <ul className="flex flex-col gap-1.5">
           {candidates.map((k) => {
             const aktiv = selected?.pseudonymId === k.pseudonymId
             return (
@@ -101,14 +101,16 @@ export function DashboardClient({ tenantId, tours, candidates }: Props) {
                 <button
                   onClick={() => waehleKandidat(k)}
                   aria-pressed={aktiv}
-                  className={`w-full rounded-md border px-3 py-2 text-left text-sm ${
-                    aktiv ? 'border-blue-700 bg-blue-50' : 'border-slate-200 hover:bg-slate-50'
+                  className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
+                    aktiv
+                      ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
+                      : 'border-[var(--color-line)] hover:bg-[var(--color-paper)]'
                   }`}
                 >
                   <span className="font-medium">
                     {minToHHMM(k.zeitfenster.von)}–{minToHHMM(k.zeitfenster.bis)}
                   </span>
-                  <span className="block text-slate-500">
+                  <span className="block text-[var(--color-faint)]">
                     PG {k.pflegegrad ?? '–'} · {k.qualifikation.join(', ') || '—'} ·{' '}
                     {k.dauerMin} {t('minutes')}
                   </span>
@@ -120,24 +122,32 @@ export function DashboardClient({ tenantId, tours, candidates }: Props) {
       </section>
 
       {/* Karte / Tabelle */}
-      <section aria-labelledby="karte-h" className="rounded-lg border bg-white p-3">
-        <div className="mb-2 flex items-center justify-between">
+      <section aria-labelledby="karte-h" className="card p-4">
+        <div className="mb-3 flex items-center justify-between">
           <h2 id="karte-h" className="font-semibold">
             {view === 'map' ? t('map') : t('mapAlt')}
           </h2>
           {/* Umschalter Karte ↔ Text-/Tabellenalternative (WCAG, /Q400/) */}
-          <div role="group" aria-label={t('map') + ' / ' + t('table')} className="text-sm">
+          <div role="group" aria-label={t('map') + ' / ' + t('table')} className="flex text-sm">
             <button
               onClick={() => setView('map')}
               aria-pressed={view === 'map'}
-              className={`rounded-l-md border px-3 py-1 ${view === 'map' ? 'bg-blue-700 text-white' : 'bg-white'}`}
+              className={`min-h-9 rounded-l-lg border px-3 py-1 font-medium transition-colors ${
+                view === 'map'
+                  ? 'border-[var(--color-ink)] bg-[var(--color-ink)] text-white'
+                  : 'border-[var(--color-line)] bg-[var(--color-surface)] hover:bg-[var(--color-paper)]'
+              }`}
             >
               {t('map')}
             </button>
             <button
               onClick={() => setView('table')}
               aria-pressed={view === 'table'}
-              className={`rounded-r-md border px-3 py-1 ${view === 'table' ? 'bg-blue-700 text-white' : 'bg-white'}`}
+              className={`-ml-px min-h-9 rounded-r-lg border px-3 py-1 font-medium transition-colors ${
+                view === 'table'
+                  ? 'border-[var(--color-ink)] bg-[var(--color-ink)] text-white'
+                  : 'border-[var(--color-line)] bg-[var(--color-surface)] hover:bg-[var(--color-paper)]'
+              }`}
             >
               {t('table')}
             </button>
@@ -152,7 +162,7 @@ export function DashboardClient({ tenantId, tours, candidates }: Props) {
 
         {/* Zeitstrahl je Tour */}
         <div className="mt-4">
-          <h3 className="mb-2 text-sm font-semibold text-slate-700">{t('timeline')}</h3>
+          <h3 className="mb-2 text-sm font-semibold text-[var(--color-muted)]">{t('timeline')}</h3>
           {tours.map((x) => (
             <Timeline key={x.tour.id} tour={x.tour} />
           ))}
@@ -160,33 +170,33 @@ export function DashboardClient({ tenantId, tours, candidates }: Props) {
       </section>
 
       {/* Trefferliste (Fit-Score) */}
-      <section aria-labelledby="treffer-h" aria-live="polite" className="rounded-lg border bg-white p-3">
-        <h2 id="treffer-h" className="mb-2 font-semibold">
+      <section aria-labelledby="treffer-h" aria-live="polite" className="card p-4">
+        <h2 id="treffer-h" className="mb-3 font-semibold">
           {t('matches')}
         </h2>
-        {!selected && <p className="text-sm text-slate-500">{t('noSelection')}</p>}
-        {loading && <p className="text-sm text-slate-500">{t('calculating')}</p>}
+        {!selected && <p className="text-sm text-[var(--color-faint)]">{t('noSelection')}</p>}
+        {loading && <p className="text-sm text-[var(--color-faint)]">{t('calculating')}</p>}
         {selected && !loading && matches && matches.length === 0 && (
-          <p className="text-sm text-amber-700">{t('noMatch')}</p>
+          <p className="text-sm font-medium text-[var(--color-danger)]">⚠ {t('noMatch')}</p>
         )}
         <ul className="flex flex-col gap-2">
           {matches?.map((mm) => (
-            <li key={mm.tourId} className="rounded-md border border-slate-200 p-3">
-              <div className="flex items-baseline justify-between">
+            <li key={mm.tourId} className="rounded-lg border border-[var(--color-line)] p-3">
+              <div className="flex items-baseline justify-between gap-2">
                 <span className="font-medium">{mm.pflegekraftId}</span>
-                <span className="text-lg font-bold text-green-700">
+                <span className="text-lg font-bold text-[var(--color-success)]">
                   +{mm.mehrwegMin} {t('minutes')}
                 </span>
               </div>
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-[var(--color-muted)]">
                 {t('detour')} · {t('position')} {mm.position + 1} ·{' '}
                 {t('minutes')} {minToHHMM(mm.ankunft)}
               </p>
-              <p className="text-xs text-green-700">✓ {t('qualificationOk')}</p>
+              <p className="text-xs font-medium text-[var(--color-success)]">✓ {t('qualificationOk')}</p>
               <button
                 onClick={() => aufnehmen(mm)}
                 disabled={loading}
-                className="mt-2 w-full rounded-md bg-green-700 px-3 py-2 text-sm font-medium text-white hover:bg-green-800 disabled:opacity-50"
+                className="btn btn-primary mt-2 w-full"
               >
                 {t('assign')}
               </button>
@@ -205,13 +215,13 @@ function TourTable({ tours }: { tours: TourMitKennzahlen[] }) {
     <div className="overflow-x-auto">
       {tours.map((x) => (
         <div key={x.tour.id} className="mb-4">
-          <h3 className="text-sm font-semibold">
+          <h3 className="text-sm font-semibold text-[var(--color-muted)]">
             {x.tour.pflegekraftId} — {x.tour.datum} · {t('tourDuration')} {x.fahrzeitMin}{' '}
             {t('minutes')} · {t('utilization')} {x.auslastungProzent}%
           </h3>
           <table className="mt-1 w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b text-left">
+              <tr className="border-b border-[var(--color-line)] text-left text-[var(--color-muted)]">
                 <th className="py-1 pr-3">#</th>
                 <th className="py-1 pr-3">{t('minutes')}</th>
                 <th className="py-1 pr-3">PG</th>
@@ -220,7 +230,7 @@ function TourTable({ tours }: { tours: TourMitKennzahlen[] }) {
             </thead>
             <tbody>
               {x.tour.einsaetze.map((e, i) => (
-                <tr key={e.pseudonymId} className="border-b">
+                <tr key={e.pseudonymId} className="border-b border-[var(--color-line)]">
                   <td className="py-1 pr-3">{i + 1}</td>
                   <td className="py-1 pr-3">
                     {e.ankunft != null ? minToHHMM(e.ankunft) : '—'}

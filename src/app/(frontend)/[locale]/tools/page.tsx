@@ -23,24 +23,26 @@ export default async function ToolsPage({ params }: { params: Promise<{ locale: 
 function ToolsInner() {
   const t = useTranslations('tools')
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <h1 className="text-2xl font-bold">{t('title')}</h1>
-      <p className="mt-1 text-slate-600">{t('subtitle')}</p>
+    <main className="container-page py-12">
+      <span className="eyebrow">PflegeLotse</span>
+      <h1 className="mt-2 text-3xl font-bold">{t('title')}</h1>
+      <p className="mt-2 max-w-2xl text-[var(--color-muted)]">{t('subtitle')}</p>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Link
-          href="/tools/pflegegrad"
-          className="rounded-lg border bg-white p-4 hover:border-blue-700 hover:bg-blue-50"
-        >
+      <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {/* Aktives Tool: Pflegegrad-Rechner */}
+        <Link href="/tools/pflegegrad" className="tile">
           <h2 className="font-semibold">{t('pflegegradName')}</h2>
-          <p className="mt-1 text-sm text-slate-600">{t('pflegegradDesc')}</p>
+          <p className="mt-1 text-sm text-[var(--color-muted)]">{t('pflegegradDesc')}</p>
         </Link>
 
         {/* In Vorbereitung */}
         {[t('budgetName'), t('antragName'), t('checklistenName')].map((name) => (
-          <div key={name} className="rounded-lg border border-dashed bg-slate-50 p-4 opacity-70">
+          <div
+            key={name}
+            className="card border-dashed p-5 opacity-70"
+          >
             <h2 className="font-semibold">{name}</h2>
-            <p className="mt-1 text-sm text-slate-500">{t('bald')}</p>
+            <p className="mt-1 text-sm text-[var(--color-faint)]">{t('bald')}</p>
           </div>
         ))}
       </div>

@@ -12,9 +12,10 @@ export default async function MarktPage({ params }: { params: Promise<{ locale: 
 function MarktInner() {
   const t = useTranslations('markt')
   return (
-    <main className="mx-auto max-w-xl px-4 py-8">
-      <h1 className="text-2xl font-bold">{t('title')}</h1>
-      <p className="mt-1 text-slate-600">{t('subtitle')}</p>
+    <main className="container-page max-w-xl py-10 sm:py-14">
+      <span className="eyebrow">{t('step1')}</span>
+      <h1 className="mt-2 text-3xl font-bold">{t('title')}</h1>
+      <p className="mt-2 text-[var(--color-muted)]">{t('subtitle')}</p>
       <BedarfForm />
     </main>
   )

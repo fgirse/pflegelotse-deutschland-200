@@ -63,37 +63,33 @@ export function EingaengeClient({ tenantId, offene, gewonnen }: Props) {
     <div className="mt-6 flex flex-col gap-6">
       {/* Offene, passende Bedarfe */}
       <section>
-        {offene.length === 0 && <p className="text-slate-500">{t('keineBedarfe')}</p>}
+        {offene.length === 0 && <p className="text-[var(--color-faint)]">{t('keineBedarfe')}</p>}
         <ul className="flex flex-col gap-3">
           {offene.map((b) => (
-            <li key={b.pseudonymId} data-bedarf={b.pseudonymId} className="rounded-lg border bg-white p-4">
-              <div className="flex items-center justify-between">
+            <li key={b.pseudonymId} data-bedarf={b.pseudonymId} className="card p-4">
+              <div className="flex items-center justify-between gap-3">
                 <span className="font-medium">
                   PG {b.pflegegrad ?? '–'} · {b.qualifikation.join(', ') || '—'} ·{' '}
                   {minToHHMM(b.zeitfenster.von)}–{minToHHMM(b.zeitfenster.bis)} · {b.dauerMin} Min
                 </span>
-                {b.express && (
-                  <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800">
-                    Express
-                  </span>
-                )}
+                {b.express && <span className="chip">Express</span>}
               </div>
               {gesendet[b.pseudonymId] ? (
-                <p className="mt-2 font-medium text-green-700">✓ {t('angebotGesendet')}</p>
+                <p className="mt-2 font-medium text-[var(--color-success)]">✓ {t('angebotGesendet')}</p>
               ) : (
-                <div className="mt-3 flex gap-2">
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                   <input
                     placeholder={t('nachricht')}
                     value={nachrichten[b.pseudonymId] ?? ''}
                     onChange={(e) =>
                       setNachrichten((n) => ({ ...n, [b.pseudonymId]: e.target.value }))
                     }
-                    className="flex-1 rounded-md border border-slate-300 px-3 py-2 text-sm"
+                    className="input mt-0 flex-1"
                   />
                   <button
                     onClick={() => angebotAbgeben(b.pseudonymId)}
                     disabled={busy}
-                    className="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-50"
+                    className="btn btn-accent"
                   >
                     {t('angebotAbgeben')}
                   </button>
@@ -110,14 +106,15 @@ export function EingaengeClient({ tenantId, offene, gewonnen }: Props) {
           <h2 className="mb-2 font-semibold">{t('vergeben')}</h2>
           <ul className="flex flex-col gap-3">
             {gewonnen.map((b) => (
-              <li key={b.pseudonymId} data-bedarf={b.pseudonymId} className="rounded-lg border border-green-200 bg-green-50 p-4">
+              <li
+                key={b.pseudonymId}
+                data-bedarf={b.pseudonymId}
+                className="card border-l-4 border-l-[var(--color-success)] p-4"
+              >
                 {kontakte[b.pseudonymId] ? (
-                  <p className="font-medium text-green-900">{kontakte[b.pseudonymId]}</p>
+                  <p className="font-medium text-[var(--color-success)]">{kontakte[b.pseudonymId]}</p>
                 ) : (
-                  <button
-                    onClick={() => kontaktLaden(b.pseudonymId)}
-                    className="rounded-md bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800"
-                  >
+                  <button onClick={() => kontaktLaden(b.pseudonymId)} className="btn btn-primary">
                     {t('kontaktAnzeigen')}
                   </button>
                 )}

@@ -65,20 +65,20 @@ export function AngeboteView({ bedarfId }: { bedarfId: string }) {
 
   return (
     <section aria-live="polite">
-      <h1 className="text-2xl font-bold">{t('angeboteTitel')}</h1>
+      <h1 className="text-3xl font-bold">{t('angeboteTitel')}</h1>
 
       {gewaehlt && (
-        <p className="mt-4 rounded-md bg-green-50 p-3 text-green-900">{t('vergebenHinweis')}</p>
+        <p className="mt-4 rounded-lg border border-[var(--color-line)] bg-[var(--color-surface)] p-3 text-[var(--color-success)]">{t('vergebenHinweis')}</p>
       )}
 
       {/* Express-Upsell (/F1020/) — einmalige Zahlung über Mollie. */}
       {!gewaehlt && (
-        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm text-amber-900">{t('expressHinweis')}</p>
+        <div className="mt-4 rounded-xl border border-[var(--color-line)] bg-[var(--color-accent-soft)] p-4">
+          <p className="text-sm text-[var(--color-accent)]">{t('expressHinweis')}</p>
           <button
             onClick={expressFreischalten}
             disabled={expressBusy}
-            className="mt-2 rounded-md bg-amber-600 px-4 py-2 text-sm font-medium text-white hover:bg-amber-700 disabled:opacity-50"
+            className="btn btn-accent mt-3"
           >
             {expressBusy ? t('expressLaedt') : t('expressFreischalten')}
           </button>
@@ -86,26 +86,26 @@ export function AngeboteView({ bedarfId }: { bedarfId: string }) {
       )}
 
       {!gewaehlt && angebote.length === 0 && (
-        <p className="mt-4 text-slate-500">{t('nochKeine')}</p>
+        <p className="mt-4 text-[var(--color-faint)]">{t('nochKeine')}</p>
       )}
 
       <ul className="mt-4 flex flex-col gap-3">
         {angebote.map((a) => (
-          <li key={a.id} className="rounded-lg border bg-white p-4">
+          <li key={a.id} className="card p-4">
             <div className="flex items-baseline justify-between">
-              <span className="font-semibold">{a.tenantId}</span>
+              <span className="font-display font-semibold">{a.tenantId}</span>
               {typeof a.mehrwegMin === 'number' && (
-                <span className="text-sm text-slate-500">+{a.mehrwegMin} Min</span>
+                <span className="chip">+{a.mehrwegMin} Min</span>
               )}
             </div>
-            {a.nachricht && <p className="mt-1 text-sm text-slate-700">{a.nachricht}</p>}
+            {a.nachricht && <p className="mt-1 text-sm text-[var(--color-muted)]">{a.nachricht}</p>}
             {gewaehlt === a.tenantId ? (
-              <p className="mt-2 font-medium text-green-700">✓ {t('gewaehlt')}</p>
+              <p className="mt-2 font-medium text-[var(--color-success)]">✓ {t('gewaehlt')}</p>
             ) : (
               <button
                 onClick={() => waehlen(a.tenantId)}
                 disabled={busy || Boolean(gewaehlt)}
-                className="mt-3 w-full rounded-md bg-blue-700 px-4 py-2 font-medium text-white hover:bg-blue-800 disabled:opacity-50"
+                className="btn btn-primary mt-3 w-full"
               >
                 {t('waehlen')}
               </button>

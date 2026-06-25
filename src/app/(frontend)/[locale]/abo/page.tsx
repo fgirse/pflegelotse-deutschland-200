@@ -24,9 +24,9 @@ export default async function AboPage({ params }: { params: Promise<{ locale: st
   }))
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-2xl font-bold">{t('title')}</h1>
-      <p className="mt-1 text-slate-600">{t('subtitle')}</p>
+    <main className="container-page max-w-3xl py-10 sm:py-14">
+      <h1 className="text-3xl font-bold sm:text-4xl">{t('title')}</h1>
+      <p className="mt-2 text-[var(--color-muted)]">{t('subtitle')}</p>
       <AboClient tenantId={TENANT} tiers={tiers} status={status} />
     </main>
   )

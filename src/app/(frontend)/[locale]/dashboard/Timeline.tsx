@@ -17,10 +17,10 @@ export function Timeline({ tour }: { tour: Tour }) {
 
   return (
     <div className="mb-3">
-      <div className="mb-1 text-xs text-slate-600">
+      <div className="mb-1 text-xs text-[var(--color-muted)]">
         {tour.pflegekraftId} · {tour.einsaetze.length} {t('stops')}
       </div>
-      <div className="relative h-9 rounded bg-slate-100" aria-hidden="true">
+      <div className="relative h-9 rounded bg-[var(--color-paper)]" aria-hidden="true">
         {tour.einsaetze.map((e) => {
           const ankunft = e.ankunft ?? e.zeitfenster.von
           const konflikt = ankunft > e.zeitfenster.bis
@@ -28,12 +28,13 @@ export function Timeline({ tour }: { tour: Tour }) {
             <div
               key={e.pseudonymId}
               title={`${minToHHMM(ankunft)} (${minToHHMM(e.zeitfenster.von)}–${minToHHMM(e.zeitfenster.bis)})`}
-              className={`absolute top-1 flex h-7 items-center justify-center rounded px-1 text-[10px] font-medium text-white ${
-                konflikt ? 'bg-red-600' : 'bg-blue-600'
-              }`}
+              className="absolute top-1 flex h-7 items-center justify-center rounded px-1 text-[10px] font-medium text-white"
+              data-konflikt={konflikt}
               style={{
                 left: `${Math.max(0, Math.min(98, pct(ankunft)))}%`,
                 minWidth: '34px',
+                // Konflikt rot (danger), sonst Tinte — Symbol unterscheidet zusätzlich.
+                backgroundColor: konflikt ? 'var(--color-danger)' : 'var(--color-ink)',
               }}
             >
               {konflikt ? '⚠ ' : ''}

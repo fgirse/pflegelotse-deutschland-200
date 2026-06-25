@@ -54,14 +54,14 @@ export function AboClient({ tenantId, tiers, status }: Props) {
   return (
     <div className="mt-6 flex flex-col gap-6">
       {/* Aktueller Status */}
-      <section className="rounded-lg border bg-white p-4" aria-live="polite">
+      <section className="card p-4" aria-live="polite">
         <h2 className="font-semibold">{t('aktuellerStatus')}</h2>
         {status ? (
           <p className="mt-1 text-sm">
             {status.stufe} — <strong>{statusText(status.status)}</strong>
           </p>
         ) : (
-          <p className="mt-1 text-sm text-slate-500">{t('keinAbo')}</p>
+          <p className="mt-1 text-sm text-[var(--color-faint)]">{t('keinAbo')}</p>
         )}
       </section>
 
@@ -70,16 +70,19 @@ export function AboClient({ tenantId, tiers, status }: Props) {
         {tiers.map((tier) => {
           const istAktiv = status?.status === 'aktiv' && status.stufe === tier.key
           return (
-            <div key={tier.key} className="flex flex-col rounded-lg border bg-white p-4">
-              <h3 className="font-semibold">{tier.label}</h3>
-              <p className="mt-1 text-2xl font-bold">
+            <div
+              key={tier.key}
+              className={`card flex flex-col p-5 ${istAktiv ? 'border-2 border-[var(--color-accent-strong)]' : ''}`}
+            >
+              <h3 className="font-display font-semibold">{tier.label}</h3>
+              <p className="mt-1 font-display text-3xl font-bold">
                 {tier.preisText}
-                <span className="text-sm font-normal text-slate-500"> {t('proMonat')}</span>
+                <span className="text-sm font-normal text-[var(--color-faint)]"> {t('proMonat')}</span>
               </p>
               <button
                 onClick={() => abonnieren(tier.key)}
                 disabled={busy !== null || istAktiv}
-                className="mt-4 rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 disabled:opacity-50"
+                className="btn btn-accent mt-4"
               >
                 {istAktiv ? t('aktiv') : busy === tier.key ? t('laedt') : t('abonnieren')}
               </button>
@@ -88,7 +91,7 @@ export function AboClient({ tenantId, tiers, status }: Props) {
         })}
       </section>
 
-      <p className="text-xs text-slate-500">{t('hinweisErstzahlung')}</p>
+      <p className="text-xs text-[var(--color-faint)]">{t('hinweisErstzahlung')}</p>
     </div>
   )
 }
