@@ -1,0 +1,36 @@
+# Eigener OSRM-Routing-Server für PflegeLotse.
+# Bedient den von prepare.sh gebauten Graphen (MLD). Der Graph muss vorher
+# existieren — siehe infra/osrm/README.md.
+#
+# Start:  docker compose -f infra/osrm/docker-compose.yml up -d
+# Stop:   docker compose -f infra/osrm/docker-compose.yml down
+services:
+  osrm:
+    image: ghcr.io/project-osrm/osrm-backend:latest
+    container_name: pflegelotse-osrm
+    # --algorithm mld passt zur prepare.sh-Pipeline (partition + customize).
+    # --max-table-size hebt das Default-Limit (100) an, damit die table-Matrix
+    # auch große Touren (viele Stopps + Kandidat) in einem Request abdeckt.
+    command: >
+      osrm-routed --algorithm mld --max-table-size 10000
+      /data/${OSRM_DATA:-germany-latest}.osrm
+    volumes:
+      - ./data:/data
+    ports:
+      # Host:Container. Die App spricht den Server über OSRM_BASE_URL an,
+      # z. B. http://localhost:5000 (lokal) oder http://<server-ip>:5000.
+      - '5000:5000'
+    restart: unless-stopped
+    healthcheck:
+      # „nearest" ist der billigste Endpoint — bestätigt, dass der Graph lädt.
+      test:
+        [
+          'CMD',
+          'wget',
+          '-qO-',
+          'http://localhost:5000/nearest/v1/driving/7.85,48.0',
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s

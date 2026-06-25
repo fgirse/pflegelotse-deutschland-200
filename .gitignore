@@ -9,3 +9,7 @@ node_modules
 /playwright-report
 /playwright/.cache
 .vercel
+
+# OSRM-Routing: Kartendaten und gebaute Graphen (groß, nicht versionieren)
+infra/osrm/data/
+infra/osrm/.env
