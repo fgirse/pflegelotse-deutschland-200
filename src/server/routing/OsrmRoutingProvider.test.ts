@@ -51,6 +51,24 @@ describe('OsrmRoutingProvider', () => {
     expect(m[1][2]).toBe(5)
   })
 
+  it('sendet den X-Api-Key-Header, wenn ein Schlüssel gesetzt ist', async () => {
+    const fetchMock = mockFetch({ code: 'Ok', durations: [[0, 60], [60, 0]] })
+    vi.stubGlobal('fetch', fetchMock)
+    const osrm = new OsrmRoutingProvider('https://osrm.example.org', 'driving', 'geheim123')
+    await osrm.travelMatrix([punkte[0], punkte[1]])
+    const init = fetchMock.mock.calls[0][1] as RequestInit
+    expect((init.headers as Record<string, string>)['X-Api-Key']).toBe('geheim123')
+  })
+
+  it('sendet ohne Schlüssel keinen Auth-Header', async () => {
+    const fetchMock = mockFetch({ code: 'Ok', durations: [[0, 60], [60, 0]] })
+    vi.stubGlobal('fetch', fetchMock)
+    const osrm = new OsrmRoutingProvider('https://osrm.example.org')
+    await osrm.travelMatrix([punkte[0], punkte[1]])
+    const init = fetchMock.mock.calls[0][1] as RequestInit
+    expect(init.headers).toBeUndefined()
+  })
+
   it('behandelt nicht erreichbare Paare (null) als unendlich weit', async () => {
     vi.stubGlobal(
       'fetch',

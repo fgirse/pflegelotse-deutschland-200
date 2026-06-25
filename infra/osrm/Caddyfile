@@ -1,0 +1,13 @@
+# Caddy-Reverse-Proxy vor osrm-routed.
+# Domain und Schlüssel kommen aus Umgebungsvariablen (docker-compose.prod.yml).
+# Für die genannte Domain holt Caddy automatisch ein Let's-Encrypt-Zertifikat
+# (dafür müssen Port 80 und 443 von außen erreichbar sein und ein DNS-A-Record
+# auf diesen Host zeigen).
+{$OSRM_DOMAIN} {
+	# Jeder Request ohne korrekten X-Api-Key wird mit 401 abgewiesen.
+	@unauth not header X-Api-Key {$OSRM_API_KEY}
+	respond @unauth "Unauthorized" 401
+
+	# Authentifizierte Requests an osrm-routed im internen Netz weiterreichen.
+	reverse_proxy osrm:5000
+}

@@ -14,7 +14,11 @@ function baueRouting(): RoutingProvider {
   const haversine = new HaversineRoutingProvider()
   let inner: RoutingProvider = haversine
   if (env.ROUTING_PROVIDER === 'osrm' && env.OSRM_BASE_URL) {
-    const osrm = new OsrmRoutingProvider(env.OSRM_BASE_URL, env.OSRM_PROFILE)
+    const osrm = new OsrmRoutingProvider(
+      env.OSRM_BASE_URL,
+      env.OSRM_PROFILE,
+      env.OSRM_API_KEY,
+    )
     inner = new FallbackRoutingProvider(osrm, haversine)
   }
   return new CachedRoutingProvider(inner, new InMemoryMatrixCache())

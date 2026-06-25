@@ -16,6 +16,9 @@ const schema = z.object({
   ROUTING_PROVIDER: z.enum(['haversine', 'osrm']).default('haversine'),
   OSRM_BASE_URL: z.string().optional(), // z. B. https://router.project-osrm.org
   OSRM_PROFILE: z.string().default('driving'),
+  // Optionaler API-Key für den eigenen, abgesicherten OSRM-Server (wird als
+  // X-Api-Key-Header gesendet; vom Reverse-Proxy geprüft).
+  OSRM_API_KEY: z.string().optional(),
   // SLA / Benachrichtigungen (optional).
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default('Pflegelotse <info@example.de>'),

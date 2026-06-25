@@ -12,6 +12,9 @@ export class OsrmRoutingProvider implements RoutingProvider {
   constructor(
     private readonly baseUrl: string,
     private readonly profile = 'driving',
+    // Optionaler API-Key. Steht der OSRM-Server hinter einem Reverse-Proxy mit
+    // Schlüsselprüfung (Produktion), wird er als X-Api-Key-Header gesendet.
+    private readonly apiKey?: string,
     // Zeitlimit, damit ein langsamer/abgestürzter OSRM-Server die interaktive
     // Antwort (< 1 s, /F220/) nicht blockiert. Bei Timeout greift der Fallback.
     private readonly timeoutMs = 4000,
@@ -29,9 +32,10 @@ export class OsrmRoutingProvider implements RoutingProvider {
 
     const ctrl = new AbortController()
     const timer = setTimeout(() => ctrl.abort(), this.timeoutMs)
+    const headers = this.apiKey ? { 'X-Api-Key': this.apiKey } : undefined
     let res: Response
     try {
-      res = await fetch(url, { signal: ctrl.signal })
+      res = await fetch(url, { signal: ctrl.signal, headers })
     } finally {
       clearTimeout(timer)
     }

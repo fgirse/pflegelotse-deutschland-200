@@ -1,0 +1,50 @@
+# Produktiver OSRM-Server: öffentlich erreichbar, aber abgesichert.
+# osrm-routed selbst hat KEINE Authentifizierung und wird daher NICHT direkt
+# ins Netz gehängt. Stattdessen liegt ein Caddy-Reverse-Proxy davor, der
+# automatisch TLS (Let's Encrypt) terminiert und jeden Request gegen einen
+# API-Key (Header X-Api-Key) prüft. Nur der Proxy ist von außen erreichbar.
+#
+# Voraussetzungen (in infra/osrm/.env):
+#   OSRM_DATA     – von prepare.sh gesetzt (z. B. baden-wuerttemberg-latest)
+#   OSRM_DOMAIN   – die öffentliche Domain (A-Record zeigt auf diesen Host)
+#   OSRM_API_KEY  – langes Zufalls-Secret; identisch in den App-Env-Variablen
+#
+# Start:  docker compose -f infra/osrm/docker-compose.prod.yml up -d
+services:
+  osrm:
+    image: ghcr.io/project-osrm/osrm-backend:latest
+    container_name: pflegelotse-osrm
+    command: >
+      osrm-routed --algorithm mld --max-table-size 10000
+      /data/${OSRM_DATA:-germany-latest}.osrm
+    volumes:
+      - ./data:/data
+    restart: unless-stopped
+    # Bewusst KEIN ports: — der Dienst ist nur im internen Netz erreichbar.
+    expose:
+      - '5000'
+    networks: [osrmnet]
+
+  caddy:
+    image: caddy:2
+    container_name: pflegelotse-osrm-caddy
+    depends_on: [osrm]
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      OSRM_DOMAIN: ${OSRM_DOMAIN:?OSRM_DOMAIN fehlt in infra/osrm/.env}
+      OSRM_API_KEY: ${OSRM_API_KEY:?OSRM_API_KEY fehlt in infra/osrm/.env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    restart: unless-stopped
+    networks: [osrmnet]
+
+networks:
+  osrmnet:
+
+volumes:
+  caddy-data:
+  caddy-config:
