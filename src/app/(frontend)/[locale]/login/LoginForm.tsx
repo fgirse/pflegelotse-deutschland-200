@@ -84,11 +84,11 @@ export function LoginForm({ locale }: { locale: string }) {
   return (
     <div className="card mt-6 p-5">
       {registriert && schritt === 'login' && (
-        <p className="mb-3 rounded-lg bg-[var(--color-accent-soft)] p-3 text-sm text-[var(--color-accent)]">
+        <p className="mb-3 rounded-lg bg-accent-soft p-3 text-sm text-accent">
           {t('registriertHinweis')}
         </p>
       )}
-      {fehler && <p className="mb-3 text-sm text-[var(--color-danger)]">⚠ {fehler}</p>}
+      {fehler && <p className="mb-3 text-sm text-danger">⚠ {fehler}</p>}
 
       {schritt === 'login' && (
         <div className="flex flex-col gap-3">
@@ -109,7 +109,7 @@ export function LoginForm({ locale }: { locale: string }) {
       {schritt === 'enroll' && (
         <div className="flex flex-col gap-3">
           <h2 className="font-semibold">{t('enrollTitle')}</h2>
-          <p className="text-sm text-[var(--color-muted)]">{t('enrollHinweis')}</p>
+          <p className="text-sm text-muted">{t('enrollHinweis')}</p>
           {qrDataUrl && (
             <div className="flex flex-col items-center gap-2">
               {/* QR-Code zum Scannen in der Authenticator-App */}
@@ -119,12 +119,12 @@ export function LoginForm({ locale }: { locale: string }) {
                 width={220}
                 height={220}
                 unoptimized
-                className="rounded-lg border border-[var(--color-line)] bg-white p-2"
+                className="rounded-lg border border-line bg-white p-2"
               />
-              <p className="text-xs text-[var(--color-faint)]">{t('qrHinweis')}</p>
+              <p className="text-xs text-faint">{t('qrHinweis')}</p>
             </div>
           )}
-          <div className="rounded-lg border border-[var(--color-line)] bg-[var(--color-paper)] p-3 text-xs break-all">
+          <div className="rounded-lg border border-line bg-paper p-3 text-xs break-all">
             <div className="font-medium">{t('manuell')}</div>
             <div className="mt-1">
               {t('secret')}: <code>{secret}</code>

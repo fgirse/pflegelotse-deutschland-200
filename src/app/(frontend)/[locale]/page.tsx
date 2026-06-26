@@ -28,10 +28,11 @@ function HomeInner() {
       <section className="container-page grid items-center gap-10 py-16 sm:py-24 lg:grid-cols-[1.1fr_0.9fr]">
         <div>
           <span className="eyebrow">{t('heroEyebrow')}</span>
-          <h1 className="mt-4 text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-5xl">
+          <h1 className="mt-4 text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-4xl lg:text-accent">
             {t('heroTitle')}
           </h1>
-          <p className="mt-6 max-w-6xl text-lg leading-relaxed text-muted">
+          <p className="mt-6 max-w-6
+          xl text-lg leading-relaxed text-muted">
             {t('heroSub')}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
