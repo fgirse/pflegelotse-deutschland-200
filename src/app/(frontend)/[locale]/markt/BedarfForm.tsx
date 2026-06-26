@@ -4,15 +4,7 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { hhmmToMin } from '@/shared/time'
-
-// Freiburger Stadtteile mit Koordinaten — Ersatz für Geocoding in diesem Bau.
-const ORTE: Record<string, { lat: number; lng: number }> = {
-  Innenstadt: { lat: 47.995, lng: 7.852 },
-  Wiehre: { lat: 47.988, lng: 7.851 },
-  Herdern: { lat: 48.013, lng: 7.846 },
-  Stühlinger: { lat: 47.998, lng: 7.838 },
-  Littenweiler: { lat: 47.978, lng: 7.905 },
-}
+import { ORTE } from '@/shared/orte'
 
 // Zweistufiges Bedarfsformular. Schritt 1: Pflegesituation (operative Daten),
 // Schritt 2: Kontakt (PII). Beim Absenden POST /api/v1/bedarfe.

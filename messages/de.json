@@ -52,7 +52,21 @@
     "tourDuration": "Fahrzeit",
     "utilization": "Auslastung",
     "stops": "Einsätze",
-    "calculating": "Berechne Fit-Score …"
+    "calculating": "Berechne Fit-Score …",
+    "eingaengeTitel": "Eingehende Bedarfe",
+    "eingaengeAnzahl": "{n, plural, =0 {Keine passenden Bedarfe} one {# passender Bedarf} other {# passende Bedarfe}}",
+    "einzugsgebietTitel": "Einzugsgebiet",
+    "einzugsgebietHinweis": "Standort & Radius festlegen, um passende Bedarfe zu erhalten"
+  },
+  "einzugsgebiet": {
+    "eyebrow": "Dienst-Einstellungen",
+    "title": "Einzugsgebiet festlegen",
+    "subtitle": "Standort und Radius bestimmen, in welchem Umkreis dir Bedarfe angezeigt werden — auch ohne bestehende Tour.",
+    "ort": "Mittelpunkt (Ort)",
+    "radius": "Radius (km)",
+    "speichern": "Speichern",
+    "gespeichert": "Einzugsgebiet gespeichert.",
+    "aktuellGesetzt": "Ein Einzugsgebiet ist bereits gesetzt — du kannst es hier anpassen."
   },
   "tools": {
     "title": "Kostenlose Tools",

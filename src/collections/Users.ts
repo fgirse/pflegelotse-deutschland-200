@@ -66,6 +66,17 @@ export const Users: CollectionConfig = {
     { name: 'totpEnabled', type: 'checkbox', defaultValue: false },
     // Selbstregistrierung: Anzeigename des Pflegedienstes (Dienst-Konten).
     { name: 'dienstName', type: 'text', label: 'Name des Pflegedienstes', required: false },
+    // Einzugsgebiet eines Dienstes: Standort + Radius (km). Bedarfe innerhalb
+    // matchen auch ohne bestehende Tour — wichtig fürs Onboarding neuer Dienste.
+    {
+      name: 'einzugsGeo',
+      type: 'group',
+      fields: [
+        { name: 'lat', type: 'number' },
+        { name: 'lng', type: 'number' },
+      ],
+    },
+    { name: 'einzugsRadiusKm', type: 'number' },
     // Selbstregistrierung: Untergruppe der Suchenden (Statistik/Ansprache).
     {
       name: 'suchendeTyp',

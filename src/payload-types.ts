@@ -146,6 +146,11 @@ export interface User {
   totpSecret?: string | null;
   totpEnabled?: boolean | null;
   dienstName?: string | null;
+  einzugsGeo?: {
+    lat?: number | null;
+    lng?: number | null;
+  };
+  einzugsRadiusKm?: number | null;
   suchendeTyp?: ('angehoerige' | 'patient' | 'sozialdienst') | null;
   updatedAt: string;
   createdAt: string;
@@ -559,6 +564,13 @@ export interface UsersSelect<T extends boolean = true> {
   totpSecret?: T;
   totpEnabled?: T;
   dienstName?: T;
+  einzugsGeo?:
+    | T
+    | {
+        lat?: T;
+        lng?: T;
+      };
+  einzugsRadiusKm?: T;
   suchendeTyp?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -1,6 +1,8 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import { ladeTouren, ladeKlientenOperativ } from '@/server/repo'
 import { planeTour } from '@/server/matching/service'
+import { listeBedarfeFuerDienst } from '@/server/marketplace/service'
 import { requireDienstSeite } from '@/server/auth/page'
 import { DashboardClient } from './DashboardClient'
 
@@ -19,6 +21,8 @@ export default async function DashboardPage({
   const user = await requireDienstSeite(locale)
   const TENANT = user.tenantId
   const t = await getTranslations('dashboard')
+
+  const eingaenge = await listeBedarfeFuerDienst(TENANT)
 
   const [touren, klienten] = await Promise.all([
     ladeTouren(TENANT),
@@ -54,6 +58,27 @@ export default async function DashboardPage({
         <h1 className="mt-3 text-3xl font-bold">{t('title')}</h1>
         <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
       </header>
+
+      {/* Marktplatz-Eingänge sichtbar machen + Einzugsgebiet pflegen. */}
+      <section className="mb-6 grid gap-4 sm:grid-cols-2">
+        <Link href="/eingaenge" className="tile flex items-center justify-between gap-3">
+          <div>
+            <div className="font-display text-lg font-semibold">{t('eingaengeTitel')}</div>
+            <div className="text-sm text-[var(--color-muted)]">
+              {t('eingaengeAnzahl', { n: eingaenge.length })}
+            </div>
+          </div>
+          <span className="chip">{eingaenge.length}</span>
+        </Link>
+        <Link href="/dienst/einzugsgebiet" className="tile flex items-center justify-between gap-3">
+          <div>
+            <div className="font-display text-lg font-semibold">{t('einzugsgebietTitel')}</div>
+            <div className="text-sm text-[var(--color-muted)]">{t('einzugsgebietHinweis')}</div>
+          </div>
+          <span aria-hidden>→</span>
+        </Link>
+      </section>
+
       <DashboardClient
         tenantId={TENANT}
         tours={tourenMitKennzahlen}

@@ -52,7 +52,21 @@
     "tourDuration": "Drive time",
     "utilization": "Utilisation",
     "stops": "Visits",
-    "calculating": "Calculating fit score …"
+    "calculating": "Calculating fit score …",
+    "eingaengeTitel": "Incoming requests",
+    "eingaengeAnzahl": "{n, plural, =0 {No matching requests} one {# matching request} other {# matching requests}}",
+    "einzugsgebietTitel": "Service area",
+    "einzugsgebietHinweis": "Set location & radius to receive matching requests"
+  },
+  "einzugsgebiet": {
+    "eyebrow": "Service settings",
+    "title": "Set service area",
+    "subtitle": "Location and radius determine within which range requests are shown to you — even without an existing tour.",
+    "ort": "Centre (town)",
+    "radius": "Radius (km)",
+    "speichern": "Save",
+    "gespeichert": "Service area saved.",
+    "aktuellGesetzt": "A service area is already set — you can adjust it here."
   },
   "tools": {
     "title": "Free tools",

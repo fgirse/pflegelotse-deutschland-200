@@ -7,6 +7,7 @@ import { getNotifier } from '@/server/notify/Notifier'
 import { erfasseVermittlungsgebuehr } from '@/server/billing/service'
 import { ladeAlleTouren } from '@/server/repo'
 import { minToHHMM } from '@/shared/time'
+import { haversineKm } from '@/shared/orte'
 import { bedarfSchema, type Bedarf, type BedarfErstellen, type Kontakt } from '@/shared/marketplace'
 import type { Tour } from '@/shared/domain'
 
@@ -139,6 +140,49 @@ export async function findePassendeDienste(kandidat: {
     const { matches } = await berechneFitScore(tenantTouren, kandidat)
     if (matches.length > 0) treffer.push(tenantId)
   }
+  // Zusätzlich Dienste, deren Einzugsgebiet die Koordinate abdeckt (auch ohne
+  // passende Tour) — so erreichen Bedarfe auch neu onboardende Dienste.
+  const ausGebiet = await diensteImEinzugsgebiet(kandidat.geo)
+  return Array.from(new Set([...treffer, ...ausGebiet]))
+}
+
+// Lädt die Einzugsgebiete je Mandant aus den Dienst-Nutzern (Standort + Radius).
+async function ladeEinzugsgebiete(): Promise<
+  Map<string, { geo: { lat: number; lng: number }; radiusKm: number }>
+> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'users',
+    where: { role: { in: ['admin', 'disponent', 'pflegekraft'] } },
+    limit: 500,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const map = new Map<string, { geo: { lat: number; lng: number }; radiusKm: number }>()
+  for (const u of res.docs as {
+    tenantId?: string
+    einzugsGeo?: { lat?: number; lng?: number }
+    einzugsRadiusKm?: number
+  }[]) {
+    const lat = u.einzugsGeo?.lat
+    const lng = u.einzugsGeo?.lng
+    if (u.tenantId && typeof lat === 'number' && typeof lng === 'number' && !map.has(u.tenantId)) {
+      map.set(u.tenantId, {
+        geo: { lat, lng },
+        radiusKm: typeof u.einzugsRadiusKm === 'number' ? u.einzugsRadiusKm : 15,
+      })
+    }
+  }
+  return map
+}
+
+// Mandanten, deren Einzugsgebiet die gegebene Koordinate abdeckt.
+async function diensteImEinzugsgebiet(geo: { lat: number; lng: number }): Promise<string[]> {
+  const gebiete = await ladeEinzugsgebiete()
+  const treffer: string[] = []
+  for (const [tenantId, g] of gebiete) {
+    if (haversineKm(geo, g.geo) <= g.radiusKm) treffer.push(tenantId)
+  }
   return treffer
 }
 
@@ -153,9 +197,16 @@ export async function listeBedarfeFuerDienst(tenantId: string): Promise<Bedarf[]
     overrideAccess: true,
     depth: 0,
   })
+  // Einzugsgebiet dieses Dienstes — damit auch BEREITS offene Bedarfe sichtbar
+  // werden, sobald der Dienst sein Gebiet setzt (nicht nur neue).
+  const gebiet = (await ladeEinzugsgebiete()).get(tenantId)
   return res.docs
     .map((d) => bedarfSchema.parse(bedarfAusDoc(d)))
-    .filter((b) => b.matchingTenants.includes(tenantId))
+    .filter(
+      (b) =>
+        b.matchingTenants.includes(tenantId) ||
+        (gebiet ? haversineKm(b.geo, gebiet.geo) <= gebiet.radiusKm : false),
+    )
 }
 
 // Bedarfe, die diesem Dienst zugeschlagen wurden (Status vergeben). Für die
