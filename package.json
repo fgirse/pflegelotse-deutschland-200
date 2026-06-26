@@ -21,6 +21,7 @@
     "db:down": "docker compose down",
     "db:init": "node --env-file=.env --import tsx scripts/db-init.ts",
     "db:seed": "node --env-file=.env --import tsx scripts/seed.ts",
+    "db:reset": "node --env-file=.env --import tsx scripts/db-reset.ts && pnpm run db:seed",
     "admin:create": "node --env-file=.env --import tsx scripts/create-admin.ts",
     "user:tenant": "node --env-file=.env --import tsx scripts/set-tenant.ts",
     "check:encryption": "node --env-file=.env --import tsx scripts/check-encryption.ts",
