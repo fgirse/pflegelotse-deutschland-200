@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from '@/i18n/navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 import { hhmmToMin } from '@/shared/time'
 import { ORTE } from '@/shared/orte'
 
@@ -37,6 +37,7 @@ export function BedarfForm() {
   const [telefon, setTelefon] = useState('')
   const [email, setEmail] = useState('')
   const [adresse, setAdresse] = useState('')
+  const [einw, setEinw] = useState(false)
 
   // Übernimmt einen vom KI-Lotsen vorgeschlagenen Entwurf (via sessionStorage).
   useEffect(() => {
@@ -98,6 +99,7 @@ export function BedarfForm() {
           dauerMin: dauer,
           express,
           kontakt: { vorname, nachname, telefon, email, adresse },
+          einwilligung: einw,
         }),
       })
       if (!res.ok) throw new Error('Fehler beim Einstellen')
@@ -212,12 +214,27 @@ export function BedarfForm() {
           <label className="label">{t('adresse')}
             <input value={adresse} onChange={(e) => setAdresse(e.target.value)} className={inputCls} />
           </label>
+          {/* Pflicht-Einwilligung (Art. 9 DSGVO) mit Verweis auf die Datenschutzerklärung. */}
+          <label className="flex items-start gap-2 text-sm text-[var(--color-muted)]">
+            <input
+              type="checkbox"
+              checked={einw}
+              onChange={(e) => setEinw(e.target.checked)}
+              className="mt-1"
+            />
+            <span>
+              {t('einwilligungLabel')}{' '}
+              <Link href="/datenschutz" className="text-[var(--color-accent)] hover:underline">
+                {t('datenschutzLink')}
+              </Link>
+            </span>
+          </label>
           {fehler && <p className="text-sm text-[var(--color-danger)]">⚠ {fehler}</p>}
           <div className="flex gap-3">
             <button onClick={() => setSchritt(1)} className="btn btn-outline">{t('zurueck')}</button>
             <button
               onClick={absenden}
-              disabled={sende || !vorname || !nachname || !telefon}
+              disabled={sende || !vorname || !nachname || !telefon || !einw}
               className="btn btn-accent flex-1"
             >
               {t('absenden')}

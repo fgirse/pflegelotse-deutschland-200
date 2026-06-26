@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import { ORTE } from '@/shared/orte'
 
 type Typ = 'suchende' | 'dienst'
@@ -23,6 +24,7 @@ export function RegistrierenForm({ locale }: { locale: string }) {
   const [geocodedGeo, setGeocodedGeo] = useState<{ lat: number; lng: number } | null>(null)
   const [geoLabel, setGeoLabel] = useState<string | null>(null)
   const [geoBusy, setGeoBusy] = useState(false)
+  const [einw, setEinw] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -55,8 +57,8 @@ export function RegistrierenForm({ locale }: { locale: string }) {
       const einzugsGeo = geocodedGeo ?? ORTE[ortWahl]
       const body =
         typ === 'dienst'
-          ? { typ, email, password, dienstName, einzugsGeo, einzugsRadiusKm: radius }
-          : { typ, email, password, suchendeTyp }
+          ? { typ, email, password, dienstName, einzugsGeo, einzugsRadiusKm: radius, einwilligung: einw }
+          : { typ, email, password, suchendeTyp, einwilligung: einw }
       const res = await fetch('/api/v1/auth/register', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
@@ -87,6 +89,7 @@ export function RegistrierenForm({ locale }: { locale: string }) {
   const bereit =
     email.length > 3 &&
     password.length >= 8 &&
+    einw &&
     (typ === 'suchende' || dienstName.length >= 2)
 
   return (
@@ -189,6 +192,17 @@ export function RegistrierenForm({ locale }: { locale: string }) {
         <label className="label">
           {t('password')}
           <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        </label>
+
+        {/* Pflicht-Einwilligung mit Verweis auf die Datenschutzerklärung. */}
+        <label className="flex items-start gap-2 text-sm text-[var(--color-muted)]">
+          <input type="checkbox" checked={einw} onChange={(e) => setEinw(e.target.checked)} className="mt-1" />
+          <span>
+            {t('einwilligungLabel')}{' '}
+            <Link href="/datenschutz" className="text-[var(--color-accent)] hover:underline">
+              {t('datenschutzLink')}
+            </Link>
+          </span>
         </label>
 
         <button onClick={absenden} disabled={busy || !bereit} className="btn btn-accent mt-1">

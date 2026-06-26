@@ -18,6 +18,7 @@ export const registrierungSchema = z.discriminatedUnion('typ', [
     email,
     password,
     suchendeTyp: suchendeTypSchema,
+    einwilligung: z.literal(true),
   }),
   // Pflegedienst: bekommt serverseitig einen neuen Mandanten + Rolle 'admin'.
   // Einzugsgebiet (Mittelpunkt + Radius) wird gleich erfasst, damit der Dienst
@@ -30,6 +31,7 @@ export const registrierungSchema = z.discriminatedUnion('typ', [
     ort: z.string().optional(),
     einzugsGeo: z.object({ lat: z.number(), lng: z.number() }).optional(),
     einzugsRadiusKm: z.number().min(1).max(100).optional(),
+    einwilligung: z.literal(true),
   }),
 ])
 export type RegistrierungEingabe = z.infer<typeof registrierungSchema>

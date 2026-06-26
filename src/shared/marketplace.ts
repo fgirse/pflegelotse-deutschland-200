@@ -54,6 +54,8 @@ export const bedarfErstellenSchema = z.object({
   dauerMin: z.number().int().positive().default(30),
   express: z.boolean().default(false),
   kontakt: kontaktSchema,
+  // Pflicht-Einwilligung (Art. 9 DSGVO) — muss true sein, sonst kein Bedarf.
+  einwilligung: z.literal(true),
 })
 export type BedarfErstellen = z.infer<typeof bedarfErstellenSchema>
 

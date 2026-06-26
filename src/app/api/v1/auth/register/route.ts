@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { randomBytes } from 'node:crypto'
 import { payloadClient } from '@/server/payloadClient'
 import { registrierungSchema } from '@/shared/registrierung'
+import { EINWILLIGUNG_VERSION } from '@/shared/consent'
 
 export const dynamic = 'force-dynamic'
 
@@ -53,6 +54,9 @@ export async function POST(req: NextRequest) {
           role: 'admin', // Dienst-Inhaber
           tenantId: tenantIdAus(data.dienstName), // neuer Mandant pro Dienst
           dienstName: data.dienstName,
+          // Einwilligungs-Nachweis (Zeitpunkt + Fassung, serverseitig).
+          einwilligungAt: new Date().toISOString(),
+          einwilligungVersion: EINWILLIGUNG_VERSION,
           // Einzugsgebiet direkt setzen, falls bei der Registrierung erfasst.
           ...(data.einzugsGeo
             ? {
@@ -71,6 +75,8 @@ export async function POST(req: NextRequest) {
           password: data.password,
           role: 'angehoeriger', // Suchende: kein Mandant, kein Klientendatenzugriff
           suchendeTyp: data.suchendeTyp,
+          einwilligungAt: new Date().toISOString(),
+          einwilligungVersion: EINWILLIGUNG_VERSION,
         },
         overrideAccess: true,
       })

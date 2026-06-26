@@ -8,6 +8,7 @@ import { erfasseVermittlungsgebuehr } from '@/server/billing/service'
 import { ladeAlleTouren } from '@/server/repo'
 import { minToHHMM } from '@/shared/time'
 import { haversineKm } from '@/shared/orte'
+import { EINWILLIGUNG_VERSION } from '@/shared/consent'
 import { bedarfSchema, type Bedarf, type BedarfErstellen, type Kontakt } from '@/shared/marketplace'
 import type { Tour } from '@/shared/domain'
 
@@ -35,10 +36,17 @@ export async function erstelleBedarf(
     qualifikation: input.qualifikation,
   })
 
-  // Säule 1: Kontaktdaten (Hooks verschlüsseln) + Konto-Verknüpfung.
+  // Säule 1: Kontaktdaten (Hooks verschlüsseln) + Konto-Verknüpfung +
+  // Einwilligungs-Nachweis (Zeitpunkt + Fassung, serverseitig gesetzt).
   await payload.create({
     collection: 'angehoerige_identitaet',
-    data: { pseudonymId, ownerUserId, ...input.kontakt },
+    data: {
+      pseudonymId,
+      ownerUserId,
+      einwilligungAt: new Date().toISOString(),
+      einwilligungVersion: EINWILLIGUNG_VERSION,
+      ...input.kontakt,
+    },
     overrideAccess: true,
   })
 

@@ -16,6 +16,8 @@ test('Reverse Bidding: Bedarf → Angebot → Auswahl → Kontaktfreigabe', asyn
   await page.getByLabel('Vorname').fill('Petra')
   await page.getByLabel('Nachname').fill('Schneider')
   await page.getByLabel('Telefon').fill('0761-987654')
+  // Pflicht-Einwilligung (Art. 9 DSGVO) — sonst ist „Bedarf einstellen" gesperrt.
+  await page.getByRole('checkbox').check()
   await page.getByRole('button', { name: 'Bedarf einstellen' }).click()
 
   // Landung auf der Angebotsseite; Bedarfs-ID aus der URL ziehen.

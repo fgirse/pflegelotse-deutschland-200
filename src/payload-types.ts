@@ -151,6 +151,8 @@ export interface User {
     lng?: number | null;
   };
   einzugsRadiusKm?: number | null;
+  einwilligungAt?: string | null;
+  einwilligungVersion?: string | null;
   suchendeTyp?: ('angehoerige' | 'patient' | 'sozialdienst') | null;
   updatedAt: string;
   createdAt: string;
@@ -355,6 +357,8 @@ export interface AngehoerigeIdentitaet {
   id: string;
   pseudonymId: string;
   ownerUserId?: string | null;
+  einwilligungAt?: string | null;
+  einwilligungVersion?: string | null;
   vorname?: string | null;
   nachname?: string | null;
   telefon?: string | null;
@@ -571,6 +575,8 @@ export interface UsersSelect<T extends boolean = true> {
         lng?: T;
       };
   einzugsRadiusKm?: T;
+  einwilligungAt?: T;
+  einwilligungVersion?: T;
   suchendeTyp?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -725,6 +731,8 @@ export interface BedarfeSelect<T extends boolean = true> {
 export interface AngehoerigeIdentitaetSelect<T extends boolean = true> {
   pseudonymId?: T;
   ownerUserId?: T;
+  einwilligungAt?: T;
+  einwilligungVersion?: T;
   vorname?: T;
   nachname?: T;
   telefon?: T;

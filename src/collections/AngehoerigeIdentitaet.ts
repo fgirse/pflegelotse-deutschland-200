@@ -25,6 +25,9 @@ export const AngehoerigeIdentitaet: CollectionConfig = {
     // unverschlüsselt und abfragbar; die Zuordnung Identität↔Konto bleibt in
     // Säule 1. Anonym (ohne Login) eingestellte Bedarfe haben keinen Wert.
     { name: 'ownerUserId', type: 'text', index: true },
+    // Einwilligungs-Nachweis (Art. 7 Abs. 1 DSGVO): wann + auf welche Fassung.
+    { name: 'einwilligungAt', type: 'date' },
+    { name: 'einwilligungVersion', type: 'text' },
     ...PII_FELDER.map(piiFeld),
   ],
 }

@@ -77,6 +77,9 @@ export const Users: CollectionConfig = {
       ],
     },
     { name: 'einzugsRadiusKm', type: 'number' },
+    // Einwilligungs-Nachweis bei der Registrierung (Art. 7 Abs. 1 DSGVO).
+    { name: 'einwilligungAt', type: 'date' },
+    { name: 'einwilligungVersion', type: 'text' },
     // Selbstregistrierung: Untergruppe der Suchenden (Statistik/Ansprache).
     {
       name: 'suchendeTyp',
