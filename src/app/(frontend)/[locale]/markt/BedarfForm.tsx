@@ -17,6 +17,12 @@ export function BedarfForm() {
 
   // Schritt 1
   const [ort, setOrt] = useState<keyof typeof ORTE>('Wiehre')
+  // Optionales Geocoding: freie Adresse/Ort → Koordinaten (überschreibt die
+  // Auswahl aus der Ortsliste, wenn ein Treffer gefunden wurde).
+  const [adresseSuche, setAdresseSuche] = useState('')
+  const [geocodedGeo, setGeocodedGeo] = useState<{ lat: number; lng: number } | null>(null)
+  const [geoLabel, setGeoLabel] = useState<string | null>(null)
+  const [geoBusy, setGeoBusy] = useState(false)
   const [pflegegrad, setPflegegrad] = useState(3)
   const [qualifikation, setQualifikation] = useState('grundpflege')
   const [leistungen, setLeistungen] = useState('LK01')
@@ -52,6 +58,29 @@ export function BedarfForm() {
     }
   }, [])
 
+  // Geocodiert die freie Adresse und merkt sich die Koordinaten.
+  async function adresseSuchen() {
+    if (adresseSuche.trim().length < 3) return
+    setGeoBusy(true)
+    setGeoLabel(null)
+    try {
+      const res = await fetch(`/api/v1/geo/geocode?q=${encodeURIComponent(adresseSuche)}`)
+      if (!res.ok) {
+        setGeocodedGeo(null)
+        setGeoLabel(t('ortNichtGefunden'))
+        return
+      }
+      const d = await res.json()
+      setGeocodedGeo({ lat: d.lat, lng: d.lng })
+      setGeoLabel(d.displayName)
+    } catch {
+      setGeocodedGeo(null)
+      setGeoLabel(t('ortNichtGefunden'))
+    } finally {
+      setGeoBusy(false)
+    }
+  }
+
   async function absenden() {
     setSende(true)
     setFehler(null)
@@ -60,7 +89,8 @@ export function BedarfForm() {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          geo: ORTE[ort],
+          // Geocodierte Adresse hat Vorrang, sonst der gewählte Ort.
+          geo: geocodedGeo ?? ORTE[ort],
           pflegegrad,
           qualifikation: [qualifikation],
           leistungen: leistungen.split(',').map((s) => s.trim()).filter(Boolean),
@@ -96,6 +126,31 @@ export function BedarfForm() {
               ))}
             </select>
           </label>
+          {/* Optional: freie Adresse/Ort per Geocoding (überschreibt die Auswahl). */}
+          <div>
+            <span className="label">{t('adresseSuche')}</span>
+            <div className="mt-1 flex gap-2">
+              <input
+                value={adresseSuche}
+                onChange={(e) => setAdresseSuche(e.target.value)}
+                placeholder={t('adresseSuchePlatzhalter')}
+                className={inputCls}
+              />
+              <button
+                type="button"
+                onClick={adresseSuchen}
+                disabled={geoBusy || adresseSuche.trim().length < 3}
+                className="btn btn-outline shrink-0"
+              >
+                {t('suchen')}
+              </button>
+            </div>
+            {geoLabel && (
+              <p className="mt-1 text-xs text-[var(--color-faint)]">
+                {geocodedGeo ? `✓ ${geoLabel}` : geoLabel}
+              </p>
+            )}
+          </div>
           <label className="label">
             {t('pflegegrad')}
             <select value={pflegegrad} onChange={(e) => setPflegegrad(Number(e.target.value))} className={inputCls}>

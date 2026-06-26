@@ -19,6 +19,12 @@ const schema = z.object({
   // Optionaler API-Key für den eigenen, abgesicherten OSRM-Server (wird als
   // X-Api-Key-Header gesendet; vom Reverse-Proxy geprüft).
   OSRM_API_KEY: z.string().optional(),
+  // Geocoding (Adresse → Koordinaten) über Nominatim/OpenStreetMap.
+  // Für Produktion idealerweise eigene Instanz; User-Agent mit Kontakt (Policy).
+  NOMINATIM_BASE_URL: z.string().default('https://nominatim.openstreetmap.org'),
+  GEOCODER_USER_AGENT: z
+    .string()
+    .default('PflegeLotse/1.0 (+https://pflegelotse-deutschland-200.vercel.app)'),
   // SLA / Benachrichtigungen (optional).
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default('Pflegelotse <info@example.de>'),
