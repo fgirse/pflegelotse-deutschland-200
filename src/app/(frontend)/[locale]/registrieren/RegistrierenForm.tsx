@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { ORTE } from '@/shared/orte'
 
 type Typ = 'suchende' | 'dienst'
 
@@ -15,17 +16,46 @@ export function RegistrierenForm({ locale }: { locale: string }) {
   const [password, setPassword] = useState('')
   const [suchendeTyp, setSuchendeTyp] = useState('angehoerige')
   const [dienstName, setDienstName] = useState('')
-  const [ort, setOrt] = useState('')
+  // Einzugsgebiet des Dienstes: Ortsauswahl (Fallback) + optionale Adresssuche.
+  const [ortWahl, setOrtWahl] = useState<string>(Object.keys(ORTE)[0])
+  const [radius, setRadius] = useState(15)
+  const [adresseSuche, setAdresseSuche] = useState('')
+  const [geocodedGeo, setGeocodedGeo] = useState<{ lat: number; lng: number } | null>(null)
+  const [geoLabel, setGeoLabel] = useState<string | null>(null)
+  const [geoBusy, setGeoBusy] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+
+  async function adresseSuchen() {
+    if (adresseSuche.trim().length < 3) return
+    setGeoBusy(true)
+    setGeoLabel(null)
+    try {
+      const res = await fetch(`/api/v1/geo/geocode?q=${encodeURIComponent(adresseSuche)}`)
+      if (!res.ok) {
+        setGeocodedGeo(null)
+        setGeoLabel(t('ortNichtGefunden'))
+        return
+      }
+      const d = await res.json()
+      setGeocodedGeo({ lat: d.lat, lng: d.lng })
+      setGeoLabel(d.displayName)
+    } catch {
+      setGeocodedGeo(null)
+      setGeoLabel(t('ortNichtGefunden'))
+    } finally {
+      setGeoBusy(false)
+    }
+  }
 
   async function absenden() {
     setBusy(true)
     setFehler(null)
     try {
+      const einzugsGeo = geocodedGeo ?? ORTE[ortWahl]
       const body =
         typ === 'dienst'
-          ? { typ, email, password, dienstName, ort: ort || undefined }
+          ? { typ, email, password, dienstName, einzugsGeo, einzugsRadiusKm: radius }
           : { typ, email, password, suchendeTyp }
       const res = await fetch('/api/v1/auth/register', {
         method: 'POST',
@@ -99,10 +129,56 @@ export function RegistrierenForm({ locale }: { locale: string }) {
               {t('dienstName')}
               <input className="input" value={dienstName} onChange={(e) => setDienstName(e.target.value)} />
             </label>
-            <label className="label">
-              {t('ort')}
-              <input className="input" value={ort} onChange={(e) => setOrt(e.target.value)} />
-            </label>
+
+            {/* Einzugsgebiet: Mittelpunkt + Radius — damit der Dienst sofort
+                passende Bedarfe sieht. */}
+            <div className="rounded-lg border border-[var(--color-line)] bg-[var(--color-paper)] p-3">
+              <p className="text-sm font-medium">{t('einzugsTitel')}</p>
+              <p className="mt-1 text-xs text-[var(--color-faint)]">{t('einzugsHinweis')}</p>
+              <label className="label mt-3">
+                {t('ort')}
+                <select className="input" value={ortWahl} onChange={(e) => setOrtWahl(e.target.value)}>
+                  {Object.keys(ORTE).map((o) => (
+                    <option key={o} value={o}>
+                      {o}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <span className="label mt-3">{t('adresseSuche')}</span>
+              <div className="mt-1 flex gap-2">
+                <input
+                  value={adresseSuche}
+                  onChange={(e) => setAdresseSuche(e.target.value)}
+                  placeholder={t('adresseSuchePlatzhalter')}
+                  className="input"
+                />
+                <button
+                  type="button"
+                  onClick={adresseSuchen}
+                  disabled={geoBusy || adresseSuche.trim().length < 3}
+                  className="btn btn-outline shrink-0"
+                >
+                  {t('suchen')}
+                </button>
+              </div>
+              {geoLabel && (
+                <p className="mt-1 text-xs text-[var(--color-faint)]">
+                  {geocodedGeo ? `✓ ${geoLabel}` : geoLabel}
+                </p>
+              )}
+              <label className="label mt-3">
+                {t('radius')}
+                <input
+                  className="input"
+                  type="number"
+                  min={1}
+                  max={100}
+                  value={radius}
+                  onChange={(e) => setRadius(Number(e.target.value))}
+                />
+              </label>
+            </div>
           </>
         )}
 

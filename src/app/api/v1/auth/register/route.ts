@@ -53,6 +53,13 @@ export async function POST(req: NextRequest) {
           role: 'admin', // Dienst-Inhaber
           tenantId: tenantIdAus(data.dienstName), // neuer Mandant pro Dienst
           dienstName: data.dienstName,
+          // Einzugsgebiet direkt setzen, falls bei der Registrierung erfasst.
+          ...(data.einzugsGeo
+            ? {
+                einzugsGeo: data.einzugsGeo,
+                einzugsRadiusKm: data.einzugsRadiusKm ?? 15,
+              }
+            : {}),
         },
         overrideAccess: true,
       })
