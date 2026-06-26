@@ -5,7 +5,9 @@
   },
   "nav": {
     "dashboard": "Disponenten-Dashboard",
-    "admin": "Verwaltung"
+    "admin": "Verwaltung",
+    "impressum": "Impressum",
+    "datenschutz": "Datenschutz"
   },
   "home": {
     "title": "PflegeLotse Deutschland",

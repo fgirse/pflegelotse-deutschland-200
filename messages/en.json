@@ -5,7 +5,9 @@
   },
   "nav": {
     "dashboard": "Dispatcher dashboard",
-    "admin": "Administration"
+    "admin": "Administration",
+    "impressum": "Imprint",
+    "datenschutz": "Privacy"
   },
   "home": {
     "title": "Pflegelotse Deutschland",

@@ -117,6 +117,12 @@ export function SiteFooter() {
           <Link href="/login" className="hover:text-[var(--color-ink)]">
             {t('login.title')}
           </Link>
+          <Link href="/impressum" className="hover:text-[var(--color-ink)]">
+            {t('nav.impressum')}
+          </Link>
+          <Link href="/datenschutz" className="hover:text-[var(--color-ink)]">
+            {t('nav.datenschutz')}
+          </Link>
         </nav>
       </div>
     </footer>
