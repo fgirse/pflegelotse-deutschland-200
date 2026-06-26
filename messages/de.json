@@ -253,6 +253,7 @@
     "keineBedarfe": "Aktuell keine passenden offenen Bedarfe.",
     "angebotAbgeben": "Angebot abgeben",
     "angebotGesendet": "Angebot gesendet",
+    "angebotFehler": "Angebot konnte nicht abgegeben werden. Bitte erneut versuchen.",
     "nachricht": "Nachricht an Angehörige",
     "kontaktAnzeigen": "Freigegebenen Kontakt anzeigen",
     "vergeben": "Vergeben",

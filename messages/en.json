@@ -253,6 +253,7 @@
     "keineBedarfe": "No matching open requests right now.",
     "angebotAbgeben": "Make an offer",
     "angebotGesendet": "Offer sent",
+    "angebotFehler": "Could not submit the offer. Please try again.",
     "nachricht": "Message to the relative",
     "kontaktAnzeigen": "Show released contact",
     "vergeben": "Assigned",

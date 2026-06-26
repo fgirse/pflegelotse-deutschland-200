@@ -240,7 +240,14 @@ export async function gibAngebotAb(
   if (!OFFEN.includes(bedarf.status as (typeof OFFEN)[number])) {
     throw new Error(`Bedarf ist nicht mehr offen (Status: ${bedarf.status})`)
   }
-  if (!bedarf.matchingTenants.includes(tenantId)) {
+  // Passend, wenn der Dienst beim Fan-out getroffen wurde ODER der Bedarf im
+  // Einzugsgebiet liegt (gleiche Logik wie listeBedarfeFuerDienst — sonst sieht
+  // ein area-gematchter Dienst den Bedarf, kann aber kein Angebot abgeben).
+  const gebiet = (await ladeEinzugsgebiete()).get(tenantId)
+  const passt =
+    bedarf.matchingTenants.includes(tenantId) ||
+    (gebiet ? haversineKm(bedarf.geo, gebiet.geo) <= gebiet.radiusKm : false)
+  if (!passt) {
     throw new Error('Dienst gehört nicht zu den passenden Diensten dieses Bedarfs')
   }
 
