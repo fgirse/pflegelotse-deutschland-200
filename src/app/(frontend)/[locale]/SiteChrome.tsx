@@ -1,7 +1,12 @@
 import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
+import { headers } from 'next/headers'
 import { Link } from '@/i18n/navigation'
+import { getAuthUser } from '@/server/auth/guard'
 import { LocaleSwitcher } from './LocaleSwitcher'
-import { UserMenu } from './UserMenu'
+import { LogoutButton } from './LogoutButton'
+
+const DIENST_ROLLEN = ['disponent', 'admin', 'pflegekraft']
 
 // Wortmarke: „Pflege" in Tinte, „Lotse" im Gold-Akzent — ruhige, eigenständige
 // Marke statt generischem Logo.
@@ -14,14 +19,30 @@ function Wordmark() {
   )
 }
 
-export function SiteHeader({ locale }: { locale: string }) {
-  const t = useTranslations()
-  // Öffentliche Navigation; der rollenrichtige Bereichs-Link (Dashboard bzw.
-  // Meine Bedarfe) kommt aus dem auth-bewussten UserMenu.
+// Serverseitig gerenderter Header: der Anmeldestatus ist sofort im ersten
+// HTML sichtbar (kein Client-Flash). Liest die Sitzung aus dem Cookie —
+// dadurch werden die Seiten dynamisch gerendert.
+export async function SiteHeader({ locale }: { locale: string }) {
+  const t = await getTranslations()
+  // headers() BEWUSST außerhalb des try/catch: der Aufruf signalisiert Next das
+  // dynamische Rendering (Bailout). Würde der catch ihn schlucken, prerenderte
+  // Next die Seite statisch und der Status käme nie aus dem echten Cookie.
+  const h = await headers()
+  let user = null
+  try {
+    user = await getAuthUser(h)
+  } catch {
+    user = null // nur Auth-/DB-Fehler abfangen, nicht den Dynamic-Bailout.
+  }
+
   const nav = [
     { href: '/lotse', label: t('lotse.title') },
     { href: '/tools', label: t('tools.title') },
   ]
+  const istDienst = user ? DIENST_ROLLEN.includes(user.role) : false
+  const bereichHref = istDienst ? '/dashboard' : '/meine-bedarfe'
+  const bereichLabel = istDienst ? t('nav.dashboard') : t('meineBedarfe.title')
+
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-line)] bg-[var(--color-paper)]/85 backdrop-blur">
       <div className="container-page flex h-16 items-center justify-between gap-4">
@@ -39,7 +60,32 @@ export function SiteHeader({ locale }: { locale: string }) {
         </nav>
         <div className="flex items-center gap-3">
           <LocaleSwitcher locale={locale} />
-          <UserMenu locale={locale} />
+          {user ? (
+            <>
+              <Link href={bereichHref} className="btn btn-outline">
+                {bereichLabel}
+              </Link>
+              <span
+                className="hidden max-w-[12rem] truncate text-sm text-[var(--color-muted)] md:inline"
+                title={user.email}
+              >
+                {user.dienstName || user.email}
+              </span>
+              <LogoutButton locale={locale} />
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+              >
+                {t('login.anmelden')}
+              </Link>
+              <Link href="/registrieren" className="btn btn-accent">
+                {t('login.jetztRegistrieren')}
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

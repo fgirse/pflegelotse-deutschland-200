@@ -24,6 +24,10 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
 }
 
+// Der Header liest die Sitzung serverseitig aus dem Cookie — daher müssen die
+// Seiten pro Request gerendert werden (kein statisches Prerendering).
+export const dynamic = 'force-dynamic'
+
 export default async function LocaleLayout({
   children,
   params,
