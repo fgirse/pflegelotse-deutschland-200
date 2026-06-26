@@ -9,6 +9,7 @@ export interface AuthUser {
   role: Rolle
   tenantId?: string
   totpEnabled?: boolean
+  dienstName?: string
 }
 
 // Rollen mit Klientendatenzugriff — für sie ist 2FA verpflichtend (/Q110/).
@@ -25,6 +26,7 @@ export async function getAuthUser(headers: Headers): Promise<AuthUser | null> {
     role: (user as { role?: Rolle }).role ?? 'disponent',
     tenantId: (user as { tenantId?: string }).tenantId,
     totpEnabled: (user as { totpEnabled?: boolean }).totpEnabled,
+    dienstName: (user as { dienstName?: string }).dienstName,
   }
 }
 

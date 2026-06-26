@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { LocaleSwitcher } from './LocaleSwitcher'
+import { UserMenu } from './UserMenu'
 
 // Wortmarke: „Pflege" in Tinte, „Lotse" im Gold-Akzent — ruhige, eigenständige
 // Marke statt generischem Logo.
@@ -15,10 +16,11 @@ function Wordmark() {
 
 export function SiteHeader({ locale }: { locale: string }) {
   const t = useTranslations()
+  // Öffentliche Navigation; der rollenrichtige Bereichs-Link (Dashboard bzw.
+  // Meine Bedarfe) kommt aus dem auth-bewussten UserMenu.
   const nav = [
     { href: '/lotse', label: t('lotse.title') },
     { href: '/tools', label: t('tools.title') },
-    { href: '/dashboard', label: t('nav.dashboard') },
   ]
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-line)] bg-[var(--color-paper)]/85 backdrop-blur">
@@ -37,15 +39,7 @@ export function SiteHeader({ locale }: { locale: string }) {
         </nav>
         <div className="flex items-center gap-3">
           <LocaleSwitcher locale={locale} />
-          <Link
-            href="/registrieren"
-            className="hidden text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)] sm:inline"
-          >
-            {t('login.jetztRegistrieren')}
-          </Link>
-          <Link href="/markt" className="btn btn-accent hidden sm:inline-flex">
-            {t('markt.title')}
-          </Link>
+          <UserMenu locale={locale} />
         </div>
       </div>
     </header>

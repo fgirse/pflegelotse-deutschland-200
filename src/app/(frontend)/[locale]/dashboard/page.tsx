@@ -43,10 +43,15 @@ export default async function DashboardPage({
   )
   const kandidaten = klienten.filter((k) => !zugeordnet.has(k.pseudonymId))
 
+  const tl = await getTranslations('login')
+
   return (
     <main className="container-page max-w-7xl py-8">
       <header className="mb-6">
-        <h1 className="text-3xl font-bold">{t('title')}</h1>
+        <span className="chip">
+          {tl('angemeldetAls')}: {user.dienstName || user.email}
+        </span>
+        <h1 className="mt-3 text-3xl font-bold">{t('title')}</h1>
         <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
       </header>
       <DashboardClient

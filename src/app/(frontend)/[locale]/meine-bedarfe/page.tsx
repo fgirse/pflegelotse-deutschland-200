@@ -18,6 +18,7 @@ export default async function MeineBedarfePage({
   setRequestLocale(locale)
   const user = await requireAngehoerige(locale)
   const t = await getTranslations('meineBedarfe')
+  const tl = await getTranslations('login')
   const eintraege = await listeBedarfeFuerNutzer(user.id)
 
   return (
@@ -27,6 +28,9 @@ export default async function MeineBedarfePage({
           <span className="eyebrow">{t('eyebrow')}</span>
           <h1 className="mt-2 text-3xl font-bold">{t('title')}</h1>
           <p className="mt-2 text-[var(--color-muted)]">{t('subtitle')}</p>
+          <p className="mt-2 text-sm text-[var(--color-faint)]">
+            {tl('angemeldetAls')}: {user.email}
+          </p>
         </div>
         <Link href="/markt" className="btn btn-accent shrink-0">
           {t('neuerBedarf')}

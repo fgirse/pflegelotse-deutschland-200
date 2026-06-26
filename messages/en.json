@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "PflegeLotse",
+    "name": "Pflegelotse Deutschland",
     "tagline": "Route optimisation for home-care services"
   },
   "nav": {
@@ -8,12 +8,12 @@
     "admin": "Administration"
   },
   "home": {
-    "title": "PflegeLotse",
+    "title": "Pflegelotse Deutschland",
     "subtitle": "Fill route gaps with a precise fit — more margin on routes you already drive.",
     "openDashboard": "Open dashboard",
     "heroEyebrow": "Home care · Freiburg region",
-    "heroTitle": "Find the right care service — and routes that pay off.",
-    "heroSub": "PflegeLotse matches relatives and home-care services precisely — by location, time and service. Privacy-compliant and accessible.",
+    "heroTitle": "For relatives, patients and social services: Find the right care service — For home-care services: Routes that pay off.",
+    "heroSub": "Pflegelotse Deutschland matches relatives and home-care services precisely — by location, time and service. Privacy-compliant and accessible.",
     "ctaDienst": "For care services",
     "trust1Title": "24-hour response",
     "trust1Text": "A binding answer to every request — guaranteed.",
@@ -129,6 +129,7 @@
     "fehlerLogin": "Wrong email or password.",
     "fehlerCode": "Invalid code.",
     "abmelden": "Sign out",
+    "angemeldetAls": "Signed in as",
     "registriertHinweis": "Registration successful. Please sign in now.",
     "keinKonto": "No account yet?",
     "jetztRegistrieren": "Register"

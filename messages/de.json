@@ -12,7 +12,7 @@
     "subtitle": "Füllen Sie Tourenlücken passgenau — mehr Marge auf bereits gefahrene Routen.",
     "openDashboard": "Dashboard öffnen",
     "heroEyebrow": "Ambulante Pflege · Pilot Region Freiburg",
-    "heroTitle": "Für Angehörige/ Sozialdienste: Den passenden Pflegedienst finden — Für ambulante Pflegedienste: Passgenaue Touren, die sich rechnen.",
+    "heroTitle": "Für Angehörige, Patienten und Sozialdienste: Den passenden Pflegedienst finden — Für ambulante Pflegedienste: Passgenaue Touren, die sich rechnen.",
     "heroSub": "PflegeLotse Deutschland bringt Angehörige und ambulante Pflegedienste passgenau zusammen — nach Ort, Zeit und Leistung. Datenschutzkonform und barrierearm.",
     "ctaDienst": "Für Pflegedienste",
     "trust1Title": "24-Stunden-Rückmeldung",
@@ -129,6 +129,7 @@
     "fehlerLogin": "E-Mail oder Passwort falsch.",
     "fehlerCode": "Code ungültig.",
     "abmelden": "Abmelden",
+    "angemeldetAls": "Angemeldet als",
     "registriertHinweis": "Registrierung erfolgreich. Bitte melde dich jetzt an.",
     "keinKonto": "Noch kein Konto?",
     "jetztRegistrieren": "Registrieren"

@@ -10,7 +10,13 @@ export async function GET(req: NextRequest) {
   if (!user) return NextResponse.json({ user: null })
   const twofaActive = verify2fa(req.cookies.get(COOKIE_2FA)?.value, user.id)
   return NextResponse.json({
-    user: { email: user.email, role: user.role, tenantId: user.tenantId, totpEnabled: user.totpEnabled },
+    user: {
+      email: user.email,
+      role: user.role,
+      tenantId: user.tenantId,
+      totpEnabled: user.totpEnabled,
+      dienstName: user.dienstName,
+    },
     twofaActive,
   })
 }
