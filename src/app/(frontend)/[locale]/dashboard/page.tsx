@@ -1,5 +1,4 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-import { redirect } from 'next/navigation'
 import { ladeTouren, ladeKlientenOperativ } from '@/server/repo'
 import { planeTour } from '@/server/matching/service'
 import { requireDienstSeite } from '@/server/auth/page'
@@ -16,9 +15,8 @@ export default async function DashboardPage({
 }) {
   const { locale } = await params
   setRequestLocale(locale)
-  // Auth + 2FA erzwingen; Mandant aus dem Nutzer ableiten.
+  // Auth + 2FA + Mandant erzwingen; Mandant aus dem Nutzer ableiten.
   const user = await requireDienstSeite(locale)
-  if (!user.tenantId) redirect(`/${locale}/login`)
   const TENANT = user.tenantId
   const t = await getTranslations('dashboard')
 

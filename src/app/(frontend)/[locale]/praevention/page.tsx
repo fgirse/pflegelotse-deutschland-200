@@ -1,5 +1,4 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server'
-import { redirect } from 'next/navigation'
 import { requireDienstSeite } from '@/server/auth/page'
 import { ladeKlientenOperativ } from '@/server/repo'
 import { HANDLUNGSFELDER } from '@/server/praevention/katalog'
@@ -16,7 +15,6 @@ export default async function PraeventionPage({
   const { locale } = await params
   setRequestLocale(locale)
   const user = await requireDienstSeite(locale)
-  if (!user.tenantId) redirect(`/${locale}/login`)
   const t = await getTranslations('praevention')
 
   const klienten = await ladeKlientenOperativ(user.tenantId, 'aktiv')

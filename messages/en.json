@@ -130,6 +130,12 @@
     "fehlerCode": "Invalid code.",
     "abmelden": "Sign out"
   },
+  "keinMandant": {
+    "eyebrow": "Account",
+    "title": "Not yet assigned to a care service",
+    "text": "Your account is signed in but not yet assigned to a care service (tenant). Please contact the operator to activate your access.",
+    "zurueck": "Back to sign in"
+  },
   "roles": {
     "disponent": "Dispatcher",
     "pflegekraft": "Caregiver",

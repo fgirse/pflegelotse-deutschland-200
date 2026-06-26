@@ -1,5 +1,4 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server'
-import { redirect } from 'next/navigation'
 import { listeBedarfeFuerDienst, listeVergebenFuerDienst } from '@/server/marketplace/service'
 import { requireDienstSeite } from '@/server/auth/page'
 import { EingaengeClient } from './EingaengeClient'
@@ -16,7 +15,6 @@ export default async function EingaengePage({
   const { locale } = await params
   setRequestLocale(locale)
   const user = await requireDienstSeite(locale)
-  if (!user.tenantId) redirect(`/${locale}/login`)
   const TENANT = user.tenantId
   const t = await getTranslations('markt')
 

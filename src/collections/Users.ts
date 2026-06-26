@@ -42,9 +42,18 @@ export const Users: CollectionConfig = {
       name: 'tenantId',
       type: 'text',
       label: 'Mandant (tenant_id)',
-      // Betreiber sind mandantenübergreifend; alle anderen brauchen einen Mandanten.
+      // Betreiber/Angehörige brauchen keinen Mandanten; Dienst-Rollen schon.
+      // Ohne Mandant würde ein Dienst-Konto nach 2FA keine Daten sehen.
       required: false,
       index: true,
+      validate: (value: unknown, { data }: { data?: { role?: string } }) => {
+        const role = data?.role
+        const dienstRollen = ['disponent', 'admin', 'pflegekraft']
+        if (role && dienstRollen.includes(role) && !value) {
+          return 'Mandant (tenant_id) ist für Dienst-Rollen (Disponent/Pflegekraft/Inhaber) erforderlich.'
+        }
+        return true
+      },
     },
     // TOTP-2FA: Seed verschlüsselt, nie an Clients ausgeliefert.
     {

@@ -22,6 +22,7 @@
     "db:init": "node --env-file=.env --import tsx scripts/db-init.ts",
     "db:seed": "node --env-file=.env --import tsx scripts/seed.ts",
     "admin:create": "node --env-file=.env --import tsx scripts/create-admin.ts",
+    "user:tenant": "node --env-file=.env --import tsx scripts/set-tenant.ts",
     "generate:types": "payload generate:types",
     "test": "vitest run && playwright test",
     "test:unit": "vitest run",

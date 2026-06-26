@@ -130,6 +130,12 @@
     "fehlerCode": "Code ungültig.",
     "abmelden": "Abmelden"
   },
+  "keinMandant": {
+    "eyebrow": "Konto",
+    "title": "Noch keinem Pflegedienst zugeordnet",
+    "text": "Dein Konto ist angemeldet, aber noch keinem Pflegedienst (Mandant) zugewiesen. Bitte wende dich an den Betreiber, damit dein Zugang freigeschaltet wird.",
+    "zurueck": "Zurück zur Anmeldung"
+  },
   "roles": {
     "disponent": "Disponent/PDL",
     "pflegekraft": "Pflegekraft",

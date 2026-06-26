@@ -4,9 +4,11 @@ import { getAuthUser, type AuthUser } from './guard'
 import { COOKIE_2FA, verify2fa } from './twofactor'
 
 // Schützt eine Dienst-Seite (Server Component): erfordert angemeldeten Nutzer
-// mit gültiger 2FA-Sitzung. Sonst Weiterleitung zur Login-Seite. Liefert den
-// Nutzer (inkl. tenantId) zurück.
-export async function requireDienstSeite(locale: string): Promise<AuthUser> {
+// mit gültiger 2FA-Sitzung UND Mandantenzuordnung. Sonst Weiterleitung.
+// Liefert den Nutzer mit garantierter tenantId zurück.
+export async function requireDienstSeite(
+  locale: string,
+): Promise<AuthUser & { tenantId: string }> {
   const h = await headers()
   const user = await getAuthUser(h)
   if (!user) redirect(`/${locale}/login`)
@@ -21,5 +23,10 @@ export async function requireDienstSeite(locale: string): Promise<AuthUser> {
   if (!verify2fa(cookie ? decodeURIComponent(cookie) : undefined, user.id)) {
     redirect(`/${locale}/login`)
   }
-  return user
+
+  // Ohne Mandantenzuordnung gibt es keine Daten. Statt still zurück zum Login
+  // (wirkt wie ein 2FA-Fehler) auf eine klare Hinweisseite leiten.
+  if (!user.tenantId) redirect(`/${locale}/kein-mandant`)
+
+  return user as AuthUser & { tenantId: string }
 }
