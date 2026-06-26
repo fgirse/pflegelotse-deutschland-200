@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 
 type Schritt = 'login' | 'enroll' | 'verify'
@@ -14,7 +15,7 @@ export function LoginForm({ locale }: { locale: string }) {
   const [password, setPassword] = useState('')
   const [code, setCode] = useState('')
   const [secret, setSecret] = useState<string | null>(null)
-  const [otpauth, setOtpauth] = useState<string | null>(null)
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -40,7 +41,7 @@ export function LoginForm({ locale }: { locale: string }) {
         const e = await fetch('/api/v1/auth/2fa/enroll', { method: 'POST' })
         const ed = await e.json()
         setSecret(ed.secret)
-        setOtpauth(ed.otpauth)
+        setQrDataUrl(ed.qrDataUrl)
         setSchritt('enroll')
       } else {
         setSchritt('verify')
@@ -93,15 +94,25 @@ export function LoginForm({ locale }: { locale: string }) {
         <div className="flex flex-col gap-3">
           <h2 className="font-semibold">{t('enrollTitle')}</h2>
           <p className="text-sm text-[var(--color-muted)]">{t('enrollHinweis')}</p>
+          {qrDataUrl && (
+            <div className="flex flex-col items-center gap-2">
+              {/* QR-Code zum Scannen in der Authenticator-App */}
+              <Image
+                src={qrDataUrl}
+                alt={t('qrAlt')}
+                width={220}
+                height={220}
+                unoptimized
+                className="rounded-lg border border-[var(--color-line)] bg-white p-2"
+              />
+              <p className="text-xs text-[var(--color-faint)]">{t('qrHinweis')}</p>
+            </div>
+          )}
           <div className="rounded-lg border border-[var(--color-line)] bg-[var(--color-paper)] p-3 text-xs break-all">
-            <div className="font-medium">{t('secret')}:</div>
-            <code>{secret}</code>
-            {otpauth && (
-              <>
-                <div className="mt-2 font-medium">otpauth:</div>
-                <code>{otpauth}</code>
-              </>
-            )}
+            <div className="font-medium">{t('manuell')}</div>
+            <div className="mt-1">
+              {t('secret')}: <code>{secret}</code>
+            </div>
           </div>
           <label className="label">
             {t('code')}

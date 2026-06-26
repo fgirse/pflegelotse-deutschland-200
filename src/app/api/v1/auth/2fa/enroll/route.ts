@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import QRCode from 'qrcode'
 import { payloadClient } from '@/server/payloadClient'
 import { getAuthUser } from '@/server/auth/guard'
 import { generateSecret, otpauthURI } from '@/lib/totp'
@@ -21,5 +22,10 @@ export async function POST(req: NextRequest) {
     overrideAccess: true,
   })
 
-  return NextResponse.json({ secret, otpauth: otpauthURI(secret, user.email) })
+  const otpauth = otpauthURI(secret, user.email)
+  // QR-Code als PNG-Data-URL — die Authenticator-App scannt ihn direkt,
+  // statt das Geheimnis abtippen zu müssen.
+  const qrDataUrl = await QRCode.toDataURL(otpauth, { margin: 1, width: 220 })
+
+  return NextResponse.json({ secret, otpauth, qrDataUrl })
 }
