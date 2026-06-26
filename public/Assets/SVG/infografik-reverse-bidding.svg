@@ -1,0 +1,1119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1200"
+   height="2244"
+   viewBox="0 0 1200 2244"
+   version="1.1"
+   id="svg84"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs84" />
+  <rect
+     x="0"
+     y="0"
+     width="1200"
+     height="2244"
+     fill="#F6FAF8"
+     id="rect1"
+     style="fill:#d5e5ff" />
+  <rect
+     x="0"
+     y="0"
+     width="1200"
+     height="312"
+     fill="#0E4D4A"
+     id="rect2"
+     style="fill:#002255" />
+  <g
+     opacity="0.1"
+     stroke="#ffffff"
+     stroke-width="14"
+     fill="none"
+     stroke-linecap="round"
+     id="g3">
+    <path
+       d="m 1140,70 a 120,120 0 1 0 -34,196"
+       id="path2" />
+    <path
+       d="m 1100,240 8,38 36,-16 z"
+       fill="#ffffff"
+       stroke="none"
+       id="path3" />
+  </g>
+  <text
+     x="72"
+     y="88"
+     font-family="'Space Grotesk Medium'"
+     font-size="18px"
+     fill="#8fd0c7"
+     text-anchor="start"
+     letter-spacing="3.2"
+     id="text3">PILOT FREIBURG -MODELL · MARKTPLATZ AMBULANTE PFLEGE</text>
+  <text
+     x="72"
+     y="160"
+     font-family="'Space Grotesk'"
+     font-size="62px"
+     fill="#ffffff"
+     text-anchor="start"
+     font-weight="bold"
+     id="text4">Reverse Bidding in der Pflege</text>
+  <text
+     x="72"
+     y="206"
+     font-family="Inter"
+     font-size="21px"
+     fill="#d6eae5"
+     text-anchor="start"
+     id="text5">Umgekehrtes Bieterverfahren bei der Suche nach einem ambulanten</text>
+  <text
+     x="72"
+     y="237.5"
+     font-family="Inter"
+     font-size="21px"
+     fill="#d6eae5"
+     text-anchor="start"
+     id="text6">Pflegedienst: nicht die Suchenden rufen Dienste ab – die Dienste</text>
+  <text
+     x="72"
+     y="269"
+     font-family="Inter"
+     font-size="21px"
+     fill="#d6eae5"
+     text-anchor="start"
+     id="text7">melden sich auf eine einzige Anfrage zurück.</text>
+  <text
+     x="72"
+     y="370"
+     font-family="'Space Grotesk Medium'"
+     font-size="18px"
+     fill="#1f8a82"
+     text-anchor="start"
+     letter-spacing="2.6"
+     id="text8">DAS PRINZIP — DIE RICHTUNG DREHT SICH UM</text>
+  <rect
+     x="72"
+     y="384"
+     width="64"
+     height="4"
+     rx="2"
+     fill="#ee6c4d"
+     id="rect8" />
+  <rect
+     x="72"
+     y="416"
+     width="468"
+     height="372"
+     rx="22"
+     fill="#ffffff"
+     stroke="#c5d9d4"
+     stroke-width="1.5"
+     id="rect9" />
+  <rect
+     x="660"
+     y="416"
+     width="468"
+     height="372"
+     rx="22"
+     fill="#ffffff"
+     stroke="#c5d9d4"
+     stroke-width="1.5"
+     id="rect10" />
+  <text
+     x="106"
+     y="470"
+     font-family="'Space Grotesk'"
+     font-size="27px"
+     fill="#102a29"
+     text-anchor="start"
+     font-weight="bold"
+     id="text10">Herkömmlich</text>
+  <circle
+     cx="164"
+     cy="566"
+     r="30"
+     fill="#5c726f"
+     id="circle10" />
+  <circle
+     cx="164"
+     cy="557.59998"
+     r="9"
+     fill="#ffffff"
+     id="circle11" />
+  <path
+     d="m 148.4,581.6 a 15.6,15.6 0 0 1 31.2,0 z"
+     fill="#ffffff"
+     id="path11" />
+  <text
+     x="164"
+     y="624"
+     font-family="'Inter SemiBold'"
+     font-size="15px"
+     fill="#5c726f"
+     text-anchor="middle"
+     id="text11">Suchende</text>
+  <line
+     x1="198"
+     y1="566"
+     x2="428"
+     y2="486"
+     stroke="#c5d9d4"
+     stroke-width="2.4"
+     id="line11" />
+  <circle
+     cx="454"
+     cy="486"
+     r="17"
+     stroke="#b9ccc7"
+     stroke-width="2"
+     fill="#eef3f2"
+     id="circle12" />
+  <g
+     stroke="#ee6c4d"
+     stroke-width="3"
+     stroke-linecap="round"
+     id="g13">
+    <line
+       x1="447"
+       y1="479"
+       x2="461"
+       y2="493"
+       id="line12" />
+    <line
+       x1="447"
+       y1="493"
+       x2="461"
+       y2="479"
+       id="line13" />
+  </g>
+  <line
+     x1="198"
+     y1="566"
+     x2="428"
+     y2="534"
+     stroke="#c5d9d4"
+     stroke-width="2.4"
+     id="line14" />
+  <circle
+     cx="454"
+     cy="534"
+     r="17"
+     stroke="#b9ccc7"
+     stroke-width="2"
+     fill="#eef3f2"
+     id="circle14" />
+  <g
+     stroke="#ee6c4d"
+     stroke-width="3"
+     stroke-linecap="round"
+     id="g16">
+    <line
+       x1="447"
+       y1="527"
+       x2="461"
+       y2="541"
+       id="line15" />
+    <line
+       x1="447"
+       y1="541"
+       x2="461"
+       y2="527"
+       id="line16" />
+  </g>
+  <line
+     x1="198"
+     y1="566"
+     x2="428"
+     y2="582"
+     stroke="#c5d9d4"
+     stroke-width="2.4"
+     id="line17" />
+  <circle
+     cx="454"
+     cy="582"
+     r="17"
+     stroke="#b9ccc7"
+     stroke-width="2"
+     fill="#eef3f2"
+     id="circle17" />
+  <path
+     d="m 447,582 5,6 10,-12"
+     stroke="#1f8a82"
+     stroke-width="3"
+     fill="none"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path17" />
+  <line
+     x1="198"
+     y1="566"
+     x2="428"
+     y2="630"
+     stroke="#c5d9d4"
+     stroke-width="2.4"
+     id="line18" />
+  <circle
+     cx="454"
+     cy="630"
+     r="17"
+     stroke="#b9ccc7"
+     stroke-width="2"
+     fill="#eef3f2"
+     id="circle18" />
+  <g
+     stroke="#ee6c4d"
+     stroke-width="3"
+     stroke-linecap="round"
+     id="g20">
+    <line
+       x1="447"
+       y1="623"
+       x2="461"
+       y2="637"
+       id="line19" />
+    <line
+       x1="447"
+       y1="637"
+       x2="461"
+       y2="623"
+       id="line20" />
+  </g>
+  <line
+     x1="198"
+     y1="566"
+     x2="428"
+     y2="678"
+     stroke="#c5d9d4"
+     stroke-width="2.4"
+     id="line21" />
+  <circle
+     cx="454"
+     cy="678"
+     r="17"
+     stroke="#b9ccc7"
+     stroke-width="2"
+     fill="#eef3f2"
+     id="circle21" />
+  <g
+     stroke="#ee6c4d"
+     stroke-width="3"
+     stroke-linecap="round"
+     id="g23">
+    <line
+       x1="447"
+       y1="671"
+       x2="461"
+       y2="685"
+       id="line22" />
+    <line
+       x1="447"
+       y1="685"
+       x2="461"
+       y2="671"
+       id="line23" />
+  </g>
+  <text
+     x="106"
+     y="736"
+     font-family="Inter"
+     font-size="16.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text23">Angehörige telefonieren viele Dienste</text>
+  <text
+     x="106"
+     y="759.42999"
+     font-family="Inter"
+     font-size="16.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text24">einzeln ab — oft folgt eine Absage</text>
+  <text
+     x="106"
+     y="782.85999"
+     font-family="Inter"
+     font-size="16.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text25">nach der anderen.</text>
+  <text
+     x="694"
+     y="470"
+     font-family="'Space Grotesk'"
+     font-size="27px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     font-weight="bold"
+     id="text26">Münster-Modell</text>
+  <line
+     x1="772"
+     y1="486"
+     x2="1002"
+     y2="566"
+     stroke="#d7e9e4"
+     stroke-width="2.4"
+     id="line26" />
+  <line
+     x1="772"
+     y1="534"
+     x2="1002"
+     y2="566"
+     stroke="#d7e9e4"
+     stroke-width="2.4"
+     id="line27" />
+  <line
+     x1="772"
+     y1="582"
+     x2="1002"
+     y2="566"
+     stroke="#d7e9e4"
+     stroke-width="2.4"
+     id="line28" />
+  <line
+     x1="772"
+     y1="630"
+     x2="1002"
+     y2="566"
+     stroke="#d7e9e4"
+     stroke-width="2.4"
+     id="line29" />
+  <line
+     x1="772"
+     y1="678"
+     x2="1002"
+     y2="566"
+     stroke="#d7e9e4"
+     stroke-width="2.4"
+     id="line30" />
+  <circle
+     cx="746"
+     cy="486"
+     r="17"
+     stroke="#1f8a82"
+     stroke-width="2"
+     fill="#e6f1ee"
+     id="circle30" />
+  <circle
+     cx="746"
+     cy="534"
+     r="17"
+     stroke="#1f8a82"
+     stroke-width="2"
+     fill="#e6f1ee"
+     id="circle31" />
+  <circle
+     cx="746"
+     cy="582"
+     r="17"
+     stroke="#1f8a82"
+     stroke-width="2"
+     fill="#e6f1ee"
+     id="circle32" />
+  <circle
+     cx="746"
+     cy="630"
+     r="17"
+     stroke="#1f8a82"
+     stroke-width="2"
+     fill="#e6f1ee"
+     id="circle33" />
+  <circle
+     cx="746"
+     cy="678"
+     r="17"
+     stroke="#1f8a82"
+     stroke-width="2"
+     fill="#e6f1ee"
+     id="circle34" />
+  <circle
+     cx="1036"
+     cy="566"
+     r="30"
+     fill="#1f8a82"
+     id="circle35" />
+  <circle
+     cx="1036"
+     cy="557.59998"
+     r="9"
+     fill="#ffffff"
+     id="circle36" />
+  <path
+     d="m 1020.4,581.6 a 15.6,15.6 0 0 1 31.2,0 z"
+     fill="#ffffff"
+     id="path36" />
+  <text
+     x="1036"
+     y="624"
+     font-family="'Inter SemiBold'"
+     font-size="15px"
+     fill="#0e4d4a"
+     text-anchor="middle"
+     id="text36">Suchende</text>
+  <line
+     x1="772"
+     y1="582"
+     x2="1002"
+     y2="566"
+     stroke="#ee6c4d"
+     stroke-width="3.4"
+     id="line36" />
+  <path
+     d="m 996,560 8,6 -8,6 z"
+     fill="#ee6c4d"
+     id="path37" />
+  <text
+     x="694"
+     y="736"
+     font-family="Inter"
+     font-size="16.5px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     id="text37">Eine Anfrage erreicht alle Dienste</text>
+  <text
+     x="694"
+     y="759.42999"
+     font-family="Inter"
+     font-size="16.5px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     id="text38">gleichzeitig — wer Kapazität hat,</text>
+  <text
+     x="694"
+     y="782.85999"
+     font-family="Inter"
+     font-size="16.5px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     id="text39">meldet sich direkt zurück.</text>
+  <circle
+     cx="600"
+     cy="602"
+     r="46"
+     fill="#ee6c4d"
+     id="circle39" />
+  <g
+     stroke="#ffffff"
+     stroke-width="5"
+     fill="none"
+     stroke-linecap="round"
+     id="g39">
+    <path
+       d="m 581,598 a 19,19 0 1 1 6,16"
+       id="path39" />
+  </g>
+  <path
+     d="m 574,588 3,16 16,-6 z"
+     fill="#ffffff"
+     id="path40" />
+  <text
+     x="600"
+     y="676"
+     font-family="'Space Grotesk'"
+     font-size="16px"
+     fill="#0e4d4a"
+     text-anchor="middle"
+     letter-spacing="1.5"
+     font-weight="bold"
+     id="text40">REVERSE</text>
+  <text
+     x="72"
+     y="852"
+     font-family="'Space Grotesk Medium'"
+     font-size="18px"
+     fill="#1f8a82"
+     text-anchor="start"
+     letter-spacing="2.6"
+     id="text41">SO FUNKTIONIERT'S</text>
+  <rect
+     x="72"
+     y="866"
+     width="64"
+     height="4"
+     rx="2"
+     fill="#ee6c4d"
+     id="rect41" />
+  <line
+     x1="99"
+     y1="962"
+     x2="99"
+     y2="1047"
+     stroke="#d7e9e4"
+     stroke-width="2"
+     id="line41" />
+  <circle
+     cx="99"
+     cy="935"
+     r="27"
+     fill="#0e4d4a"
+     id="circle41" />
+  <text
+     x="99"
+     y="945"
+     font-family="'Space Grotesk'"
+     font-size="28px"
+     fill="#ffffff"
+     text-anchor="middle"
+     font-weight="bold"
+     id="text42">1</text>
+  <text
+     x="156"
+     y="934"
+     font-family="'Space Grotesk'"
+     font-size="25px"
+     fill="#102a29"
+     text-anchor="start"
+     font-weight="bold"
+     id="text43">Eine Anfrage stellen</text>
+  <text
+     x="156"
+     y="966"
+     font-family="Inter"
+     font-size="17.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text44">Über das Online-Formular der Stadt: Pflegegrad, Wohnsituation,</text>
+  <text
+     x="156"
+     y="990.84998"
+     font-family="Inter"
+     font-size="17.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text45">Abwesenheiten und gewünschte Leistungen — auf drei Seiten.</text>
+  <line
+     x1="99"
+     y1="1080"
+     x2="99"
+     y2="1165"
+     stroke="#d7e9e4"
+     stroke-width="2"
+     id="line45" />
+  <circle
+     cx="99"
+     cy="1053"
+     r="27"
+     fill="#0e4d4a"
+     id="circle45" />
+  <text
+     x="99"
+     y="1063"
+     font-family="'Space Grotesk'"
+     font-size="28px"
+     fill="#ffffff"
+     text-anchor="middle"
+     font-weight="bold"
+     id="text46">2</text>
+  <text
+     x="156"
+     y="1052"
+     font-family="'Space Grotesk'"
+     font-size="25px"
+     fill="#102a29"
+     text-anchor="start"
+     font-weight="bold"
+     id="text47">An alle Dienste zugleich</text>
+  <text
+     x="156"
+     y="1084"
+     font-family="Inter"
+     font-size="17.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text48">Die Anfrage landet gleichzeitig bei allen lokal (im Umkreis von 30km registrierten)</text>
+  <text
+     x="156"
+     y="1108.85"
+     font-family="Inter"
+     font-size="17.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text49">ambulanten Pflegediensten der jeweiligen geographischen Umgebung (Pilot Region Freiburg).</text>
+  <line
+     x1="99"
+     y1="1198"
+     x2="99"
+     y2="1283"
+     stroke="#d7e9e4"
+     stroke-width="2"
+     id="line49" />
+  <circle
+     cx="99"
+     cy="1171"
+     r="27"
+     fill="#0e4d4a"
+     id="circle49" />
+  <text
+     x="99"
+     y="1181"
+     font-family="'Space Grotesk'"
+     font-size="28px"
+     fill="#ffffff"
+     text-anchor="middle"
+     font-weight="bold"
+     id="text50">3</text>
+  <text
+     x="156"
+     y="1170"
+     font-family="'Space Grotesk'"
+     font-size="25px"
+     fill="#102a29"
+     text-anchor="start"
+     font-weight="bold"
+     id="text51">Dienste prüfen &amp; melden sich</text>
+  <text
+     x="156"
+     y="1202"
+     font-family="Inter"
+     font-size="17.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text52">Jeder Dienst prüft Kapazität und ob die Adresse zur Tour im</text>
+  <text
+     x="156"
+     y="1226.85"
+     font-family="Inter"
+     font-size="17.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text53">eigenen Workflow passt. Wer zusagen kann, nimmt direkt Kontakt auf.</text>
+  <line
+     x1="99"
+     y1="1316"
+     x2="99"
+     y2="1401"
+     stroke="#d7e9e4"
+     stroke-width="2"
+     id="line53" />
+  <circle
+     cx="99"
+     cy="1289"
+     r="27"
+     fill="#0e4d4a"
+     id="circle53" />
+  <text
+     x="99"
+     y="1299"
+     font-family="'Space Grotesk'"
+     font-size="28px"
+     fill="#ffffff"
+     text-anchor="middle"
+     font-weight="bold"
+     id="text54">4</text>
+  <text
+     x="156"
+     y="1288"
+     font-family="'Space Grotesk'"
+     font-size="25px"
+     fill="#102a29"
+     text-anchor="start"
+     font-weight="bold"
+     id="text55">Status für alle sichtbar</text>
+  <text
+     x="156"
+     y="1320"
+     font-family="Inter"
+     font-size="17.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text56">Eine Markierung im System zeigt den anderen Diensten, dass die</text>
+  <text
+     x="156"
+     y="1344.85"
+     font-family="Inter"
+     font-size="17.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text57">Anfrage bereits bearbeitet wird.</text>
+  <circle
+     cx="99"
+     cy="1407"
+     r="27"
+     fill="#0e4d4a"
+     id="circle57" />
+  <text
+     x="99"
+     y="1417"
+     font-family="'Space Grotesk'"
+     font-size="28px"
+     fill="#ffffff"
+     text-anchor="middle"
+     font-weight="bold"
+     id="text58">5</text>
+  <text
+     x="156"
+     y="1406"
+     font-family="'Space Grotesk'"
+     font-size="25px"
+     fill="#102a29"
+     text-anchor="start"
+     font-weight="bold"
+     id="text59">Verlässliche Rückmeldung</text>
+  <text
+     x="156"
+     y="1438"
+     font-family="Inter"
+     font-size="17.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text60">Vertrag geschlossen → Anfrage verschwindet. Ohne Zusage nach</text>
+  <text
+     x="156"
+     y="1462.85"
+     font-family="Inter"
+     font-size="17.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text61">fünf Tagen folgt eine klare Absage — kein Im-Ungewissen-Bleiben.</text>
+  <rect
+     x="72"
+     y="1516"
+     width="1056"
+     height="150"
+     rx="22"
+     fill="#0E4D4A"
+     id="rect61"
+     style="fill:#003380" />
+  <text
+     x="204"
+     y="1588"
+     font-family="'Space Grotesk'"
+     font-size="46px"
+     fill="#ee6c4d"
+     text-anchor="middle"
+     font-weight="bold"
+     id="text62">12</text>
+  <text
+     x="193.38829"
+     y="1733.2764"
+     font-family="Inter"
+     font-size="14.8117px"
+     fill="#bfe0db"
+     text-anchor="middle"
+     id="text63"
+     transform="scale(1.0670687,0.93714678)"
+     style="white-space:pre;inline-size:205.27;stroke-width:0.955595"
+     xml:space="preserve"><tspan
+       x="193.38829"
+       y="1733.2764"
+       id="tspan1">registrierte Pflegedienste<tspan
+   y="1733.2764"
+   id="tspan2">  </tspan></tspan><tspan
+       x="193.38829"
+       y="1751.791"
+       id="tspan3">(Pilotphase-Freiburg)</tspan></text>
+  <line
+     x1="336"
+     y1="1550"
+     x2="336"
+     y2="1632"
+     stroke="#1c615d"
+     stroke-width="1.5"
+     id="line63" />
+  <text
+     x="468"
+     y="1588"
+     font-family="'Space Grotesk'"
+     font-size="46px"
+     fill="#ee6c4d"
+     text-anchor="middle"
+     font-weight="bold"
+     id="text64">1</text>
+  <text
+     x="468"
+     y="1620"
+     font-family="Inter"
+     font-size="15.5px"
+     fill="#bfe0db"
+     text-anchor="middle"
+     id="text65">Anfrage statt vieler</text>
+  <text
+     x="468"
+     y="1640"
+     font-family="Inter"
+     font-size="15.5px"
+     fill="#bfe0db"
+     text-anchor="middle"
+     id="text66">Anrufe</text>
+  <line
+     x1="600"
+     y1="1550"
+     x2="600"
+     y2="1632"
+     stroke="#1c615d"
+     stroke-width="1.5"
+     id="line66" />
+  <text
+     x="732"
+     y="1588"
+     font-family="'Space Grotesk'"
+     font-size="46px"
+     fill="#ee6c4d"
+     text-anchor="middle"
+     font-weight="bold"
+     id="text67">10/2026</text>
+  <text
+     x="732"
+     y="1624"
+     font-family="Inter"
+     font-size="15.5px"
+     fill="#bfe0db"
+     text-anchor="middle"
+     id="text68">Start des Marktplatzes</text>
+  <line
+     x1="864"
+     y1="1550"
+     x2="864"
+     y2="1632"
+     stroke="#1c615d"
+     stroke-width="1.5"
+     id="line68" />
+  <text
+     x="996"
+     y="1588"
+     font-family="'Space Grotesk'"
+     font-size="46px"
+     fill="#ee6c4d"
+     text-anchor="middle"
+     font-weight="bold"
+     id="text69">5 Tage</text>
+  <text
+     x="996"
+     y="1620"
+     font-family="Inter"
+     font-size="15.5px"
+     fill="#bfe0db"
+     text-anchor="middle"
+     id="text70">bis zur sicheren</text>
+  <text
+     x="996"
+     y="1640"
+     font-family="Inter"
+     font-size="15.5px"
+     fill="#bfe0db"
+     text-anchor="middle"
+     id="text71">Rückmeldung</text>
+  <text
+     x="72"
+     y="1728"
+     font-family="'Space Grotesk Medium'"
+     font-size="18px"
+     fill="#1f8a82"
+     text-anchor="start"
+     letter-spacing="2.6"
+     id="text72">WAS DAS BRINGT</text>
+  <rect
+     x="72"
+     y="1742"
+     width="64"
+     height="4"
+     rx="2"
+     fill="#ee6c4d"
+     id="rect72" />
+  <rect
+     x="72"
+     y="1778"
+     width="516"
+     height="104"
+     rx="18"
+     fill="#E6F1EE"
+     id="rect73"
+     style="fill:#dbe2e3" />
+  <circle
+     cx="116"
+     cy="1830"
+     r="22"
+     fill="#1f8a82"
+     id="circle73" />
+  <path
+     d="m 107,1830 6,7 13,-15"
+     stroke="#ffffff"
+     stroke-width="4"
+     fill="none"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path73" />
+  <text
+     x="156"
+     y="1822"
+     font-family="'Inter SemiBold'"
+     font-size="18.5px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     id="text73">Schluss mit dem Durchtelefonieren</text>
+  <text
+     x="156"
+     y="1847.9"
+     font-family="'Inter SemiBold'"
+     font-size="18.5px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     id="text74">und der Absage-Spirale.</text>
+  <rect
+     x="612"
+     y="1778"
+     width="516"
+     height="104"
+     rx="18"
+     fill="#E6F1EE"
+     id="rect74"
+     style="fill:#dbe2e3" />
+  <circle
+     cx="656"
+     cy="1830"
+     r="22"
+     fill="#1f8a82"
+     id="circle74" />
+  <path
+     d="m 647,1830 6,7 13,-15"
+     stroke="#ffffff"
+     stroke-width="4"
+     fill="none"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path74" />
+  <text
+     x="696"
+     y="1822"
+     font-family="'Inter SemiBold'"
+     font-size="18.5px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     id="text75">Verlässliche Rückmeldung — auch</text>
+  <text
+     x="696"
+     y="1847.9"
+     font-family="'Inter SemiBold'"
+     font-size="18.5px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     id="text76">wenn sie negativ ausfällt.</text>
+  <rect
+     x="72"
+     y="1904"
+     width="516"
+     height="104"
+     rx="18"
+     fill="#E6F1EE"
+     id="rect76"
+     style="fill:#dbe2e3" />
+  <circle
+     cx="116"
+     cy="1956"
+     r="22"
+     fill="#1f8a82"
+     id="circle76" />
+  <path
+     d="m 107,1956 6,7 13,-15"
+     stroke="#ffffff"
+     stroke-width="4"
+     fill="none"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path76" />
+  <text
+     x="156"
+     y="1948"
+     font-family="'Inter SemiBold'"
+     font-size="18.5px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     id="text77">Entlastet Angehörige in belastenden</text>
+  <text
+     x="156"
+     y="1973.9"
+     font-family="'Inter SemiBold'"
+     font-size="18.5px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     id="text78">Situationen und die Dienste.</text>
+  <rect
+     x="612"
+     y="1904"
+     width="516"
+     height="104"
+     rx="18"
+     fill="#E6F1EE"
+     id="rect78"
+     style="fill:#dbe2e3" />
+  <circle
+     cx="656"
+     cy="1956"
+     r="22"
+     fill="#1f8a82"
+     id="circle78" />
+  <path
+     d="m 647,1956 6,7 13,-15"
+     stroke="#ffffff"
+     stroke-width="4"
+     fill="none"
+     stroke-linecap="round"
+     stroke-linejoin="round"
+     id="path78" />
+  <text
+     x="696"
+     y="1948"
+     font-family="'Inter SemiBold'"
+     font-size="18.5px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     id="text79">Schnelle, gute erste Kontaktaufnahme</text>
+  <text
+     x="696"
+     y="1973.9"
+     font-family="'Inter SemiBold'"
+     font-size="18.5px"
+     fill="#0e4d4a"
+     text-anchor="start"
+     id="text80">(ersetzt keine persönliche Beratung).</text>
+  <line
+     x1="72"
+     y1="2066"
+     x2="1128"
+     y2="2066"
+     stroke="#c5d9d4"
+     stroke-width="1.5"
+     id="line80" />
+  <text
+     x="72"
+     y="2100"
+     font-family="'Space Grotesk Medium'"
+     font-size="15px"
+     fill="#1f8a82"
+     text-anchor="start"
+     letter-spacing="2.4"
+     id="text81">WER STEHT DAHINTER</text>
+  <text
+     x="72"
+     y="2130"
+     font-family="Inter"
+     font-size="17.5px"
+     fill="#102a29"
+     text-anchor="start"
+     id="text82">Pflegelotse Deutschland GmbH· technische Umsetzung: MEDICUS DESIGN Basel Switzerland</text>
+  <text
+     x="72"
+     y="2170"
+     font-family="Inter"
+     font-size="14.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text83">Quelle: Diakonie RWL (Mai 2025); Stadt Münster — Marktplatz Ambulante Pflege (online seit Okt. 2024).</text>
+  <text
+     x="72"
+     y="2191.75"
+     font-family="Inter"
+     font-size="14.5px"
+     fill="#5c726f"
+     text-anchor="start"
+     id="text84">Infografik zur Veranschaulichung des Verfahrens.</text>
+  <text
+     xml:space="preserve"
+     style="font-size:96px;font-family:'BowelbyOne SC';-inkscape-font-specification:'BowelbyOne SC';text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;opacity:0.6;fill:#002255"
+     x="982.08514"
+     y="1243.1357"
+     id="text85"><tspan
+       id="tspan84"
+       x="982.08514"
+       y="1243.1357"> </tspan></text>
+</svg>
