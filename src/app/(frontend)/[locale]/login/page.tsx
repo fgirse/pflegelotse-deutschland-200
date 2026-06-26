@@ -1,5 +1,6 @@
 import { setRequestLocale } from 'next-intl/server'
 import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/navigation'
 import { LoginForm } from './LoginForm'
 
 export const dynamic = 'force-dynamic'
@@ -17,6 +18,15 @@ function LoginInner({ locale }: { locale: string }) {
       <h1 className="text-3xl font-bold">{t('title')}</h1>
       <p className="mt-2 text-sm text-[var(--color-muted)]">{t('subtitle')}</p>
       <LoginForm locale={locale} />
+      <p className="mt-4 text-sm text-[var(--color-muted)]">
+        {t('keinKonto')}{' '}
+        <Link
+          href="/registrieren"
+          className="font-semibold text-[var(--color-accent)] hover:underline"
+        >
+          {t('jetztRegistrieren')}
+        </Link>
+      </p>
     </main>
   )
 }

@@ -20,13 +20,17 @@ export async function POST(req: NextRequest) {
       collection: 'users',
       data: { email: parsed.data.email, password: parsed.data.password },
     })
+    const role = (user as { role?: string }).role ?? 'angehoeriger'
     const totpEnabled = Boolean((user as { totpEnabled?: boolean }).totpEnabled)
+    // 2FA ist nur für Klientendaten-Rollen Pflicht; Suchende/Betreiber nicht.
+    const rollenMit2fa = ['disponent', 'admin', 'pflegekraft']
+    const braucht2fa = rollenMit2fa.includes(role)
     const res = NextResponse.json({
-      role: (user as { role?: string }).role,
+      role,
       totpEnabled,
       // Solange 2FA nicht eingerichtet/bestätigt ist, sind geschützte Routen gesperrt.
-      twoFactorRequired: totpEnabled,
-      needsEnrollment: !totpEnabled,
+      twoFactorRequired: braucht2fa && totpEnabled,
+      needsEnrollment: braucht2fa && !totpEnabled,
     })
     if (token) {
       res.cookies.set('payload-token', token, {

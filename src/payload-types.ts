@@ -145,6 +145,8 @@ export interface User {
   tenantId?: string | null;
   totpSecret?: string | null;
   totpEnabled?: boolean | null;
+  dienstName?: string | null;
+  suchendeTyp?: ('angehoerige' | 'patient' | 'sozialdienst') | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -555,6 +557,8 @@ export interface UsersSelect<T extends boolean = true> {
   tenantId?: T;
   totpSecret?: T;
   totpEnabled?: T;
+  dienstName?: T;
+  suchendeTyp?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

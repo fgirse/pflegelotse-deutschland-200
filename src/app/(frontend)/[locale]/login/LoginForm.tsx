@@ -2,24 +2,30 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 type Schritt = 'login' | 'enroll' | 'verify'
 
 // Login mit zweitem Faktor. Reihenfolge: Passwort → (Ersteinrichtung der 2FA
-// oder) Code-Bestätigung → Weiterleitung in den Dienst-Bereich.
+// oder) Code-Bestätigung → Weiterleitung. Dienst-Rollen mit 2FA gehen ins
+// Dashboard, Suchende ohne 2FA direkt in den Marktplatz.
 export function LoginForm({ locale }: { locale: string }) {
   const t = useTranslations('login')
+  const params = useSearchParams()
+  // Nach Registrierung: E-Mail vorbelegen + Erfolgshinweis zeigen.
   const [schritt, setSchritt] = useState<Schritt>('login')
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(params.get('email') ?? '')
   const [password, setPassword] = useState('')
   const [code, setCode] = useState('')
   const [secret, setSecret] = useState<string | null>(null)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const registriert = params.get('registriert') === '1'
 
   const inputCls = 'input'
+  // Ziel nach abgeschlossener 2FA (Dienst-Rollen).
   const ziel = `/${locale}/dashboard`
 
   async function login() {
@@ -37,14 +43,19 @@ export function LoginForm({ locale }: { locale: string }) {
       }
       const data = await res.json()
       if (data.needsEnrollment) {
-        // 2FA erstmalig einrichten.
+        // 2FA erstmalig einrichten (Dienst-Rollen).
         const e = await fetch('/api/v1/auth/2fa/enroll', { method: 'POST' })
         const ed = await e.json()
         setSecret(ed.secret)
         setQrDataUrl(ed.qrDataUrl)
         setSchritt('enroll')
-      } else {
+      } else if (data.twoFactorRequired) {
+        // 2FA-Code bestätigen.
         setSchritt('verify')
+      } else {
+        // Keine 2FA-Pflicht (Suchende): direkt weiter in den Marktplatz.
+        window.location.href =
+          data.role === 'angehoeriger' ? `/${locale}/markt` : ziel
       }
     } finally {
       setBusy(false)
@@ -72,6 +83,11 @@ export function LoginForm({ locale }: { locale: string }) {
 
   return (
     <div className="card mt-6 p-5">
+      {registriert && schritt === 'login' && (
+        <p className="mb-3 rounded-lg bg-[var(--color-accent-soft)] p-3 text-sm text-[var(--color-accent)]">
+          {t('registriertHinweis')}
+        </p>
+      )}
       {fehler && <p className="mb-3 text-sm text-[var(--color-danger)]">⚠ {fehler}</p>}
 
       {schritt === 'login' && (

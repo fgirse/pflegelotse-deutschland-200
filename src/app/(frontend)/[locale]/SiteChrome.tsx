@@ -37,6 +37,12 @@ export function SiteHeader({ locale }: { locale: string }) {
         </nav>
         <div className="flex items-center gap-3">
           <LocaleSwitcher locale={locale} />
+          <Link
+            href="/registrieren"
+            className="hidden text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)] sm:inline"
+          >
+            {t('login.jetztRegistrieren')}
+          </Link>
           <Link href="/markt" className="btn btn-accent hidden sm:inline-flex">
             {t('markt.title')}
           </Link>

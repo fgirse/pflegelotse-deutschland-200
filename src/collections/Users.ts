@@ -64,5 +64,18 @@ export const Users: CollectionConfig = {
       hooks: { beforeChange: [sealHook], afterRead: [openHook] },
     },
     { name: 'totpEnabled', type: 'checkbox', defaultValue: false },
+    // Selbstregistrierung: Anzeigename des Pflegedienstes (Dienst-Konten).
+    { name: 'dienstName', type: 'text', label: 'Name des Pflegedienstes', required: false },
+    // Selbstregistrierung: Untergruppe der Suchenden (Statistik/Ansprache).
+    {
+      name: 'suchendeTyp',
+      type: 'select',
+      required: false,
+      options: [
+        { label: 'Angehörige(r)', value: 'angehoerige' },
+        { label: 'Patient(in)', value: 'patient' },
+        { label: 'Sozialdienst', value: 'sozialdienst' },
+      ],
+    },
   ],
 }
