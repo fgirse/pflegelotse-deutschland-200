@@ -20,6 +20,8 @@ const OFFEN = ['offen', 'in_bearbeitung'] as const
 // Fan-out an alle passenden Dienste. Gibt die Bedarfs-ID + Treffer-Mandanten zurück.
 export async function erstelleBedarf(
   input: BedarfErstellen,
+  // Optionale Konto-Verknüpfung (gesetzt, wenn ein Suchender eingeloggt ist).
+  ownerUserId?: string,
 ): Promise<{ bedarfId: string; matchingTenants: string[] }> {
   const payload = await payloadClient()
   const pseudonymId = neuePseudonymId()
@@ -32,10 +34,10 @@ export async function erstelleBedarf(
     qualifikation: input.qualifikation,
   })
 
-  // Säule 1: Kontaktdaten (Hooks verschlüsseln).
+  // Säule 1: Kontaktdaten (Hooks verschlüsseln) + Konto-Verknüpfung.
   await payload.create({
     collection: 'angehoerige_identitaet',
-    data: { pseudonymId, ...input.kontakt },
+    data: { pseudonymId, ownerUserId, ...input.kontakt },
     overrideAccess: true,
   })
 
@@ -323,6 +325,52 @@ export async function ladeBedarf(bedarfId: string): Promise<Bedarf | null> {
   })
   if (!res.docs[0]) return null
   return bedarfSchema.parse(bedarfAusDoc(res.docs[0]))
+}
+
+// „Meine Bedarfe": alle Bedarfe eines Suchenden-Kontos mit Angebots-Anzahl.
+// Verknüpfung läuft über Säule 1 (ownerUserId) → pseudonymIds → Säule 2.
+export async function listeBedarfeFuerNutzer(
+  ownerUserId: string,
+): Promise<{ bedarf: Bedarf; anzahlAngebote: number }[]> {
+  const payload = await payloadClient()
+  const ident = await payload.find({
+    collection: 'angehoerige_identitaet',
+    where: { ownerUserId: { equals: ownerUserId } },
+    limit: 100,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const ids = ident.docs
+    .map((d) => (d as { pseudonymId?: string }).pseudonymId)
+    .filter((x): x is string => Boolean(x))
+  if (ids.length === 0) return []
+
+  const res = await payload.find({
+    collection: 'bedarfe',
+    where: { pseudonymId: { in: ids } },
+    limit: 100,
+    overrideAccess: true,
+    depth: 0,
+    sort: '-createdAt',
+  })
+
+  // Abgegebene Angebote je Bedarf in einem Query zählen.
+  const ang = await payload.find({
+    collection: 'angebote',
+    where: { and: [{ bedarfPseudonymId: { in: ids } }, { status: { equals: 'abgegeben' } }] },
+    limit: 1000,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const counts = new Map<string, number>()
+  for (const a of ang.docs as { bedarfPseudonymId?: string }[]) {
+    if (a.bedarfPseudonymId) counts.set(a.bedarfPseudonymId, (counts.get(a.bedarfPseudonymId) ?? 0) + 1)
+  }
+
+  return res.docs.map((d) => ({
+    bedarf: bedarfSchema.parse(bedarfAusDoc(d)),
+    anzahlAngebote: counts.get((d as { pseudonymId: string }).pseudonymId) ?? 0,
+  }))
 }
 
 export function bedarfAusDoc(d: any): unknown {

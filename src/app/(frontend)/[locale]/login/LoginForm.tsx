@@ -53,9 +53,9 @@ export function LoginForm({ locale }: { locale: string }) {
         // 2FA-Code bestätigen.
         setSchritt('verify')
       } else {
-        // Keine 2FA-Pflicht (Suchende): direkt weiter in den Marktplatz.
+        // Keine 2FA-Pflicht (Suchende): weiter ins eigene Bedarfe-Portal.
         window.location.href =
-          data.role === 'angehoeriger' ? `/${locale}/markt` : ziel
+          data.role === 'angehoeriger' ? `/${locale}/meine-bedarfe` : ziel
       }
     } finally {
       setBusy(false)

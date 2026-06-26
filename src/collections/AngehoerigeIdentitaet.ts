@@ -21,6 +21,10 @@ export const AngehoerigeIdentitaet: CollectionConfig = {
   },
   fields: [
     { name: 'pseudonymId', type: 'text', required: true, unique: true, index: true },
+    // Verknüpfung zum Suchenden-Konto (für „Meine Bedarfe"). Kein PII, daher
+    // unverschlüsselt und abfragbar; die Zuordnung Identität↔Konto bleibt in
+    // Säule 1. Anonym (ohne Login) eingestellte Bedarfe haben keinen Wert.
+    { name: 'ownerUserId', type: 'text', index: true },
     ...PII_FELDER.map(piiFeld),
   ],
 }

@@ -156,6 +156,23 @@
     "schonKonto": "Schon ein Konto?",
     "zumLogin": "Zur Anmeldung"
   },
+  "meineBedarfe": {
+    "eyebrow": "Mein Bereich",
+    "title": "Meine Bedarfe",
+    "subtitle": "Deine eingestellten Anfragen und die eingegangenen Angebote.",
+    "neuerBedarf": "Neuen Bedarf einstellen",
+    "leer": "Du hast noch keinen Bedarf eingestellt.",
+    "pflegegrad": "Pflegegrad",
+    "min": "Min",
+    "angebote": "{n, plural, =0 {Noch keine Angebote} one {# Angebot} other {# Angebote}}",
+    "ansehen": "Angebote ansehen",
+    "status": {
+      "offen": "Offen",
+      "in_bearbeitung": "Angebote eingegangen",
+      "vergeben": "Vergeben",
+      "abgesagt": "Abgesagt"
+    }
+  },
   "keinMandant": {
     "eyebrow": "Konto",
     "title": "Noch keinem Pflegedienst zugeordnet",

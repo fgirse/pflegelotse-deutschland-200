@@ -15,9 +15,9 @@ const figtree = Figtree({ subsets: ['latin'], variable: '--font-figtree', displa
 const noto = Noto_Sans({ subsets: ['latin'], variable: '--font-noto', display: 'swap' })
 
 export const metadata: Metadata = {
-  title: 'PflegeLotse — Tourenoptimierung für ambulante Pflege',
+  title: 'PflegeLotse Deutschland — Tourenoptimierung für ambulante Pflege',
   description:
-    'Passgenaue Tourenlücken füllen und Pflegedienste finden — datenschutzkonform, barrierearm.',
+    'Für Angehörige und Sozialdienste: unkompliziert Pflegedienste finden! Für ambulante Pflegedienste: Passgenaue Tourenlücken füllen — datenschutzkonform, barrierearm.',
 }
 
 export function generateStaticParams() {

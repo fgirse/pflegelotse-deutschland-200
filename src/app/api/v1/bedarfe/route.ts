@@ -1,17 +1,20 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { bedarfErstellenSchema } from '@/shared/marketplace'
 import { erstelleBedarf, listeBedarfeFuerDienst } from '@/server/marketplace/service'
-import { requireAuth } from '@/server/auth/guard'
+import { requireAuth, getAuthUser } from '@/server/auth/guard'
 
 // POST /api/v1/bedarfe — Angehörige stellt einen Bedarf ein (Säulen-Split +
 // Fan-out an passende Dienste). Antwort: Bedarfs-ID + Anzahl passender Dienste.
+// Ist ein Suchender eingeloggt, wird der Bedarf seinem Konto zugeordnet
+// („Meine Bedarfe"); anonymes Einstellen bleibt möglich.
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
   const parsed = bedarfErstellenSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
-  const { bedarfId, matchingTenants } = await erstelleBedarf(parsed.data)
+  const user = await getAuthUser(req.headers)
+  const { bedarfId, matchingTenants } = await erstelleBedarf(parsed.data, user?.id)
   return NextResponse.json({ bedarfId, passendeDienste: matchingTenants.length }, { status: 201 })
 }
 

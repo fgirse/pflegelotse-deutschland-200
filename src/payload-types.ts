@@ -349,6 +349,7 @@ export interface Bedarfe {
 export interface AngehoerigeIdentitaet {
   id: string;
   pseudonymId: string;
+  ownerUserId?: string | null;
   vorname?: string | null;
   nachname?: string | null;
   telefon?: string | null;
@@ -711,6 +712,7 @@ export interface BedarfeSelect<T extends boolean = true> {
  */
 export interface AngehoerigeIdentitaetSelect<T extends boolean = true> {
   pseudonymId?: T;
+  ownerUserId?: T;
   vorname?: T;
   nachname?: T;
   telefon?: T;

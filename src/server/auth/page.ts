@@ -30,3 +30,13 @@ export async function requireDienstSeite(
 
   return user as AuthUser & { tenantId: string }
 }
+
+// Schützt eine Suchenden-Seite (z. B. „Meine Bedarfe"): nur angemeldeter
+// Nutzer nötig — kein 2FA, kein Mandant (Suchende haben keinen Klientendaten-
+// zugriff). Sonst Weiterleitung zum Login.
+export async function requireAngehoerige(locale: string): Promise<AuthUser> {
+  const h = await headers()
+  const user = await getAuthUser(h)
+  if (!user) redirect(`/${locale}/login`)
+  return user
+}

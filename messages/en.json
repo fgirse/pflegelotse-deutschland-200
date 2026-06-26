@@ -156,6 +156,23 @@
     "schonKonto": "Already have an account?",
     "zumLogin": "Sign in"
   },
+  "meineBedarfe": {
+    "eyebrow": "My area",
+    "title": "My requests",
+    "subtitle": "Your posted requests and the offers received.",
+    "neuerBedarf": "Post a new request",
+    "leer": "You haven't posted a request yet.",
+    "pflegegrad": "Care level",
+    "min": "min",
+    "angebote": "{n, plural, =0 {No offers yet} one {# offer} other {# offers}}",
+    "ansehen": "View offers",
+    "status": {
+      "offen": "Open",
+      "in_bearbeitung": "Offers received",
+      "vergeben": "Assigned",
+      "abgesagt": "Cancelled"
+    }
+  },
   "keinMandant": {
     "eyebrow": "Account",
     "title": "Not yet assigned to a care service",
