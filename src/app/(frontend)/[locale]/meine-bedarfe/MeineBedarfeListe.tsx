@@ -90,7 +90,7 @@ export function MeineBedarfeListe({ eintraege }: { eintraege: PortalEintrag[] })
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
               <span className="text-sm font-medium">{t('angebote', { n: e.anzahlAngebote })}</span>
               <div className="flex flex-wrap gap-2">
-                <Link href={`/markt/${e.pseudonymId}`} className="btn btn-outline">
+                <Link href={`/meine-bedarfe/${e.pseudonymId}`} className="btn btn-outline">
                   {t('ansehenWaehlen')}
                 </Link>
                 {offen(e.status) ? (

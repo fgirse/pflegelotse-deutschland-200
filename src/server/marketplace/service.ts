@@ -581,6 +581,19 @@ export async function listeBedarfeFuerNutzer(
   }))
 }
 
+// Gehört ein Bedarf dem angemeldeten Suchenden? (Besitz über Säule 1.)
+export async function bedarfGehoertNutzer(bedarfId: string, userId: string): Promise<boolean> {
+  const payload = await payloadClient()
+  const ident = await payload.find({
+    collection: 'angehoerige_identitaet',
+    where: { pseudonymId: { equals: bedarfId } },
+    limit: 1,
+    overrideAccess: true,
+    depth: 0,
+  })
+  return (ident.docs[0] as { ownerUserId?: string } | undefined)?.ownerUserId === userId
+}
+
 // Suchende zieht einen eigenen, noch offenen Bedarf zurück (Status „abgesagt").
 // Besitzprüfung über ownerUserId (Säule 1); räumt Probe-Einplanungen auf.
 export async function zieheZurueck(bedarfId: string, userId: string): Promise<void> {
