@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { ladeTouren, ladeKlientenOperativ } from '@/server/repo'
-import { planeTour } from '@/server/matching/service'
+import { planeTour, berechneFitScore } from '@/server/matching/service'
 import { listeBedarfeFuerDienst } from '@/server/marketplace/service'
 import { requireDienstSeite } from '@/server/auth/page'
 import { DashboardClient } from './DashboardClient'
@@ -47,6 +47,33 @@ export default async function DashboardPage({
   )
   const kandidaten = klienten.filter((k) => !zugeordnet.has(k.pseudonymId))
 
+  // Fit je offenem Bedarf (bester Slot) — für die Kachel-Zusammenfassung.
+  const eingaengeFit = await Promise.all(
+    eingaenge.map((b) =>
+      berechneFitScore(touren, {
+        geo: b.geo,
+        zeitfenster: b.zeitfenster,
+        dauerMin: b.dauerMin,
+        qualifikation: b.qualifikation,
+      }).then((r) => r.matches[0] ?? null),
+    ),
+  )
+  const passend = eingaengeFit.filter(Boolean).length
+  const ohneUmweg = eingaengeFit.filter((m) => m && m.mehrwegMin === 0).length
+
+  // Offene Bedarfe (noch in keiner Tour) als einplanbare Marktplatz-Kandidaten.
+  const bedarfeKandidaten = eingaenge
+    .filter((b) => !zugeordnet.has(b.pseudonymId))
+    .map((b) => ({
+      pseudonymId: b.pseudonymId,
+      geo: b.geo,
+      zeitfenster: b.zeitfenster,
+      dauerMin: b.dauerMin,
+      qualifikation: b.qualifikation,
+      pflegegrad: b.pflegegrad,
+      quelle: 'bedarf' as const,
+    }))
+
   const tl = await getTranslations('login')
 
   return (
@@ -67,6 +94,11 @@ export default async function DashboardPage({
             <div className="text-sm text-[var(--color-muted)]">
               {t('eingaengeAnzahl', { n: eingaenge.length })}
             </div>
+            {eingaenge.length > 0 && (
+              <div className="mt-1 text-sm font-medium text-[var(--color-success)]">
+                {t('eingaengeFit', { passend, ohneUmweg })}
+              </div>
+            )}
           </div>
           <span className="chip">{eingaenge.length}</span>
         </Link>
@@ -83,6 +115,7 @@ export default async function DashboardPage({
         tenantId={TENANT}
         tours={tourenMitKennzahlen}
         candidates={kandidaten}
+        bedarfe={bedarfeKandidaten}
       />
     </main>
   )

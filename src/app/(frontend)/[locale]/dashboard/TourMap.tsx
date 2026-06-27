@@ -2,11 +2,12 @@
 
 import { useEffect, useRef } from 'react'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { KlientOperativ, Tour } from '@/shared/domain'
+import type { Tour } from '@/shared/domain'
 
 interface Props {
   tours: Tour[]
-  selected: KlientOperativ | null
+  // Nur die Koordinate wird gebraucht — passt für eigene Klienten UND Bedarfe.
+  selected: { geo: { lat: number; lng: number } } | null
 }
 
 // Tourenkarte auf Basis von MapLibre GL mit freiem OSM-Raster-Hintergrund

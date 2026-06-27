@@ -57,6 +57,9 @@
     "calculating": "Calculating fit score …",
     "eingaengeTitel": "Incoming requests",
     "eingaengeAnzahl": "{n, plural, =0 {No matching requests} one {# matching request} other {# matching requests}}",
+    "eingaengeFit": "{passend} with tour slot · {ohneUmweg} without detour",
+    "marktKandidaten": "Marketplace requests",
+    "marktChip": "Marketplace",
     "einzugsgebietTitel": "Service area",
     "einzugsgebietHinweis": "Set location & radius to receive matching requests"
   },

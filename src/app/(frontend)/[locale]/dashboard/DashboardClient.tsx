@@ -14,25 +14,49 @@ export interface TourMitKennzahlen {
   auslastungProzent: number
 }
 
+// Gemeinsame Form für einplanbare Kandidaten — eigene Klienten UND offene
+// Marktplatz-Bedarfe. quelle steuert nur die Kennzeichnung in der Liste.
+export interface PlanKandidat {
+  pseudonymId: string
+  geo: { lat: number; lng: number }
+  zeitfenster: { von: number; bis: number }
+  dauerMin: number
+  qualifikation: string[]
+  pflegegrad?: number
+  quelle: 'klient' | 'bedarf'
+}
+
 interface Props {
   tenantId: string
   tours: TourMitKennzahlen[]
   candidates: KlientOperativ[]
+  bedarfe: PlanKandidat[]
 }
 
 // Disponenten-Dashboard: Kandidaten links, Karte/Tabelle mittig, Trefferliste
 // rechts. Auswahl eines Kandidaten ruft den Fit-Score; ein Klick nimmt ihn auf.
-export function DashboardClient({ tenantId, tours, candidates }: Props) {
+export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props) {
   const t = useTranslations('dashboard')
   const router = useRouter()
   const [, startTransition] = useTransition()
 
-  const [selected, setSelected] = useState<KlientOperativ | null>(null)
+  const [selected, setSelected] = useState<PlanKandidat | null>(null)
   const [matches, setMatches] = useState<FitMatch[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [view, setView] = useState<'map' | 'table'>('map')
 
-  async function waehleKandidat(k: KlientOperativ) {
+  // Eigene Klienten in die gemeinsame Kandidatenform bringen.
+  const eigene: PlanKandidat[] = candidates.map((k) => ({
+    pseudonymId: k.pseudonymId,
+    geo: k.geo,
+    zeitfenster: k.zeitfenster,
+    dauerMin: k.dauerMin,
+    qualifikation: k.qualifikation,
+    pflegegrad: k.pflegegrad,
+    quelle: 'klient',
+  }))
+
+  async function waehleKandidat(k: PlanKandidat) {
     setSelected(k)
     setMatches(null)
     setLoading(true)
@@ -88,37 +112,42 @@ export function DashboardClient({ tenantId, tours, candidates }: Props) {
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[280px_1fr_320px]">
-      {/* Kandidatenliste */}
+      {/* Kandidatenliste: eigene Klienten + offene Marktplatz-Bedarfe */}
       <section aria-labelledby="kandidaten-h" className="card p-4">
         <h2 id="kandidaten-h" className="mb-3 font-semibold">
-          {t('candidates')} ({candidates.length})
+          {t('candidates')} ({eigene.length})
         </h2>
         <ul className="flex flex-col gap-1.5">
-          {candidates.map((k) => {
-            const aktiv = selected?.pseudonymId === k.pseudonymId
-            return (
-              <li key={k.pseudonymId}>
-                <button
-                  onClick={() => waehleKandidat(k)}
-                  aria-pressed={aktiv}
-                  className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
-                    aktiv
-                      ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
-                      : 'border-[var(--color-line)] hover:bg-[var(--color-paper)]'
-                  }`}
-                >
-                  <span className="font-medium">
-                    {minToHHMM(k.zeitfenster.von)}–{minToHHMM(k.zeitfenster.bis)}
-                  </span>
-                  <span className="block text-[var(--color-faint)]">
-                    PG {k.pflegegrad ?? '–'} · {k.qualifikation.join(', ') || '—'} ·{' '}
-                    {k.dauerMin} {t('minutes')}
-                  </span>
-                </button>
-              </li>
-            )
-          })}
+          {eigene.map((k) => (
+            <li key={k.pseudonymId}>
+              <KandidatButton
+                k={k}
+                aktiv={selected?.pseudonymId === k.pseudonymId}
+                onClick={() => waehleKandidat(k)}
+              />
+            </li>
+          ))}
         </ul>
+
+        {bedarfe.length > 0 && (
+          <>
+            <h2 className="mt-5 mb-3 flex items-center gap-2 font-semibold">
+              {t('marktKandidaten')} ({bedarfe.length})
+            </h2>
+            <ul className="flex flex-col gap-1.5">
+              {bedarfe.map((b) => (
+                <li key={b.pseudonymId}>
+                  <KandidatButton
+                    k={b}
+                    aktiv={selected?.pseudonymId === b.pseudonymId}
+                    onClick={() => waehleKandidat(b)}
+                    badge={t('marktChip')}
+                  />
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </section>
 
       {/* Karte / Tabelle */}
@@ -205,6 +234,43 @@ export function DashboardClient({ tenantId, tours, candidates }: Props) {
         </ul>
       </section>
     </div>
+  )
+}
+
+// Kandidaten-Button (eigener Klient oder Marktplatz-Bedarf, via badge markiert).
+function KandidatButton({
+  k,
+  aktiv,
+  onClick,
+  badge,
+}: {
+  k: PlanKandidat
+  aktiv: boolean
+  onClick: () => void
+  badge?: string
+}) {
+  const t = useTranslations('dashboard')
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={aktiv}
+      className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition-colors ${
+        aktiv
+          ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)]'
+          : 'border-[var(--color-line)] hover:bg-[var(--color-paper)]'
+      }`}
+    >
+      <span className="flex items-center justify-between gap-2">
+        <span className="font-medium">
+          {minToHHMM(k.zeitfenster.von)}–{minToHHMM(k.zeitfenster.bis)}
+        </span>
+        {badge && <span className="chip">{badge}</span>}
+      </span>
+      <span className="block text-[var(--color-faint)]">
+        PG {k.pflegegrad ?? '–'} · {k.qualifikation.join(', ') || '—'} · {k.dauerMin}{' '}
+        {t('minutes')}
+      </span>
+    </button>
   )
 }
 

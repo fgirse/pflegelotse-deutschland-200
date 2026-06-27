@@ -57,6 +57,9 @@
     "calculating": "Berechne Fit-Score …",
     "eingaengeTitel": "Eingehende Bedarfe",
     "eingaengeAnzahl": "{n, plural, =0 {Keine passenden Bedarfe} one {# passender Bedarf} other {# passende Bedarfe}}",
+    "eingaengeFit": "{passend} mit Tour-Slot · {ohneUmweg} ohne Umweg",
+    "marktKandidaten": "Marktplatz-Bedarfe",
+    "marktChip": "Marktplatz",
     "einzugsgebietTitel": "Einzugsgebiet",
     "einzugsgebietHinweis": "Standort & Radius festlegen, um passende Bedarfe zu erhalten"
   },

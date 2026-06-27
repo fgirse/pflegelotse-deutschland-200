@@ -9,7 +9,7 @@ import { routing } from '@/i18n/routing'
 import { SiteHeader, SiteFooter } from './SiteChrome'
 // Globales Stylesheet (Tailwind + Theme-Tokens) — MUSS importiert werden,
 // sonst werden keine Styles angewendet.
-import '../globals.css'
+import '@/app/(frontend)/globals.css'
 
 // Distinctive, barrierearme Schriftpaarung: Figtree (Display) + Noto Sans (Body).
 // next/font lädt selbst-gehostet, ohne Layout-Shift, mit display: swap.
