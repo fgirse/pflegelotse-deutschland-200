@@ -2,46 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-
-// Unsere Zielfelder. label = Anzeige, req = Pflicht. Geo wird aus adresse/ort
-// geokodiert, falls lat/lng nicht zugeordnet sind.
-const FELDER: { key: string; label: string; req?: boolean }[] = [
-  { key: 'external_id', label: 'Eindeutige Kennung (Pflicht)', req: true },
-  { key: 'vorname', label: 'Vorname' },
-  { key: 'nachname', label: 'Nachname' },
-  { key: 'adresse', label: 'Adresse (Straße)' },
-  { key: 'ort', label: 'Ort / PLZ' },
-  { key: 'telefon', label: 'Telefon' },
-  { key: 'email', label: 'E-Mail' },
-  { key: 'pflegegrad', label: 'Pflegegrad' },
-  { key: 'leistungen', label: 'Leistungen (Trenner ; oder ,)' },
-  { key: 'qualifikation', label: 'Qualifikation' },
-  { key: 'zeitfenster_von', label: 'Einsatz von (HH:MM)' },
-  { key: 'zeitfenster_bis', label: 'Einsatz bis (HH:MM)' },
-  { key: 'dauer', label: 'Dauer (Min)' },
-  { key: 'lat', label: 'Breitengrad (optional)' },
-  { key: 'lng', label: 'Längengrad (optional)' },
-]
-
-const SYNONYME: Record<string, string[]> = {
-  external_id: ['externalid', 'id', 'kundennr', 'kundennummer', 'klientnr', 'klientennr', 'nummer'],
-  vorname: ['vorname', 'firstname', 'given'],
-  nachname: ['nachname', 'name', 'lastname', 'surname', 'familienname'],
-  adresse: ['adresse', 'strasse', 'straße', 'street', 'anschrift'],
-  ort: ['ort', 'plz', 'stadt', 'city', 'postleitzahl'],
-  telefon: ['telefon', 'tel', 'phone', 'rufnummer'],
-  email: ['email', 'mail'],
-  pflegegrad: ['pflegegrad', 'grad'],
-  leistungen: ['leistungen', 'leistung', 'leistungskomplex'],
-  qualifikation: ['qualifikation', 'qual'],
-  zeitfenster_von: ['von', 'beginn', 'start'],
-  zeitfenster_bis: ['bis', 'ende', 'end'],
-  dauer: ['dauer', 'duration', 'minuten'],
-  lat: ['lat', 'breite', 'latitude'],
-  lng: ['lng', 'lon', 'laenge', 'länge', 'longitude'],
-}
-
-const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
+import { ZIELFELDER, rateMapping } from '@/shared/importMapping'
 
 type Ergebnis = {
   neu: number
@@ -77,16 +38,8 @@ export function ImportClient() {
     const d = await res.json()
     setHeaders(d.headers ?? [])
     setAnzahl(d.anzahl ?? 0)
-    // Automatische Zuordnung per Synonym-Treffer.
-    const auto: Record<string, string> = {}
-    for (const f of FELDER) {
-      const treffer = (d.headers as string[]).find((h) => {
-        const n = norm(h)
-        return n === f.key || (SYNONYME[f.key] ?? []).some((syn) => n.includes(syn))
-      })
-      if (treffer) auto[f.key] = treffer
-    }
-    setMapping(auto)
+    // Automatische Spaltenzuordnung (auf deutsche Pflegesoftware getrimmt).
+    setMapping(rateMapping(d.headers ?? []))
   }
 
   async function importieren() {
@@ -140,7 +93,7 @@ export function ImportClient() {
           <h2 className="font-display text-lg font-semibold">{t('zuordnung')}</h2>
           <p className="mt-1 text-xs text-[var(--color-faint)]">{t('zuordnungHinweis')}</p>
           <div className="mt-3 flex flex-col gap-2">
-            {FELDER.map((f) => (
+            {ZIELFELDER.map((f) => (
               <label key={f.key} className="grid grid-cols-2 items-center gap-2 text-sm">
                 <span className={f.req ? 'font-medium' : ''}>{f.label}</span>
                 <select
