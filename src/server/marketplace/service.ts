@@ -1,11 +1,11 @@
 import { payloadClient } from '@/server/payloadClient'
 import { neuePseudonymId } from '@/lib/pseudonym'
 import { identityHash } from '@/lib/audit'
-import { berechneFitScore } from '@/server/matching/service'
+import { berechneFitScore, planeTour } from '@/server/matching/service'
 import { berechneDeadline } from '@/server/sla/deadline'
 import { getNotifier } from '@/server/notify/Notifier'
 import { erfasseVermittlungsgebuehr } from '@/server/billing/service'
-import { ladeAlleTouren } from '@/server/repo'
+import { ladeAlleTouren, ladeTour, speichereEinsaetze } from '@/server/repo'
 import { minToHHMM } from '@/shared/time'
 import { haversineKm } from '@/shared/orte'
 import { EINWILLIGUNG_VERSION } from '@/shared/consent'
@@ -320,17 +320,16 @@ export async function entferneProbeEinsaetze(
     depth: 0,
   })
   let entfernt = 0
-  for (const d of res.docs as {
-    id: string | number
-    tenantId?: string
-    einsaetze?: { pseudonymId?: string; probe?: boolean }[]
-  }[]) {
+  for (const d of res.docs as { id: string | number; tenantId?: string }[]) {
     if (exceptTenantId && d.tenantId === exceptTenantId) continue
-    const einsaetze = d.einsaetze ?? []
-    const gefiltert = einsaetze.filter((e) => !(e.pseudonymId === bedarfId && e.probe))
-    if (gefiltert.length !== einsaetze.length) {
-      await payload.update({ collection: 'touren', id: d.id, data: { einsaetze: gefiltert }, overrideAccess: true })
-      entfernt += einsaetze.length - gefiltert.length
+    const tour = await ladeTour(String(d.id))
+    if (!tour) continue
+    const gefiltert = tour.einsaetze.filter((e) => !(e.pseudonymId === bedarfId && e.probe))
+    if (gefiltert.length !== tour.einsaetze.length) {
+      // Tour ohne die Probe neu durchplanen (frische Ankunftszeiten) + speichern.
+      const geplant = await planeTour({ ...tour, einsaetze: gefiltert })
+      await speichereEinsaetze(tour.id, geplant.einsaetze)
+      entfernt += tour.einsaetze.length - gefiltert.length
     }
   }
   return entfernt
@@ -353,13 +352,11 @@ async function wandleProbeInVerbindlich(
     overrideAccess: true,
     depth: 0,
   })
-  for (const d of res.docs as {
-    id: string | number
-    einsaetze?: { pseudonymId?: string; probe?: boolean }[]
-  }[]) {
-    const einsaetze = d.einsaetze ?? []
+  for (const d of res.docs as { id: string | number }[]) {
+    const tour = await ladeTour(String(d.id))
+    if (!tour) continue
     let changed = false
-    const neu = einsaetze.map((e) => {
+    const neu = tour.einsaetze.map((e) => {
       if (e.pseudonymId === bedarfId && e.probe) {
         changed = true
         return { ...e, pseudonymId: neuePseudonym, probe: false }
@@ -367,7 +364,9 @@ async function wandleProbeInVerbindlich(
       return e
     })
     if (changed) {
-      await payload.update({ collection: 'touren', id: d.id, data: { einsaetze: neu }, overrideAccess: true })
+      // Mit verbindlichem Einsatz neu durchplanen (frische Ankunftszeiten).
+      const geplant = await planeTour({ ...tour, einsaetze: neu })
+      await speichereEinsaetze(tour.id, geplant.einsaetze)
     }
   }
 }
