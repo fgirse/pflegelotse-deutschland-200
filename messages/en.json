@@ -66,7 +66,9 @@
     "gewinnen": "Make an offer (win)",
     "angebotGesendet": "Offer sent",
     "einzugsgebietTitel": "Service area",
-    "einzugsgebietHinweis": "Set location & radius to receive matching requests"
+    "einzugsgebietHinweis": "Set location & radius to receive matching requests",
+    "importTitel": "Import clients",
+    "importHinweis": "Import a client list from your care software (CSV/Excel)"
   },
   "einzugsgebiet": {
     "eyebrow": "Service settings",
@@ -81,6 +83,25 @@
     "speichern": "Save",
     "gespeichert": "Service area saved.",
     "aktuellGesetzt": "A service area is already set — you can adjust it here."
+  },
+  "import": {
+    "eyebrow": "Service settings",
+    "title": "Import clients",
+    "subtitle": "Export a client list from your care software (CSV/Excel) and map the columns — no retyping. Addresses are converted to coordinates automatically.",
+    "datei": "CSV / export file",
+    "dateiHinweis": "Export a CSV from your software (German Excel with semicolons is fine). Nothing leaves the server except the address for geocoding.",
+    "erkannt": "{spalten} columns, {zeilen} records detected.",
+    "zuordnung": "Map columns",
+    "zuordnungHinweis": "We pre-selected matching columns — please review and adjust if needed.",
+    "nichtZuordnen": "don't map",
+    "geoNoetig": "Route planning needs a location: map either \"Address\" (will be geocoded) or latitude and longitude.",
+    "importieren": "Import {n} records",
+    "importiereLaedt": "Importing … (geocoding addresses)",
+    "fertig": "Import complete",
+    "ergebnis": "{neu} created, {aktualisiert} updated.",
+    "fehlerTitel": "{n} records skipped:",
+    "fehlerDatei": "Could not read the file.",
+    "fehlerImport": "Import failed. Please try again."
   },
   "tools": {
     "title": "Free tools",

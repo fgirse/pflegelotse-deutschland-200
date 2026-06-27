@@ -66,7 +66,9 @@
     "gewinnen": "Angebot abgeben (gewinnen)",
     "angebotGesendet": "Angebot gesendet",
     "einzugsgebietTitel": "Einzugsgebiet",
-    "einzugsgebietHinweis": "Standort & Radius festlegen, um passende Bedarfe zu erhalten"
+    "einzugsgebietHinweis": "Standort & Radius festlegen, um passende Bedarfe zu erhalten",
+    "importTitel": "Klienten importieren",
+    "importHinweis": "Klientenliste aus der Pflegesoftware (CSV/Excel) übernehmen"
   },
   "einzugsgebiet": {
     "eyebrow": "Dienst-Einstellungen",
@@ -81,6 +83,25 @@
     "speichern": "Speichern",
     "gespeichert": "Einzugsgebiet gespeichert.",
     "aktuellGesetzt": "Ein Einzugsgebiet ist bereits gesetzt — du kannst es hier anpassen."
+  },
+  "import": {
+    "eyebrow": "Dienst-Einstellungen",
+    "title": "Klienten importieren",
+    "subtitle": "Exportiere eine Klientenliste aus deiner Pflegesoftware (CSV/Excel) und ordne die Spalten zu — kein Abtippen. Adressen werden automatisch in Koordinaten umgewandelt.",
+    "datei": "CSV-/Export-Datei",
+    "dateiHinweis": "CSV aus deiner Software exportieren (deutsches Excel mit Semikolon ist ok). Nichts verlässt den Server außer der Adresse zur Geokodierung.",
+    "erkannt": "{spalten} Spalten, {zeilen} Datensätze erkannt.",
+    "zuordnung": "Spalten zuordnen",
+    "zuordnungHinweis": "Wir haben passende Spalten vorausgewählt — bitte prüfen und ggf. anpassen.",
+    "nichtZuordnen": "nicht zuordnen",
+    "geoNoetig": "Für die Tourenplanung wird ein Standort gebraucht: ordne entweder „Adresse“ zu (wird geokodiert) oder Breiten- und Längengrad.",
+    "importieren": "{n} Datensätze importieren",
+    "importiereLaedt": "Importiere … (Adressen werden geokodiert)",
+    "fertig": "Import abgeschlossen",
+    "ergebnis": "{neu} neu angelegt, {aktualisiert} aktualisiert.",
+    "fehlerTitel": "{n} Datensätze übersprungen:",
+    "fehlerDatei": "Datei konnte nicht gelesen werden.",
+    "fehlerImport": "Import fehlgeschlagen. Bitte erneut versuchen."
   },
   "tools": {
     "title": "Kostenlose Tools",

@@ -86,8 +86,8 @@ export default async function DashboardPage({
         <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
       </header>
 
-      {/* Marktplatz-Eingänge sichtbar machen + Einzugsgebiet pflegen. */}
-      <section className="mb-6 grid gap-4 sm:grid-cols-2">
+      {/* Marktplatz-Eingänge sichtbar machen + Einzugsgebiet/Import. */}
+      <section className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Link href="/eingaenge" className="tile flex items-center justify-between gap-3">
           <div>
             <div className="font-display text-lg font-semibold">{t('eingaengeTitel')}</div>
@@ -106,6 +106,13 @@ export default async function DashboardPage({
           <div>
             <div className="font-display text-lg font-semibold">{t('einzugsgebietTitel')}</div>
             <div className="text-sm text-[var(--color-muted)]">{t('einzugsgebietHinweis')}</div>
+          </div>
+          <span aria-hidden>→</span>
+        </Link>
+        <Link href="/dienst/import" className="tile flex items-center justify-between gap-3">
+          <div>
+            <div className="font-display text-lg font-semibold">{t('importTitel')}</div>
+            <div className="text-sm text-[var(--color-muted)]">{t('importHinweis')}</div>
           </div>
           <span aria-hidden>→</span>
         </Link>
