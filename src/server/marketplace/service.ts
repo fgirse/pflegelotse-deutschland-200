@@ -297,7 +297,79 @@ export async function uebernehmeBedarfAlsKlient(
     overrideAccess: true,
   })
 
+  // Eine bestehende Probe-Einplanung dieses Bedarfs wird zum verbindlichen
+  // Einsatz (neue Klienten-Kennung, Probe-Markierung entfernt).
+  await wandleProbeInVerbindlich(bedarfId, tenantId, pseudonymId)
+
   return { klientPseudonymId: pseudonymId, bereits: false }
+}
+
+// Entfernt Probe-Einplanungen eines Bedarfs aus den Touren — für verlorene oder
+// abgesagte Bedarfe. Optional ein Mandant ausgenommen (der Gewinner behält
+// seine Probe, bis er übernimmt). Liefert die Anzahl entfernter Einsätze.
+export async function entferneProbeEinsaetze(
+  bedarfId: string,
+  exceptTenantId?: string,
+): Promise<number> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'touren',
+    where: { 'einsaetze.pseudonymId': { equals: bedarfId } },
+    limit: 500,
+    overrideAccess: true,
+    depth: 0,
+  })
+  let entfernt = 0
+  for (const d of res.docs as {
+    id: string | number
+    tenantId?: string
+    einsaetze?: { pseudonymId?: string; probe?: boolean }[]
+  }[]) {
+    if (exceptTenantId && d.tenantId === exceptTenantId) continue
+    const einsaetze = d.einsaetze ?? []
+    const gefiltert = einsaetze.filter((e) => !(e.pseudonymId === bedarfId && e.probe))
+    if (gefiltert.length !== einsaetze.length) {
+      await payload.update({ collection: 'touren', id: d.id, data: { einsaetze: gefiltert }, overrideAccess: true })
+      entfernt += einsaetze.length - gefiltert.length
+    }
+  }
+  return entfernt
+}
+
+// Wandelt die Probe-Einplanung eines übernommenen Bedarfs in einen
+// verbindlichen Einsatz um (neue Klienten-Kennung, probe entfernt).
+async function wandleProbeInVerbindlich(
+  bedarfId: string,
+  tenantId: string,
+  neuePseudonym: string,
+): Promise<void> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'touren',
+    where: {
+      and: [{ tenantId: { equals: tenantId } }, { 'einsaetze.pseudonymId': { equals: bedarfId } }],
+    },
+    limit: 50,
+    overrideAccess: true,
+    depth: 0,
+  })
+  for (const d of res.docs as {
+    id: string | number
+    einsaetze?: { pseudonymId?: string; probe?: boolean }[]
+  }[]) {
+    const einsaetze = d.einsaetze ?? []
+    let changed = false
+    const neu = einsaetze.map((e) => {
+      if (e.pseudonymId === bedarfId && e.probe) {
+        changed = true
+        return { ...e, pseudonymId: neuePseudonym, probe: false }
+      }
+      return e
+    })
+    if (changed) {
+      await payload.update({ collection: 'touren', id: d.id, data: { einsaetze: neu }, overrideAccess: true })
+    }
+  }
 }
 
 // Ein Dienst gibt ein verbindliches Angebot ab. Setzt den Bedarf auf
@@ -390,6 +462,10 @@ export async function waehleDienst(bedarfId: string, tenantId: string): Promise<
     data: { status: 'vergeben', selectedTenantId: tenantId },
     overrideAccess: true,
   })
+
+  // Verlierer-Dienste: Probe-Einplanungen dieses Bedarfs entfernen. Der
+  // Gewinner behält seine Probe (wird beim Übernehmen verbindlich).
+  await entferneProbeEinsaetze(bedarfId, tenantId)
 
   const { hash, pepperVersion } = identityHash(`${bedarfId}:${tenantId}`)
   await payload.create({

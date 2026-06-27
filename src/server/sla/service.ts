@@ -1,6 +1,6 @@
 import { payloadClient } from '@/server/payloadClient'
 import { getNotifier } from '@/server/notify/Notifier'
-import { holeKontaktIntern, bedarfAusDoc } from '@/server/marketplace/service'
+import { holeKontaktIntern, bedarfAusDoc, entferneProbeEinsaetze } from '@/server/marketplace/service'
 import { istAbgelaufen, slaKennzahlen, type SlaKennzahlen } from './deadline'
 import { bedarfSchema } from '@/shared/marketplace'
 
@@ -34,6 +34,9 @@ export async function verarbeiteAbgelaufeneBedarfe(
       data: { status: 'abgesagt' },
       overrideAccess: true,
     })
+
+    // Abgesagt → etwaige Probe-Einplanungen aus allen Touren entfernen.
+    await entferneProbeEinsaetze(b.pseudonymId)
 
     // Klare Absage an die Angehörige (an ihre eigene Adresse — kein Leak).
     const kontakt = await holeKontaktIntern(b.pseudonymId)
