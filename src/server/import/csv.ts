@@ -40,8 +40,11 @@ export async function importiereKlienten(
     }
 
     // Koordinaten: direkt aus lat/lng oder per Geokodierung der Adresse.
-    let lat = Number((row.lat ?? '').replace(',', '.'))
-    let lng = Number((row.lng ?? '').replace(',', '.'))
+    // Wichtig: leere Felder als „fehlt" behandeln (Number('') === 0!).
+    const latStr = (row.lat ?? '').replace(',', '.').trim()
+    const lngStr = (row.lng ?? '').replace(',', '.').trim()
+    let lat = latStr ? Number(latStr) : NaN
+    let lng = lngStr ? Number(lngStr) : NaN
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
       const adresse = [row.adresse, row.ort].map((x) => x?.trim()).filter(Boolean).join(', ')
       if (adresse) {
