@@ -2,7 +2,7 @@ import { setRequestLocale, getTranslations } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { requireAngehoerige } from '@/server/auth/page'
 import { listeBedarfeFuerNutzer } from '@/server/marketplace/service'
-import { minToHHMM } from '@/shared/time'
+import { MeineBedarfeListe } from './MeineBedarfeListe'
 
 // Liest die Bedarfe des angemeldeten Suchenden — dynamisch, nicht vorrendern.
 export const dynamic = 'force-dynamic'
@@ -20,6 +20,29 @@ export default async function MeineBedarfePage({
   const t = await getTranslations('meineBedarfe')
   const tl = await getTranslations('login')
   const eintraege = await listeBedarfeFuerNutzer(user.id)
+
+  // Datumsangaben serverseitig formatieren (vermeidet Hydration-Probleme).
+  const fmt = new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'de-DE', {
+    dateStyle: 'short',
+    timeStyle: 'short',
+    timeZone: 'Europe/Berlin',
+  })
+  const datum = (iso?: string) => (iso ? fmt.format(new Date(iso)) : undefined)
+  const portal = eintraege.map(({ bedarf, anzahlAngebote }) => ({
+    pseudonymId: bedarf.pseudonymId,
+    status: bedarf.status,
+    express: bedarf.express,
+    pflegegrad: bedarf.pflegegrad,
+    zeitfensterVon: bedarf.zeitfenster.von,
+    zeitfensterBis: bedarf.zeitfenster.bis,
+    dauerMin: bedarf.dauerMin,
+    qualifikation: bedarf.qualifikation,
+    leistungen: bedarf.leistungen,
+    anzahlAngebote,
+    eingestellt: datum(bedarf.createdAt),
+    ersteReaktion: datum(bedarf.firstResponseAt),
+    frist: datum(bedarf.deadlineAt),
+  }))
 
   return (
     <main className="container-page max-w-2xl py-10 sm:py-14">
@@ -45,29 +68,7 @@ export default async function MeineBedarfePage({
           </Link>
         </div>
       ) : (
-        <ul className="mt-6 flex flex-col gap-4">
-          {eintraege.map(({ bedarf, anzahlAngebote }) => (
-            <li key={bedarf.pseudonymId} className="card p-5">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="chip">{t(`status.${bedarf.status}`)}</span>
-                {bedarf.express && <span className="chip">Express</span>}
-              </div>
-              <div className="mt-3 text-sm text-[var(--color-muted)]">
-                {bedarf.pflegegrad ? `${t('pflegegrad')} ${bedarf.pflegegrad} · ` : ''}
-                {minToHHMM(bedarf.zeitfenster.von)}–{minToHHMM(bedarf.zeitfenster.bis)} · {bedarf.dauerMin}{' '}
-                {t('min')}
-              </div>
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <span className="text-sm font-medium">
-                  {t('angebote', { n: anzahlAngebote })}
-                </span>
-                <Link href={`/markt/${bedarf.pseudonymId}`} className="btn btn-outline">
-                  {t('ansehen')}
-                </Link>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <MeineBedarfeListe eintraege={portal} />
       )}
     </main>
   )

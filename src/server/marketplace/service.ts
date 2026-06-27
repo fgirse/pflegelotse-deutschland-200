@@ -581,6 +581,34 @@ export async function listeBedarfeFuerNutzer(
   }))
 }
 
+// Suchende zieht einen eigenen, noch offenen Bedarf zurück (Status „abgesagt").
+// Besitzprüfung über ownerUserId (Säule 1); räumt Probe-Einplanungen auf.
+export async function zieheZurueck(bedarfId: string, userId: string): Promise<void> {
+  const payload = await payloadClient()
+  const ident = await payload.find({
+    collection: 'angehoerige_identitaet',
+    where: { pseudonymId: { equals: bedarfId } },
+    limit: 1,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const owner = (ident.docs[0] as { ownerUserId?: string } | undefined)?.ownerUserId
+  if (!owner || owner !== userId) throw new Error('Kein Zugriff auf diesen Bedarf')
+
+  const bedarf = await ladeBedarf(bedarfId)
+  if (!bedarf) throw new Error('Bedarf nicht gefunden')
+  if (!['offen', 'in_bearbeitung'].includes(bedarf.status)) {
+    throw new Error('Bedarf kann nicht mehr zurückgezogen werden')
+  }
+  await payload.update({
+    collection: 'bedarfe',
+    where: { pseudonymId: { equals: bedarfId } },
+    data: { status: 'abgesagt' },
+    overrideAccess: true,
+  })
+  await entferneProbeEinsaetze(bedarfId)
+}
+
 export function bedarfAusDoc(d: any): unknown {
   return {
     pseudonymId: d.pseudonymId,
