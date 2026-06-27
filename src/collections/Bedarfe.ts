@@ -53,5 +53,8 @@ export const Bedarfe: CollectionConfig = {
     { name: 'deadlineAt', type: 'date', index: true },
     // Zeitpunkt des ersten Angebots (SLA: Zeit bis erste Reaktion /F440/).
     { name: 'firstResponseAt', type: 'date' },
+    // Gesetzt, wenn der gewonnene Bedarf als Klient in die Tourenplanung
+    // übernommen wurde (verhindert Doppel-Übernahme).
+    { name: 'uebernommenAt', type: 'date' },
   ],
 }

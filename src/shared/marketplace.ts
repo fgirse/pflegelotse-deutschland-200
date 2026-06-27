@@ -31,6 +31,9 @@ export const bedarfSchema = z.object({
   deadlineAt: z.string().optional(),
   firstResponseAt: z.string().optional(),
   createdAt: z.string().optional(), // von Payload gesetzt
+  // Gesetzt, sobald der Dienst den (gewonnenen) Bedarf als Klient in die
+  // Tourenplanung übernommen hat — verhindert doppelte Übernahme.
+  uebernommenAt: z.string().optional(),
 })
 export type Bedarf = z.infer<typeof bedarfSchema>
 

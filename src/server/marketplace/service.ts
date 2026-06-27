@@ -233,6 +233,73 @@ export async function listeVergebenFuerDienst(tenantId: string): Promise<Bedarf[
   return res.docs.map((d) => bedarfSchema.parse(bedarfAusDoc(d)))
 }
 
+// Übernimmt einen GEWONNENEN Bedarf als Klient in die Tourenplanung des
+// Dienstes: legt Säule 2 (operativ) + Säule 1 (Identität aus dem freigegebenen
+// Kontakt) an. Idempotent über uebernommenAt. Nur erlaubt, wenn der Dienst den
+// Bedarf gewonnen hat (Kontakt ist dann freigegeben — kein Leak).
+export async function uebernehmeBedarfAlsKlient(
+  bedarfId: string,
+  tenantId: string,
+): Promise<{ klientPseudonymId: string; bereits: boolean }> {
+  const payload = await payloadClient()
+  const bedarf = await ladeBedarf(bedarfId)
+  if (!bedarf) throw new Error('Bedarf nicht gefunden')
+  if (bedarf.status !== 'vergeben' || bedarf.selectedTenantId !== tenantId) {
+    throw new Error('Nur ein gewonnener Bedarf kann übernommen werden')
+  }
+  if (bedarf.uebernommenAt) {
+    return { klientPseudonymId: '', bereits: true }
+  }
+
+  const kontakt = await holeKontaktIntern(bedarfId)
+  const pseudonymId = neuePseudonymId()
+
+  // Säule 2: operativer Klient (pseudonym).
+  await payload.create({
+    collection: 'klienten_operativ',
+    data: {
+      pseudonymId,
+      tenantId,
+      geo: bedarf.geo,
+      pflegegrad: bedarf.pflegegrad,
+      leistungen: bedarf.leistungen,
+      qualifikation: bedarf.qualifikation,
+      zeitfenster: bedarf.zeitfenster,
+      dauerMin: bedarf.dauerMin,
+      status: 'aktiv',
+    },
+    overrideAccess: true,
+  })
+
+  // Säule 1: Identität aus dem freigegebenen Kontakt (Hooks verschlüsseln).
+  if (kontakt) {
+    await payload.create({
+      collection: 'klienten_identitaet',
+      data: {
+        pseudonymId,
+        tenantId,
+        externalId: `bedarf:${bedarfId}`,
+        vorname: kontakt.vorname,
+        nachname: kontakt.nachname,
+        adresse: kontakt.adresse ?? '',
+        telefon: kontakt.telefon,
+        email: kontakt.email,
+      },
+      overrideAccess: true,
+    })
+  }
+
+  // Bedarf als übernommen markieren (verhindert Doppel-Übernahme).
+  await payload.update({
+    collection: 'bedarfe',
+    where: { pseudonymId: { equals: bedarfId } },
+    data: { uebernommenAt: new Date().toISOString() },
+    overrideAccess: true,
+  })
+
+  return { klientPseudonymId: pseudonymId, bereits: false }
+}
+
 // Ein Dienst gibt ein verbindliches Angebot ab. Setzt den Bedarf auf
 // „in_bearbeitung" (Statusmarker /F320/). Doppelangebote verhindert der
 // eindeutige Index (bedarfPseudonymId+tenantId).
@@ -455,5 +522,6 @@ export function bedarfAusDoc(d: any): unknown {
     deadlineAt: d.deadlineAt ? new Date(d.deadlineAt).toISOString() : undefined,
     firstResponseAt: d.firstResponseAt ? new Date(d.firstResponseAt).toISOString() : undefined,
     createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : undefined,
+    uebernommenAt: d.uebernommenAt ? new Date(d.uebernommenAt).toISOString() : undefined,
   }
 }

@@ -346,6 +346,7 @@ export interface Bedarfe {
   selectedTenantId?: string | null;
   deadlineAt?: string | null;
   firstResponseAt?: string | null;
+  uebernommenAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -721,6 +722,7 @@ export interface BedarfeSelect<T extends boolean = true> {
   selectedTenantId?: T;
   deadlineAt?: T;
   firstResponseAt?: T;
+  uebernommenAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

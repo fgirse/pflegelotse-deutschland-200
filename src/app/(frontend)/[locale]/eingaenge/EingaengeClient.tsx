@@ -3,7 +3,14 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
+import { Link } from '@/i18n/navigation'
 import { minToHHMM } from '@/shared/time'
+
+interface FitInfo {
+  pflegekraftId: string
+  mehrwegMin: number
+  position: number
+}
 
 interface OffenerBedarf {
   pseudonymId: string
@@ -13,12 +20,13 @@ interface OffenerBedarf {
   dauerMin: number
   express: boolean
   status: string
+  fit: FitInfo | null
 }
 
 interface Props {
   tenantId: string
   offene: OffenerBedarf[]
-  gewonnen: { pseudonymId: string }[]
+  gewonnen: { pseudonymId: string; uebernommen: boolean }[]
 }
 
 // Dienst-Seite: anonyme Bedarfe mit „Angebot abgeben" und gewonnene Bedarfe,
@@ -29,8 +37,27 @@ export function EingaengeClient({ tenantId, offene, gewonnen }: Props) {
   const [nachrichten, setNachrichten] = useState<Record<string, string>>({})
   const [gesendet, setGesendet] = useState<Record<string, boolean>>({})
   const [kontakte, setKontakte] = useState<Record<string, string>>({})
+  const [uebernommen, setUebernommen] = useState<Record<string, boolean>>({})
   const [busy, setBusy] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
+
+  async function uebernehmen(bedarfId: string) {
+    setBusy(true)
+    setFehler(null)
+    try {
+      const res = await fetch(`/api/v1/bedarfe/${bedarfId}/uebernehmen`, { method: 'POST' })
+      if (res.ok) {
+        setUebernommen((u) => ({ ...u, [bedarfId]: true }))
+      } else {
+        const d = await res.json().catch(() => null)
+        setFehler(d?.error ?? t('uebernehmenFehler'))
+      }
+    } catch {
+      setFehler(t('uebernehmenFehler'))
+    } finally {
+      setBusy(false)
+    }
+  }
 
   async function angebotAbgeben(bedarfId: string) {
     setBusy(true)
@@ -83,6 +110,18 @@ export function EingaengeClient({ tenantId, offene, gewonnen }: Props) {
                 </span>
                 {b.express && <span className="chip">Express</span>}
               </div>
+              {/* Fit-Vorschau: passt der Bedarf in eine Tour? */}
+              {b.fit ? (
+                <p className="mt-2 text-sm font-medium text-[var(--color-success)]">
+                  ✓ {t('fitPasst', {
+                    pk: b.fit.pflegekraftId,
+                    min: b.fit.mehrwegMin,
+                    pos: b.fit.position + 1,
+                  })}
+                </p>
+              ) : (
+                <p className="mt-2 text-sm text-[var(--color-faint)]">{t('fitKeinSlot')}</p>
+              )}
               {gesendet[b.pseudonymId] ? (
                 <p className="mt-2 font-medium text-[var(--color-success)]">✓ {t('angebotGesendet')}</p>
               ) : (
@@ -127,6 +166,25 @@ export function EingaengeClient({ tenantId, offene, gewonnen }: Props) {
                     {t('kontaktAnzeigen')}
                   </button>
                 )}
+                {/* In die Tourenplanung übernehmen (als Klient). */}
+                <div className="mt-3">
+                  {b.uebernommen || uebernommen[b.pseudonymId] ? (
+                    <p className="text-sm font-medium text-[var(--color-success)]">
+                      ✓ {t('uebernommen')}{' '}
+                      <Link href="/dashboard" className="text-[var(--color-accent)] hover:underline">
+                        {t('zumDashboard')}
+                      </Link>
+                    </p>
+                  ) : (
+                    <button
+                      onClick={() => uebernehmen(b.pseudonymId)}
+                      disabled={busy}
+                      className="btn btn-outline"
+                    >
+                      {t('inTourplanung')}
+                    </button>
+                  )}
+                </div>
               </li>
             ))}
           </ul>
