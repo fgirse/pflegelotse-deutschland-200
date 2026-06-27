@@ -60,6 +60,11 @@
     "eingaengeFit": "{passend} mit Tour-Slot · {ohneUmweg} ohne Umweg",
     "marktKandidaten": "Marktplatz-Bedarfe",
     "marktChip": "Marktplatz",
+    "probe": "Probe",
+    "probeHinweis": "Noch nicht gewonnen. Du kannst ihn unverbindlich als Probe einplanen oder ein Angebot abgeben, um ihn zu gewinnen.",
+    "probeEinplanen": "Als Probe einplanen",
+    "gewinnen": "Angebot abgeben (gewinnen)",
+    "angebotGesendet": "Angebot gesendet",
     "einzugsgebietTitel": "Einzugsgebiet",
     "einzugsgebietHinweis": "Standort & Radius festlegen, um passende Bedarfe zu erhalten"
   },

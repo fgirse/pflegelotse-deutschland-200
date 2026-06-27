@@ -276,6 +276,7 @@ export interface Touren {
           | boolean
           | null;
         ankunft?: number | null;
+        probe?: boolean | null;
         id?: string | null;
       }[]
     | null;
@@ -675,6 +676,7 @@ export interface TourenSelect<T extends boolean = true> {
         dauerMin?: T;
         qualifikation?: T;
         ankunft?: T;
+        probe?: T;
         id?: T;
       };
   updatedAt?: T;

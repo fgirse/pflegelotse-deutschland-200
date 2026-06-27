@@ -94,6 +94,7 @@ function normTour(d: any): unknown {
       dauerMin: e.dauerMin ?? 30,
       qualifikation: arr(e.qualifikation),
       ankunft: e.ankunft,
+      probe: Boolean(e.probe),
     })),
   }
 }

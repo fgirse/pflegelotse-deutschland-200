@@ -51,6 +51,9 @@ export const einsatzSchema = z.object({
   qualifikation: z.array(z.string()).default([]),
   // Geplante Ankunftszeit (Minuten seit Mitternacht), vom Planer gesetzt.
   ankunft: z.number().int().min(0).max(1439).optional(),
+  // Probe-Einplanung: ein offener Marktplatz-Bedarf, der noch nicht gewonnen
+  // ist — unverbindliche Kapazitätsplanung, klar gekennzeichnet.
+  probe: z.boolean().optional(),
 })
 export type Einsatz = z.infer<typeof einsatzSchema>
 

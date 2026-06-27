@@ -60,6 +60,11 @@
     "eingaengeFit": "{passend} with tour slot · {ohneUmweg} without detour",
     "marktKandidaten": "Marketplace requests",
     "marktChip": "Marketplace",
+    "probe": "Trial",
+    "probeHinweis": "Not won yet. You can plan it tentatively as a trial or make an offer to win it.",
+    "probeEinplanen": "Plan as trial",
+    "gewinnen": "Make an offer (win)",
+    "angebotGesendet": "Offer sent",
     "einzugsgebietTitel": "Service area",
     "einzugsgebietHinweis": "Set location & radius to receive matching requests"
   },

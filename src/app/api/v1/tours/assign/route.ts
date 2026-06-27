@@ -8,6 +8,8 @@ import { requireAuth } from '@/server/auth/guard'
 const bodySchema = z.object({
   tourId: z.string().min(1),
   position: z.number().int().min(0),
+  // true = unverbindliche Probe-Einplanung eines offenen Bedarfs.
+  probe: z.boolean().optional(),
   kandidat: z.object({
     pseudonymId: pseudonymIdSchema,
     geo: geoSchema,
@@ -29,7 +31,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
   }
-  const { tourId, position, kandidat } = parsed.data
+  const { tourId, position, probe, kandidat } = parsed.data
 
   const tour = await ladeTour(tourId)
   if (!tour) return NextResponse.json({ error: 'Tour nicht gefunden' }, { status: 404 })
@@ -45,6 +47,7 @@ export async function POST(req: NextRequest) {
     zeitfenster: kandidat.zeitfenster,
     dauerMin: kandidat.dauerMin,
     qualifikation: kandidat.qualifikation,
+    probe: probe ?? false,
   }
   const pos = Math.min(position, tour.einsaetze.length)
   const einsaetze = [...tour.einsaetze]

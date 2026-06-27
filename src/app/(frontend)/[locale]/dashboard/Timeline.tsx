@@ -27,17 +27,24 @@ export function Timeline({ tour }: { tour: Tour }) {
           return (
             <div
               key={e.pseudonymId}
-              title={`${minToHHMM(ankunft)} (${minToHHMM(e.zeitfenster.von)}–${minToHHMM(e.zeitfenster.bis)})`}
+              title={`${minToHHMM(ankunft)} (${minToHHMM(e.zeitfenster.von)}–${minToHHMM(e.zeitfenster.bis)})${e.probe ? ' · ' + t('probe') : ''}`}
               className="absolute top-1 flex h-7 items-center justify-center rounded px-1 text-[10px] font-medium text-white"
               data-konflikt={konflikt}
+              data-probe={Boolean(e.probe)}
               style={{
                 left: `${Math.max(0, Math.min(98, pct(ankunft)))}%`,
                 minWidth: '34px',
-                // Konflikt rot (danger), sonst Tinte — Symbol unterscheidet zusätzlich.
-                backgroundColor: konflikt ? 'var(--color-danger)' : 'var(--color-ink)',
+                // Konflikt rot, Probe gold (gestrichelt), sonst Tinte — Symbol
+                // unterscheidet zusätzlich (nie Farbe allein, /Q400/).
+                backgroundColor: konflikt
+                  ? 'var(--color-danger)'
+                  : e.probe
+                    ? 'var(--color-accent-strong)'
+                    : 'var(--color-ink)',
+                border: e.probe ? '1px dashed var(--color-ink)' : undefined,
               }}
             >
-              {konflikt ? '⚠ ' : ''}
+              {konflikt ? '⚠ ' : e.probe ? '◌ ' : ''}
               {minToHHMM(ankunft)}
             </div>
           )
@@ -49,6 +56,7 @@ export function Timeline({ tour }: { tour: Tour }) {
           <li key={e.pseudonymId}>
             {i + 1}. {minToHHMM(e.ankunft ?? e.zeitfenster.von)},{' '}
             {e.ankunft && e.ankunft > e.zeitfenster.bis ? 'Zeitfensterkonflikt' : 'im Zeitfenster'}
+            {e.probe ? ` (${t('probe')})` : ''}
           </li>
         ))}
       </ul>

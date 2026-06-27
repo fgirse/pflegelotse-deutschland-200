@@ -44,6 +44,7 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
   const [matches, setMatches] = useState<FitMatch[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [view, setView] = useState<'map' | 'table'>('map')
+  const [angebotGesendet, setAngebotGesendet] = useState(false)
 
   // Eigene Klienten in die gemeinsame Kandidatenform bringen.
   const eigene: PlanKandidat[] = candidates.map((k) => ({
@@ -59,6 +60,7 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
   async function waehleKandidat(k: PlanKandidat) {
     setSelected(k)
     setMatches(null)
+    setAngebotGesendet(false)
     setLoading(true)
     try {
       const res = await fetch('/api/v1/matching/fit-score', {
@@ -82,7 +84,7 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
     }
   }
 
-  async function aufnehmen(match: FitMatch) {
+  async function aufnehmen(match: FitMatch, probe: boolean) {
     if (!selected) return
     setLoading(true)
     try {
@@ -92,6 +94,7 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
         body: JSON.stringify({
           tourId: match.tourId,
           position: match.position,
+          probe,
           kandidat: {
             pseudonymId: selected.pseudonymId,
             geo: selected.geo,
@@ -105,6 +108,21 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
       setMatches(null)
       // Server-Daten neu laden (Tour hat sich geändert).
       startTransition(() => router.refresh())
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // „Gewinnen": Angebot auf den offenen Bedarf abgeben.
+  async function angebotAbgeben(bedarfId: string) {
+    setLoading(true)
+    try {
+      const res = await fetch(`/api/v1/bedarfe/${bedarfId}/angebote`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ tenantId, nachricht: '' }),
+      })
+      if (res.ok) setAngebotGesendet(true)
     } finally {
       setLoading(false)
     }
@@ -208,6 +226,27 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
         {selected && !loading && matches && matches.length === 0 && (
           <p className="text-sm font-medium text-[var(--color-danger)]">⚠ {t('noMatch')}</p>
         )}
+
+        {/* Marktplatz-Bedarf: Hinweis + „gewinnen" (Angebot abgeben). */}
+        {selected?.quelle === 'bedarf' && (
+          <div className="mb-3 rounded-lg bg-[var(--color-accent-soft)] p-3">
+            <p className="text-xs text-[var(--color-muted)]">{t('probeHinweis')}</p>
+            {angebotGesendet ? (
+              <p className="mt-2 text-sm font-medium text-[var(--color-success)]">
+                ✓ {t('angebotGesendet')}
+              </p>
+            ) : (
+              <button
+                onClick={() => angebotAbgeben(selected.pseudonymId)}
+                disabled={loading}
+                className="btn btn-accent mt-2 w-full"
+              >
+                {t('gewinnen')}
+              </button>
+            )}
+          </div>
+        )}
+
         <ul className="flex flex-col gap-2">
           {matches?.map((mm) => (
             <li key={mm.tourId} className="rounded-lg border border-[var(--color-line)] p-3">
@@ -223,11 +262,11 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
               </p>
               <p className="text-xs font-medium text-[var(--color-success)]">✓ {t('qualificationOk')}</p>
               <button
-                onClick={() => aufnehmen(mm)}
+                onClick={() => aufnehmen(mm, selected?.quelle === 'bedarf')}
                 disabled={loading}
-                className="btn btn-primary mt-2 w-full"
+                className={`mt-2 w-full ${selected?.quelle === 'bedarf' ? 'btn btn-outline' : 'btn btn-primary'}`}
               >
-                {t('assign')}
+                {selected?.quelle === 'bedarf' ? t('probeEinplanen') : t('assign')}
               </button>
             </li>
           ))}
@@ -302,7 +341,10 @@ function TourTable({ tours }: { tours: TourMitKennzahlen[] }) {
                     {e.ankunft != null ? minToHHMM(e.ankunft) : '—'}
                   </td>
                   <td className="py-1 pr-3">{e.dauerMin}</td>
-                  <td className="py-1 pr-3">{e.qualifikation.join(', ') || '—'}</td>
+                  <td className="py-1 pr-3">
+                    {e.qualifikation.join(', ') || '—'}
+                    {e.probe && <span className="chip ml-1">{t('probe')}</span>}
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -51,6 +51,7 @@ export const Touren: CollectionConfig = {
         { name: 'dauerMin', type: 'number', defaultValue: 30 },
         { name: 'qualifikation', type: 'json', defaultValue: [] },
         { name: 'ankunft', type: 'number' }, // geplante Ankunft (Min seit Mitternacht)
+        { name: 'probe', type: 'checkbox', defaultValue: false }, // unverbindliche Probe-Einplanung
       ],
     },
   ],
