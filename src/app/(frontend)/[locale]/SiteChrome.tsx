@@ -77,7 +77,7 @@ export async function SiteHeader({ locale }: { locale: string }) {
             <>
               <Link
                 href="/login"
-                className="text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+                className="rounded-lg border border-neutral-800 px-3 py-1.5 text-sm font-medium text-[var(--color-ink)] transition-colors hover:bg-white"
               >
                 {t('login.anmelden')}
               </Link>
