@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server'
 import { headers } from 'next/headers'
 import { Link } from '@/i18n/navigation'
 import { getAuthUser } from '@/server/auth/guard'
+import { zaehleOffeneAngebote } from '@/server/marketplace/service'
 import { LocaleSwitcher } from './LocaleSwitcher'
 import { LogoutButton } from './LogoutButton'
 
@@ -43,6 +44,16 @@ export async function SiteHeader({ locale }: { locale: string }) {
   const bereichHref = istDienst ? '/dashboard' : '/meine-bedarfe'
   const bereichLabel = istDienst ? t('nav.dashboard') : t('meineBedarfe.title')
 
+  // In-App-Hinweis für Suchende: Anzahl Bedarfe mit neuen/offenen Angeboten.
+  let angeboteBadge = 0
+  if (user && !istDienst) {
+    try {
+      angeboteBadge = await zaehleOffeneAngebote(user.id)
+    } catch {
+      angeboteBadge = 0
+    }
+  }
+
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-line)] bg-[var(--color-paper)]/85 backdrop-blur">
       <div className="container-page flex h-16 items-center justify-between gap-4">
@@ -64,6 +75,14 @@ export async function SiteHeader({ locale }: { locale: string }) {
             <>
               <Link href={bereichHref} className="btn btn-outline">
                 {bereichLabel}
+                {angeboteBadge > 0 && (
+                  <span
+                    className="ml-1.5 rounded-full bg-[var(--color-accent-strong)] px-1.5 text-xs font-bold text-white"
+                    aria-label={`${angeboteBadge} neue Angebote`}
+                  >
+                    {angeboteBadge}
+                  </span>
+                )}
               </Link>
               <span
                 className="hidden max-w-[12rem] truncate text-sm text-[var(--color-muted)] md:inline"

@@ -9,6 +9,7 @@ import { ladeAlleTouren, ladeTour, speichereEinsaetze } from '@/server/repo'
 import { minToHHMM } from '@/shared/time'
 import { haversineKm } from '@/shared/orte'
 import { EINWILLIGUNG_VERSION } from '@/shared/consent'
+import { env } from '@/lib/env'
 import { bedarfSchema, type Bedarf, type BedarfErstellen, type Kontakt } from '@/shared/marketplace'
 import type { Tour } from '@/shared/domain'
 
@@ -422,7 +423,35 @@ export async function gibAngebotAb(
       overrideAccess: true,
     })
   }
+
+  // Suchende benachrichtigen (an die eigene Adresse — kein Leak; Dienst bleibt
+  // anonym, die Auswahl trifft die/der Suchende im Portal).
+  await benachrichtigeSuchende(bedarfId, tenantId).catch((e) =>
+    console.error('Angebots-Benachrichtigung fehlgeschlagen:', e),
+  )
+
   return angebot
+}
+
+// E-Mail an die/den Suchenden, dass ein neues Angebot vorliegt. Dedupe je
+// Dienst, damit pro Angebot höchstens eine Benachrichtigung rausgeht.
+async function benachrichtigeSuchende(bedarfId: string, tenantId: string): Promise<void> {
+  const kontakt = await holeKontaktIntern(bedarfId)
+  if (!kontakt?.email) return
+  const url = env.NEXT_PUBLIC_SERVER_URL
+  const link = url.startsWith('https')
+    ? `<p><a href="${url}/de/meine-bedarfe">Meine Bedarfe öffnen</a></p>`
+    : ''
+  await getNotifier().sende(
+    kontakt.email,
+    'Neues Angebot zu Ihrem Pflegebedarf',
+    `<p>Hallo ${kontakt.vorname},</p>` +
+      `<p>zu Ihrem Pflegebedarf ist ein neues Angebot eingegangen. Melden Sie sich an und ` +
+      `vergleichen Sie unter „Meine Bedarfe" die Angebote — Sie wählen selbst, welcher ` +
+      `Dienst Ihre Kontaktdaten erhält.</p>` +
+      link,
+    `${bedarfId}:angebot:${tenantId}`,
+  )
 }
 
 // Angebote zu einem Bedarf (für die Angehörigen-Vergleichsansicht).
@@ -579,6 +608,47 @@ export async function listeBedarfeFuerNutzer(
     bedarf: bedarfSchema.parse(bedarfAusDoc(d)),
     anzahlAngebote: counts.get((d as { pseudonymId: string }).pseudonymId) ?? 0,
   }))
+}
+
+// Anzahl eigener, noch offener Bedarfe mit mindestens einem Angebot — für ein
+// In-App-Badge „du hast Angebote".
+export async function zaehleOffeneAngebote(userId: string): Promise<number> {
+  const payload = await payloadClient()
+  const ident = await payload.find({
+    collection: 'angehoerige_identitaet',
+    where: { ownerUserId: { equals: userId } },
+    limit: 200,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const ids = (ident.docs as { pseudonymId?: string }[])
+    .map((d) => d.pseudonymId)
+    .filter((x): x is string => Boolean(x))
+  if (ids.length === 0) return 0
+
+  const bedarfe = await payload.find({
+    collection: 'bedarfe',
+    where: { and: [{ pseudonymId: { in: ids } }, { status: { in: ['offen', 'in_bearbeitung'] } }] },
+    limit: 200,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const offeneIds = (bedarfe.docs as { pseudonymId?: string }[])
+    .map((d) => d.pseudonymId)
+    .filter((x): x is string => Boolean(x))
+  if (offeneIds.length === 0) return 0
+
+  const ang = await payload.find({
+    collection: 'angebote',
+    where: { and: [{ bedarfPseudonymId: { in: offeneIds } }, { status: { equals: 'abgegeben' } }] },
+    limit: 1000,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const mitAngebot = new Set(
+    (ang.docs as { bedarfPseudonymId?: string }[]).map((a) => a.bedarfPseudonymId).filter(Boolean),
+  )
+  return mitAngebot.size
 }
 
 // Gehört ein Bedarf dem angemeldeten Suchenden? (Besitz über Säule 1.)
