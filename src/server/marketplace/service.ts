@@ -276,6 +276,9 @@ export async function uebernehmeBedarfAlsKlient(
       qualifikation: bedarf.qualifikation,
       zeitfenster: bedarf.zeitfenster,
       dauerMin: bedarf.dauerMin,
+      // Kostenträger aus dem gewonnenen Bedarf mitführen (Abrechnung).
+      kostentraegerArt: bedarf.kostentraegerArt,
+      krankenversicherer: bedarf.krankenversicherer,
       status: 'aktiv',
     },
     overrideAccess: true,

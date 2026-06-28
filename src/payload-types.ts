@@ -226,6 +226,8 @@ export interface KlientenOperativ {
     bis: number;
   };
   dauerMin?: number | null;
+  kostentraegerArt?: ('gesetzlich' | 'privat') | null;
+  krankenversicherer?: string | null;
   bezugspflege?: string | null;
   status?: ('aktiv' | 'pausiert' | 'beendet') | null;
   updatedAt: string;
@@ -638,6 +640,8 @@ export interface KlientenOperativSelect<T extends boolean = true> {
         bis?: T;
       };
   dauerMin?: T;
+  kostentraegerArt?: T;
+  krankenversicherer?: T;
   bezugspflege?: T;
   status?: T;
   updatedAt?: T;

@@ -109,6 +109,8 @@ function normKlient(d: any): unknown {
     qualifikation: arr(d.qualifikation),
     zeitfenster: d.zeitfenster,
     dauerMin: d.dauerMin ?? 30,
+    kostentraegerArt: d.kostentraegerArt ?? undefined,
+    krankenversicherer: d.krankenversicherer ?? undefined,
     bezugspflege: d.bezugspflege,
     status: d.status ?? 'aktiv',
   }

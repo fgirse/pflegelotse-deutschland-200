@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { UUID_V4_PATTERN } from '@/lib/pseudonym'
+import { KOSTENTRAEGER_ARTEN } from './krankenkassen'
 
 // ── Gemeinsame Domänen-Schemas (zod) ─────────────────────────────────────
 // Eine einzige Quelle der Wahrheit für Frontend, API und Matching.
@@ -37,6 +38,9 @@ export const klientOperativSchema = z.object({
   qualifikation: z.array(z.string()).default([]), // nötige Qualifikationen
   zeitfenster: zeitfensterSchema,
   dauerMin: z.number().int().positive().default(30), // Einsatzdauer
+  // Kostenträger aus dem übernommenen Bedarf (Abrechnung).
+  kostentraegerArt: z.enum(KOSTENTRAEGER_ARTEN).optional(),
+  krankenversicherer: z.string().optional(),
   bezugspflege: z.string().optional(), // bevorzugte Pflegekraft (Pflegekraft-Id)
   status: statusSchema.default('aktiv'),
 })

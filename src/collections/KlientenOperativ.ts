@@ -40,6 +40,9 @@ export const KlientenOperativ: CollectionConfig = {
       ],
     },
     { name: 'dauerMin', type: 'number', defaultValue: 30 },
+    // Kostenträger aus dem übernommenen Bedarf — relevant für die Abrechnung.
+    { name: 'kostentraegerArt', type: 'select', options: ['gesetzlich', 'privat'], index: true },
+    { name: 'krankenversicherer', type: 'text' },
     { name: 'bezugspflege', type: 'text' },
     {
       name: 'status',
