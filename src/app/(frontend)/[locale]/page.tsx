@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { setRequestLocale } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
@@ -24,15 +25,14 @@ function HomeInner() {
 
   return (
     <main>
-      {/* Hero */}
-      <section className="container-page grid items-center gap-10 py-16 sm:py-24 lg:grid-cols-[1.1fr_0.9fr]">
+      {/* Hero: links die Botschaft, rechts ein hochwertiges Pflegeteam-Foto. */}
+      <section className="container-page grid items-center gap-10 py-16 sm:py-24 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
           <span className="eyebrow">{t('heroEyebrow')}</span>
-          <h1 className="mt-4 text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-4xl lg:text-accent">
+          <h1 className="mt-4 text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
             {t('heroTitle')}
           </h1>
-          <p className="mt-6 max-w-6
-          xl text-lg leading-relaxed text-muted">
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
             {t('heroSub')}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
@@ -45,25 +45,43 @@ function HomeInner() {
           </div>
         </div>
 
-        {/* Vertrauens-Panel als ruhige Karte */}
-        <div className="card p-6 sm:p-8">
-          <ul className="flex flex-col gap-6">
-            {trust.map((item, i) => (
-              <li key={i} className="flex gap-4">
-                <span
-                  aria-hidden
-                  className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-soft font-display text-sm font-bold text-accent"
-                >
-                  {i + 1}
-                </span>
-                <div>
-                  <div className="font-display font-semibold">{item.titel}</div>
-                  <div className="text-sm text-muted">{item.text}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
+        {/* Hero-Bild: vielfältiges, professionelles Pflegeteam. Weiche
+            Akzentfläche dahinter für Tiefe; priority = LCP-Bild. */}
+        <div className="relative">
+          <div
+            aria-hidden
+            className="absolute -inset-3 -z-10 rounded-[2rem] bg-accent-soft opacity-70 blur-2xl"
+          />
+          <Image
+            src="/Assets/Img/pflegedienst_team.png"
+            alt={t('heroBildAlt')}
+            width={1536}
+            height={1024}
+            priority
+            sizes="(min-width: 1024px) 45vw, 100vw"
+            className="h-auto w-full rounded-2xl border border-[var(--color-line)] object-cover shadow-xl"
+          />
         </div>
+      </section>
+
+      {/* Vertrauenspunkte als ruhiger Streifen unter dem Hero. */}
+      <section className="container-page pb-4">
+        <ul className="grid gap-4 sm:grid-cols-3">
+          {trust.map((item, i) => (
+            <li key={i} className="card flex gap-4 p-6">
+              <span
+                aria-hidden
+                className="mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent-soft font-display text-sm font-bold text-accent"
+              >
+                {i + 1}
+              </span>
+              <div>
+                <div className="font-display font-semibold">{item.titel}</div>
+                <div className="text-sm text-muted">{item.text}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* Zielgruppen-Split */}
