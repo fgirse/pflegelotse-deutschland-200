@@ -64,6 +64,8 @@
     "kvStammTitel": "Payer mix of the client base",
     "kvStammGesamt": "{n, plural, =0 {no clients} one {# client} other {# clients}}",
     "kvStammLeer": "No active clients with a payer yet.",
+    "pgTitel": "Client base by care level",
+    "pgRow": "Care level {n}",
     "kvPrivat": "Private (PKV)",
     "kvGesetzlich": "Statutory (GKV)",
     "kvOhne": "Not specified",

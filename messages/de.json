@@ -64,6 +64,8 @@
     "kvStammTitel": "Kostenträger-Mix des Klientenstamms",
     "kvStammGesamt": "{n, plural, =0 {keine Klienten} one {# Klient} other {# Klienten}}",
     "kvStammLeer": "Noch keine aktiven Klienten mit Kostenträger.",
+    "pgTitel": "Klientenstamm nach Pflegegrad",
+    "pgRow": "Pflegegrad {n}",
     "kvPrivat": "Privat (PKV)",
     "kvGesetzlich": "Gesetzlich (GKV)",
     "kvOhne": "Ohne Angabe",

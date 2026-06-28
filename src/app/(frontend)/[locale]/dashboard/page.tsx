@@ -67,6 +67,11 @@ export default async function DashboardPage({
   const kvStamm = zaehleKv(klienten)
   const kvLabels = { privat: t('kvPrivat'), gesetzlich: t('kvGesetzlich'), ohne: t('kvOhne') }
 
+  // Klientenstamm zusätzlich nach Pflegegrad — Pflegeintensität des Portfolios.
+  const pgZahlen = zaehlePflegegrad(klienten)
+  const pgRows = [1, 2, 3, 4, 5].map((g) => ({ label: t('pgRow', { n: g }), count: pgZahlen[g] }))
+  if (pgZahlen.ohne > 0) pgRows.push({ label: t('kvOhne'), count: pgZahlen.ohne })
+
   // Offene Bedarfe (noch in keiner Tour) als einplanbare Marktplatz-Kandidaten.
   const bedarfeKandidaten = eingaenge
     .filter((b) => !zugeordnet.has(b.pseudonymId))
@@ -142,6 +147,16 @@ export default async function DashboardPage({
         />
       </div>
 
+      {/* Klientenstamm nach Pflegegrad. */}
+      <div className="mb-6">
+        <PflegegradCard
+          titel={t('pgTitel')}
+          gesamtText={t('kvStammGesamt', { n: klienten.length })}
+          leerText={t('kvStammLeer')}
+          rows={pgRows}
+        />
+      </div>
+
       <DashboardClient
         tenantId={TENANT}
         tours={tourenMitKennzahlen}
@@ -150,6 +165,17 @@ export default async function DashboardPage({
       />
     </main>
   )
+}
+
+// Zählt Klienten je Pflegegrad (1–5) plus „ohne Angabe".
+function zaehlePflegegrad(items: { pflegegrad?: number }[]): Record<string, number> {
+  const m: Record<string, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, ohne: 0 }
+  for (const it of items) {
+    const g = it.pflegegrad
+    if (g && g >= 1 && g <= 5) m[g]++
+    else m.ohne++
+  }
+  return m
 }
 
 // Zählt Einträge je Kostenträger-Art (privat/gesetzlich/ohne Angabe).
@@ -161,6 +187,47 @@ function zaehleKv(items: { kostentraegerArt?: 'gesetzlich' | 'privat' }[]) {
     else m.ohne++
   }
   return m
+}
+
+// Karte: horizontale Mini-Balken je Pflegegrad. Balkenbreite = Anteil am Stamm.
+function PflegegradCard({
+  titel,
+  gesamtText,
+  leerText,
+  rows,
+}: {
+  titel: string
+  gesamtText: string
+  leerText: string
+  rows: { label: string; count: number }[]
+}) {
+  const total = rows.reduce((s, r) => s + r.count, 0)
+  const pct = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0)
+  return (
+    <section className="card p-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="font-display text-lg font-semibold">{titel}</h2>
+        <span className="text-sm text-[var(--color-muted)]">{gesamtText}</span>
+      </div>
+      {total === 0 ? (
+        <p className="mt-3 text-sm text-[var(--color-faint)]">{leerText}</p>
+      ) : (
+        <div className="mt-3 flex flex-col gap-1.5">
+          {rows.map((r) => (
+            <div key={r.label} className="flex items-center gap-3">
+              <span className="w-24 shrink-0 text-sm text-[var(--color-muted)]">{r.label}</span>
+              <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-[var(--color-line)]">
+                <div className="h-full bg-[var(--color-accent)]" style={{ width: `${pct(r.count)}%` }} />
+              </div>
+              <span className="w-20 shrink-0 text-right text-sm">
+                <strong>{r.count}</strong> ({pct(r.count)}%)
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  )
 }
 
 type KvMix = { privat: number; gesetzlich: number; ohne: number }
