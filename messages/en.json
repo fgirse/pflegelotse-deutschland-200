@@ -7,7 +7,13 @@
     "dashboard": "Dispatcher dashboard",
     "admin": "Administration",
     "impressum": "Imprint",
-    "datenschutz": "Privacy"
+    "datenschutz": "Privacy",
+    "menue": "Menu",
+    "menueOeffnen": "Open menu",
+    "menueSchliessen": "Close menu",
+    "navigation": "Navigation",
+    "meinBereich": "My area",
+    "sprache": "Language"
   },
   "home": {
     "title": "Pflegelotse Deutschland",

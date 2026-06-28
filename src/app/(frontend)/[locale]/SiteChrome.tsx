@@ -6,6 +6,7 @@ import { getAuthUser } from '@/server/auth/guard'
 import { zaehleOffeneAngebote } from '@/server/marketplace/service'
 import { LocaleSwitcher } from './LocaleSwitcher'
 import { LogoutButton } from './LogoutButton'
+import { DesktopNav, MobileMenu } from './SiteNav'
 
 const DIENST_ROLLEN = ['disponent', 'admin', 'pflegekraft']
 
@@ -36,10 +37,6 @@ export async function SiteHeader({ locale }: { locale: string }) {
     user = null // nur Auth-/DB-Fehler abfangen, nicht den Dynamic-Bailout.
   }
 
-  const nav = [
-    { href: '/lotse', label: t('lotse.title') },
-    { href: '/tools', label: t('tools.title') },
-  ]
   const istDienst = user ? DIENST_ROLLEN.includes(user.role) : false
   const bereichHref = istDienst ? '/dashboard' : '/meine-bedarfe'
   const bereichLabel = istDienst ? t('nav.dashboard') : t('meineBedarfe.title')
@@ -56,55 +53,60 @@ export async function SiteHeader({ locale }: { locale: string }) {
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-line)] bg-[var(--color-paper)]/85 backdrop-blur">
-      <div className="container-page flex h-16 items-center justify-between gap-4">
+      <div className="container-page flex h-16 items-center gap-4">
         <Wordmark />
-        <nav aria-label="Hauptnavigation" className="hidden items-center gap-1 md:flex">
-          {nav.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className="rounded-lg px-3 py-2 text-sm font-medium text-[var(--color-muted)] transition-colors hover:bg-[var(--color-line)] hover:text-[var(--color-ink)]"
-            >
-              {n.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center gap-3">
-          <LocaleSwitcher locale={locale} />
-          {user ? (
-            <>
-              <Link href={bereichHref} className="btn btn-outline">
-                {bereichLabel}
-                {angeboteBadge > 0 && (
-                  <span
-                    className="ml-1.5 rounded-full bg-[var(--color-accent-strong)] px-1.5 text-xs font-bold text-white"
-                    aria-label={`${angeboteBadge} neue Angebote`}
-                  >
-                    {angeboteBadge}
-                  </span>
-                )}
-              </Link>
-              <span
-                className="hidden max-w-[12rem] truncate text-sm text-[var(--color-muted)] md:inline"
-                title={user.email}
-              >
-                {user.dienstName || user.email}
-              </span>
-              <LogoutButton locale={locale} />
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="rounded-lg border border-neutral-800 px-3 py-1.5 text-sm font-medium text-[var(--color-ink)] transition-colors hover:bg-white"
-              >
-                {t('login.anmelden')}
-              </Link>
-              <Link href="/registrieren" className="btn btn-accent">
-                {t('login.jetztRegistrieren')}
-              </Link>
-            </>
-          )}
+        {/* Inline-Navigation ab 1024px (mit Aktiv-Zustand). */}
+        <DesktopNav />
+
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
+          {/* Desktop-Aktionen ab 1024px. */}
+          <div className="hidden items-center gap-3 lg:flex">
+            <LocaleSwitcher locale={locale} />
+            {user ? (
+              <>
+                <Link href={bereichHref} className="btn btn-outline min-h-11">
+                  {bereichLabel}
+                  {angeboteBadge > 0 && (
+                    <span
+                      className="ml-1.5 rounded-full bg-[var(--color-accent-strong)] px-1.5 text-xs font-bold text-white"
+                      aria-label={`${angeboteBadge} neue Angebote`}
+                    >
+                      {angeboteBadge}
+                    </span>
+                  )}
+                </Link>
+                <span
+                  className="max-w-[12rem] truncate text-sm text-[var(--color-muted)]"
+                  title={user.email}
+                >
+                  {user.dienstName || user.email}
+                </span>
+                <LogoutButton locale={locale} />
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="flex min-h-11 items-center rounded-lg border border-[var(--color-line)] px-3 text-sm font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-line)]"
+                >
+                  {t('login.anmelden')}
+                </Link>
+                <Link href="/registrieren" className="btn btn-accent min-h-11">
+                  {t('login.jetztRegistrieren')}
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobiles/Tablet-Menü unter 1024px. */}
+          <MobileMenu
+            locale={locale}
+            isLoggedIn={!!user}
+            bereichHref={bereichHref}
+            bereichLabel={bereichLabel}
+            userLabel={user ? user.dienstName || user.email : ''}
+            angeboteBadge={angeboteBadge}
+          />
         </div>
       </div>
     </header>

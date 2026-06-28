@@ -170,3 +170,13 @@ h1, h2, h3, h4 {
     color: var(--color-accent);
   }
 }
+
+/* Menü-Animationen (Schublade): nur bei erlaubter Bewegung via motion-safe. */
+@keyframes pl-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pl-slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
