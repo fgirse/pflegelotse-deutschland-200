@@ -328,6 +328,8 @@ export interface Bedarfe {
     | number
     | boolean
     | null;
+  kostentraegerArt?: ('gesetzlich' | 'privat') | null;
+  krankenversicherer?: string | null;
   zeitfenster: {
     von: number;
     bis: number;
@@ -711,6 +713,8 @@ export interface BedarfeSelect<T extends boolean = true> {
   pflegegrad?: T;
   leistungen?: T;
   qualifikation?: T;
+  kostentraegerArt?: T;
+  krankenversicherer?: T;
   zeitfenster?:
     | T
     | {

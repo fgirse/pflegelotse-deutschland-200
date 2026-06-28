@@ -15,6 +15,8 @@ export interface PortalEintrag {
   dauerMin: number
   qualifikation: string[]
   leistungen: string[]
+  kostentraegerArt?: 'gesetzlich' | 'privat'
+  krankenversicherer?: string
   anzahlAngebote: number
   eingestellt?: string
   ersteReaktion?: string
@@ -79,6 +81,13 @@ export function MeineBedarfeListe({ eintraege }: { eintraege: PortalEintrag[] })
               {e.pflegegrad ? `${t('pflegegrad')} ${e.pflegegrad} · ` : ''}
               {minToHHMM(e.zeitfensterVon)}–{minToHHMM(e.zeitfensterBis)} · {e.dauerMin} {t('min')}
             </div>
+
+            {e.kostentraegerArt && (
+              <div className="mt-1 text-sm text-[var(--color-muted)]">
+                {t('kostentraeger')}: {t(`kostentraegerArt.${e.kostentraegerArt}`)}
+                {e.krankenversicherer ? ` · ${e.krankenversicherer}` : ''}
+              </div>
+            )}
 
             {/* Status-Verlauf */}
             <ul className="mt-3 flex flex-col gap-0.5 text-xs text-[var(--color-faint)]">

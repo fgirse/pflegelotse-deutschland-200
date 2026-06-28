@@ -223,6 +223,11 @@
     "leer": "Du hast noch keinen Bedarf eingestellt.",
     "pflegegrad": "Pflegegrad",
     "min": "Min",
+    "kostentraeger": "Kostenträger",
+    "kostentraegerArt": {
+      "gesetzlich": "Gesetzlich (GKV)",
+      "privat": "Privat (PKV)"
+    },
     "angebote": "{n, plural, =0 {Noch keine Angebote} one {# Angebot} other {# Angebote}}",
     "ansehen": "Angebote ansehen",
     "ansehenWaehlen": "Angebote ansehen & wählen",
@@ -269,6 +274,16 @@
     "grundpflege": "Grundpflege",
     "behandlungspflege": "Behandlungspflege",
     "leistungen": "Leistungen (Codes, kommagetrennt)",
+    "kostentraegerArt": "Kostenträger",
+    "kostentraegerKeineAngabe": "Keine Angabe",
+    "kostentraegerGesetzlich": "Gesetzlich (GKV)",
+    "kostentraegerPrivat": "Privat (PKV)",
+    "krankenversicherer": "Krankenversicherer",
+    "krankenversichererWaehlen": "Kasse wählen …",
+    "kostentraeger": {
+      "gesetzlich": "Gesetzlich",
+      "privat": "Privat"
+    },
     "zeitVon": "Einsatz frühestens",
     "zeitBis": "Einsatz spätestens",
     "dauer": "Dauer (Minuten)",

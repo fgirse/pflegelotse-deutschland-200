@@ -1,5 +1,9 @@
 import { z } from 'zod'
 import { geoSchema, zeitfensterSchema, pseudonymIdSchema } from './domain'
+import { KOSTENTRAEGER_ARTEN } from './krankenkassen'
+
+// Kostenträger eines Bedarfs (gesetzlich/privat) — für bietende Dienste wichtig.
+export const kostentraegerArtSchema = z.enum(KOSTENTRAEGER_ARTEN)
 
 // ── Marktplatz / Reverse Bidding (zod) ───────────────────────────────────
 // Ein Bedarf ist marktplatzweit und pseudonym (Säule 2). Die Kontaktdaten der
@@ -21,6 +25,9 @@ export const bedarfSchema = z.object({
   pflegegrad: z.number().int().min(1).max(5).optional(),
   leistungen: z.array(z.string()).default([]),
   qualifikation: z.array(z.string()).default([]),
+  // Kostenträger: Art (GKV/PKV) + konkrete Kasse — für die Abrechnung des Dienstes.
+  kostentraegerArt: kostentraegerArtSchema.optional(),
+  krankenversicherer: z.string().optional(),
   zeitfenster: zeitfensterSchema,
   dauerMin: z.number().int().positive().default(30),
   express: z.boolean().default(false),
@@ -48,18 +55,27 @@ export const kontaktSchema = z.object({
 export type Kontakt = z.infer<typeof kontaktSchema>
 
 // Eingabe beim Einstellen eines Bedarfs: operative Daten + Kontakt.
-export const bedarfErstellenSchema = z.object({
-  geo: geoSchema,
-  pflegegrad: z.number().int().min(1).max(5).optional(),
-  leistungen: z.array(z.string()).default([]),
-  qualifikation: z.array(z.string()).default([]),
-  zeitfenster: zeitfensterSchema,
-  dauerMin: z.number().int().positive().default(30),
-  express: z.boolean().default(false),
-  kontakt: kontaktSchema,
-  // Pflicht-Einwilligung (Art. 9 DSGVO) — muss true sein, sonst kein Bedarf.
-  einwilligung: z.literal(true),
-})
+export const bedarfErstellenSchema = z
+  .object({
+    geo: geoSchema,
+    pflegegrad: z.number().int().min(1).max(5).optional(),
+    leistungen: z.array(z.string()).default([]),
+    qualifikation: z.array(z.string()).default([]),
+    // Kostenträger optional; Kasse nur sinnvoll mit gewählter Art.
+    kostentraegerArt: kostentraegerArtSchema.optional(),
+    krankenversicherer: z.string().optional(),
+    zeitfenster: zeitfensterSchema,
+    dauerMin: z.number().int().positive().default(30),
+    express: z.boolean().default(false),
+    kontakt: kontaktSchema,
+    // Pflicht-Einwilligung (Art. 9 DSGVO) — muss true sein, sonst kein Bedarf.
+    einwilligung: z.literal(true),
+  })
+  // Eine konkrete Kasse ergibt nur Sinn, wenn auch die Art gewählt wurde.
+  .refine((d) => !d.krankenversicherer || !!d.kostentraegerArt, {
+    message: 'Krankenversicherer ohne Kostenträger-Art ist nicht zulässig',
+    path: ['kostentraegerArt'],
+  })
 export type BedarfErstellen = z.infer<typeof bedarfErstellenSchema>
 
 export const angebotStatusSchema = z.enum(['abgegeben', 'zurueckgezogen'])

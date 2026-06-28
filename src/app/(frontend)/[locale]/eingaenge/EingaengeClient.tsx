@@ -16,6 +16,8 @@ interface OffenerBedarf {
   pseudonymId: string
   pflegegrad?: number
   qualifikation: string[]
+  kostentraegerArt?: 'gesetzlich' | 'privat'
+  krankenversicherer?: string
   zeitfenster: { von: number; bis: number }
   dauerMin: number
   express: boolean
@@ -110,6 +112,24 @@ export function EingaengeClient({ tenantId, offene, gewonnen }: Props) {
                 </span>
                 {b.express && <span className="chip">Express</span>}
               </div>
+              {/* Kostenträger — für die Abrechnung/Marge des Dienstes wichtig.
+                  PKV optisch hervorgehoben (i. d. R. höhere Sätze). */}
+              {b.kostentraegerArt && (
+                <p className="mt-2 text-sm">
+                  <span
+                    className={
+                      b.kostentraegerArt === 'privat'
+                        ? 'chip bg-[var(--color-accent-soft)] text-[var(--color-accent)]'
+                        : 'chip'
+                    }
+                  >
+                    {t(`kostentraeger.${b.kostentraegerArt}`)}
+                  </span>
+                  {b.krankenversicherer && (
+                    <span className="ml-2 text-[var(--color-muted)]">{b.krankenversicherer}</span>
+                  )}
+                </p>
+              )}
               {/* Fit-Vorschau: passt der Bedarf in eine Tour? */}
               {b.fit ? (
                 <p className="mt-2 text-sm font-medium text-[var(--color-success)]">

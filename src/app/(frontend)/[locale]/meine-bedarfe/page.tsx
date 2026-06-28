@@ -38,6 +38,8 @@ export default async function MeineBedarfePage({
     dauerMin: bedarf.dauerMin,
     qualifikation: bedarf.qualifikation,
     leistungen: bedarf.leistungen,
+    kostentraegerArt: bedarf.kostentraegerArt,
+    krankenversicherer: bedarf.krankenversicherer,
     anzahlAngebote,
     eingestellt: datum(bedarf.createdAt),
     ersteReaktion: datum(bedarf.firstResponseAt),

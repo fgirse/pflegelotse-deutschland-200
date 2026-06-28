@@ -41,6 +41,8 @@ export default async function EingaengePage({
         pseudonymId: b.pseudonymId,
         pflegegrad: b.pflegegrad,
         qualifikation: b.qualifikation,
+        kostentraegerArt: b.kostentraegerArt,
+        krankenversicherer: b.krankenversicherer,
         zeitfenster: b.zeitfenster,
         dauerMin: b.dauerMin,
         express: b.express,

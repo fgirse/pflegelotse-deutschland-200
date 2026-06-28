@@ -1,0 +1,212 @@
+[
+  {
+    "name": "Advigon Versicherung AG",
+    "sitz": "Vaduz (FL)",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Allianz Private Krankenversicherungs-AG",
+    "sitz": "München",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "ALTE OLDENBURGER Krankenversicherung AG",
+    "sitz": "Vechta",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "ARAG Krankenversicherungs-AG",
+    "sitz": "München",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "AXA Krankenversicherung AG",
+    "sitz": "Köln",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Barmenia Krankenversicherung AG",
+    "sitz": "Wuppertal",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Bayerische Beamtenkrankenkasse AG",
+    "sitz": "München",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Concordia Krankenversicherungs-AG",
+    "sitz": "Hannover",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Continentale Krankenversicherung a.G.",
+    "sitz": "Dortmund",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "DBV Deutsche Beamtenversicherung AG",
+    "sitz": "Wiesbaden",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Debeka Krankenversicherungsverein a.G.",
+    "sitz": "Koblenz",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "DEVK Krankenversicherungs-AG",
+    "sitz": "Köln",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "DFV Deutsche Familienversicherung AG",
+    "sitz": "Frankfurt am Main",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Die Bayerische (BBV)",
+    "sitz": "München",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "DKV Deutsche Krankenversicherung AG",
+    "sitz": "Köln",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "ENVIVAS Krankenversicherung AG",
+    "sitz": "Köln",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "ERGO Krankenversicherung AG",
+    "sitz": "Nürnberg",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Generali Deutschland Krankenversicherung AG",
+    "sitz": "München",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Gothaer Krankenversicherung AG",
+    "sitz": "Köln",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "HALLESCHE Krankenversicherung a.G.",
+    "sitz": "Stuttgart",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "HanseMerkur Krankenversicherung AG",
+    "sitz": "Hamburg",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "HUK-COBURG-Krankenversicherung AG",
+    "sitz": "Coburg",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "INTER Krankenversicherung AG",
+    "sitz": "Mannheim",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Janitos Versicherung AG",
+    "sitz": "Heidelberg",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Landeskrankenhilfe V.V.a.G. (LKH)",
+    "sitz": "Lüneburg",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "LIGA Krankenversicherung katholischer Priester VVaG",
+    "sitz": "Regensburg",
+    "vertrieb": "Regional / Spezifisch"
+  },
+  {
+    "name": "LVM Krankenversicherungs-AG",
+    "sitz": "Münster",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Mecklenburgische Krankenversicherungs-AG",
+    "sitz": "Hannover",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Münchener Verein Krankenversicherung a.G.",
+    "sitz": "München",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "NÜRNBERGER Krankenversicherung AG",
+    "sitz": "Nürnberg",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "ottonova Krankenversicherung AG",
+    "sitz": "München",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Provinzial Krankenversicherung Hannover AG",
+    "sitz": "Hannover",
+    "vertrieb": "Regional"
+  },
+  {
+    "name": "R + V Krankenversicherung AG",
+    "sitz": "Wiesbaden",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "SIGNAL IDUNA Krankenversicherung a.G.",
+    "sitz": "Dortmund",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "SONO Krankenversicherung a.G.",
+    "sitz": "Bottrop",
+    "vertrieb": "Regional"
+  },
+  {
+    "name": "Süddeutsche Krankenversicherung a.G. (SDK)",
+    "sitz": "Fellbach",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "UKV – Union Krankenversicherung AG",
+    "sitz": "Saarbrücken",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "universa Krankenversicherung a.G.",
+    "sitz": "Nürnberg",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "VGH Krankenversicherung",
+    "sitz": "Hannover",
+    "vertrieb": "Regional"
+  },
+  {
+    "name": "vigo Krankenversicherung VVaG",
+    "sitz": "Düsseldorf",
+    "vertrieb": "Regional"
+  },
+  {
+    "name": "VRK Versicherer im Raum der Kirchen Krankenversicherung AG",
+    "sitz": "Detmold",
+    "vertrieb": "Bundesweit"
+  },
+  {
+    "name": "Württembergische Krankenversicherung AG",
+    "sitz": "Stuttgart",
+    "vertrieb": "Bundesweit"
+  }
+]

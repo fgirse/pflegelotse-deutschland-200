@@ -9,6 +9,7 @@ import { ladeAlleTouren, ladeTour, speichereEinsaetze } from '@/server/repo'
 import { minToHHMM } from '@/shared/time'
 import { haversineKm } from '@/shared/orte'
 import { EINWILLIGUNG_VERSION } from '@/shared/consent'
+import { istGueltigeKasse } from '@/shared/krankenkassen'
 import { env } from '@/lib/env'
 import { bedarfSchema, type Bedarf, type BedarfErstellen, type Kontakt } from '@/shared/marketplace'
 import type { Tour } from '@/shared/domain'
@@ -63,6 +64,14 @@ export async function erstelleBedarf(
       pflegegrad: input.pflegegrad,
       leistungen: input.leistungen,
       qualifikation: input.qualifikation,
+      // Kasse nur übernehmen, wenn sie zur Art passt — sonst nur die Art.
+      kostentraegerArt: input.kostentraegerArt,
+      krankenversicherer:
+        input.kostentraegerArt &&
+        input.krankenversicherer &&
+        istGueltigeKasse(input.kostentraegerArt, input.krankenversicherer)
+          ? input.krankenversicherer
+          : undefined,
       zeitfenster: input.zeitfenster,
       dauerMin: input.dauerMin,
       express: input.express,
@@ -699,6 +708,8 @@ export function bedarfAusDoc(d: any): unknown {
     pflegegrad: d.pflegegrad ?? undefined,
     leistungen: Array.isArray(d.leistungen) ? d.leistungen : [],
     qualifikation: Array.isArray(d.qualifikation) ? d.qualifikation : [],
+    kostentraegerArt: d.kostentraegerArt ?? undefined,
+    krankenversicherer: d.krankenversicherer ?? undefined,
     zeitfenster: d.zeitfenster,
     dauerMin: d.dauerMin ?? 30,
     express: Boolean(d.express),

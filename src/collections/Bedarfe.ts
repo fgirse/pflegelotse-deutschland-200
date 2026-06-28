@@ -28,6 +28,15 @@ export const Bedarfe: CollectionConfig = {
     { name: 'pflegegrad', type: 'number', min: 1, max: 5 },
     { name: 'leistungen', type: 'json', defaultValue: [] },
     { name: 'qualifikation', type: 'json', defaultValue: [] },
+    // Kostenträger: Art (gesetzlich/privat) + konkrete Kasse. Operativ relevant
+    // für die Abrechnung des Dienstes; kein PII (grobe Kategorie, kein Identifikator).
+    {
+      name: 'kostentraegerArt',
+      type: 'select',
+      options: ['gesetzlich', 'privat'],
+      index: true,
+    },
+    { name: 'krankenversicherer', type: 'text' },
     {
       name: 'zeitfenster',
       type: 'group',

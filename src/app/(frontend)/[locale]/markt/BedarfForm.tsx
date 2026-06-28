@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
 import { hhmmToMin } from '@/shared/time'
 import { ORTE } from '@/shared/orte'
+import { kassenFuerArt, type KostentraegerArt } from '@/shared/krankenkassen'
 
 // Zweistufiges Bedarfsformular. Schritt 1: Pflegesituation (operative Daten),
 // Schritt 2: Kontakt (PII). Beim Absenden POST /api/v1/bedarfe.
@@ -26,6 +27,9 @@ export function BedarfForm() {
   const [pflegegrad, setPflegegrad] = useState(3)
   const [qualifikation, setQualifikation] = useState('grundpflege')
   const [leistungen, setLeistungen] = useState('LK01')
+  // Kostenträger: Art (gesetzlich/privat) + konkrete Kasse. Beides optional.
+  const [kvArt, setKvArt] = useState<'' | KostentraegerArt>('')
+  const [kasse, setKasse] = useState('')
   const [von, setVon] = useState('08:30')
   const [bis, setBis] = useState('10:00')
   const [dauer, setDauer] = useState(30)
@@ -95,6 +99,8 @@ export function BedarfForm() {
           pflegegrad,
           qualifikation: [qualifikation],
           leistungen: leistungen.split(',').map((s) => s.trim()).filter(Boolean),
+          kostentraegerArt: kvArt || undefined,
+          krankenversicherer: kasse || undefined,
           zeitfenster: { von: hhmmToMin(von), bis: hhmmToMin(bis) },
           dauerMin: dauer,
           express,
@@ -172,6 +178,33 @@ export function BedarfForm() {
             {t('leistungen')}
             <input value={leistungen} onChange={(e) => setLeistungen(e.target.value)} className={inputCls} />
           </label>
+          {/* Kostenträger: Art wählen, dann (optional) die konkrete Kasse. */}
+          <label className="label">
+            {t('kostentraegerArt')}
+            <select
+              value={kvArt}
+              onChange={(e) => {
+                setKvArt(e.target.value as '' | KostentraegerArt)
+                setKasse('') // Kasse zurücksetzen, wenn die Art wechselt
+              }}
+              className={inputCls}
+            >
+              <option value="">{t('kostentraegerKeineAngabe')}</option>
+              <option value="gesetzlich">{t('kostentraegerGesetzlich')}</option>
+              <option value="privat">{t('kostentraegerPrivat')}</option>
+            </select>
+          </label>
+          {kvArt && (
+            <label className="label">
+              {t('krankenversicherer')}
+              <select value={kasse} onChange={(e) => setKasse(e.target.value)} className={inputCls}>
+                <option value="">{t('krankenversichererWaehlen')}</option>
+                {kassenFuerArt(kvArt).map((k) => (
+                  <option key={k} value={k}>{k}</option>
+                ))}
+              </select>
+            </label>
+          )}
           <div className="flex gap-3">
             <label className="label flex-1">
               {t('zeitVon')}

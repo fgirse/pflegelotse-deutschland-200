@@ -223,6 +223,11 @@
     "leer": "You haven't posted a request yet.",
     "pflegegrad": "Care level",
     "min": "min",
+    "kostentraeger": "Payer",
+    "kostentraegerArt": {
+      "gesetzlich": "Statutory (GKV)",
+      "privat": "Private (PKV)"
+    },
     "angebote": "{n, plural, =0 {No offers yet} one {# offer} other {# offers}}",
     "ansehen": "View offers",
     "ansehenWaehlen": "View offers & choose",
@@ -269,6 +274,16 @@
     "grundpflege": "Basic care",
     "behandlungspflege": "Medical care",
     "leistungen": "Services (codes, comma-separated)",
+    "kostentraegerArt": "Payer",
+    "kostentraegerKeineAngabe": "Not specified",
+    "kostentraegerGesetzlich": "Statutory (GKV)",
+    "kostentraegerPrivat": "Private (PKV)",
+    "krankenversicherer": "Health insurer",
+    "krankenversichererWaehlen": "Select insurer …",
+    "kostentraeger": {
+      "gesetzlich": "Statutory",
+      "privat": "Private"
+    },
     "zeitVon": "Earliest visit",
     "zeitBis": "Latest visit",
     "dauer": "Duration (minutes)",
