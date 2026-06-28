@@ -61,6 +61,16 @@ export default async function DashboardPage({
   const passend = eingaengeFit.filter(Boolean).length
   const ohneUmweg = eingaengeFit.filter((m) => m && m.mehrwegMin === 0).length
 
+  // PKV/GKV-Verteilung der offenen Bedarfe — Margen-Mix der Gelegenheiten.
+  const kvMix = { privat: 0, gesetzlich: 0, ohne: 0 }
+  for (const b of eingaenge) {
+    if (b.kostentraegerArt === 'privat') kvMix.privat++
+    else if (b.kostentraegerArt === 'gesetzlich') kvMix.gesetzlich++
+    else kvMix.ohne++
+  }
+  const kvGesamt = eingaenge.length
+  const pct = (n: number) => (kvGesamt > 0 ? Math.round((n / kvGesamt) * 100) : 0)
+
   // Offene Bedarfe (noch in keiner Tour) als einplanbare Marktplatz-Kandidaten.
   const bedarfeKandidaten = eingaenge
     .filter((b) => !zugeordnet.has(b.pseudonymId))
@@ -116,6 +126,41 @@ export default async function DashboardPage({
           </div>
           <span aria-hidden>→</span>
         </Link>
+      </section>
+
+      {/* Kostenträger-Mix der offenen Bedarfe — PKV (höhere Marge) hervorgehoben. */}
+      <section className="card mb-6 p-5">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="font-display text-lg font-semibold">{t('kvMixTitel')}</h2>
+          <span className="text-sm text-[var(--color-muted)]">{t('kvMixGesamt', { n: kvGesamt })}</span>
+        </div>
+        {kvGesamt === 0 ? (
+          <p className="mt-3 text-sm text-[var(--color-faint)]">{t('kvMixLeer')}</p>
+        ) : (
+          <>
+            {/* Gestapelter Balken: privat | gesetzlich | ohne Angabe. */}
+            <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-[var(--color-line)]">
+              <div className="bg-[var(--color-accent-strong)]" style={{ width: `${pct(kvMix.privat)}%` }} />
+              <div className="bg-[var(--color-accent)]" style={{ width: `${pct(kvMix.gesetzlich)}%` }} />
+            </div>
+            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+              <span className="flex items-center gap-2">
+                <span className="inline-block h-3 w-3 rounded-sm bg-[var(--color-accent-strong)]" />
+                {t('kvPrivat')}: <strong>{kvMix.privat}</strong> ({pct(kvMix.privat)}%)
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="inline-block h-3 w-3 rounded-sm bg-[var(--color-accent)]" />
+                {t('kvGesetzlich')}: <strong>{kvMix.gesetzlich}</strong> ({pct(kvMix.gesetzlich)}%)
+              </span>
+              {kvMix.ohne > 0 && (
+                <span className="flex items-center gap-2 text-[var(--color-muted)]">
+                  <span className="inline-block h-3 w-3 rounded-sm bg-[var(--color-line)]" />
+                  {t('kvOhne')}: <strong>{kvMix.ohne}</strong> ({pct(kvMix.ohne)}%)
+                </span>
+              )}
+            </div>
+          </>
+        )}
       </section>
 
       <DashboardClient
