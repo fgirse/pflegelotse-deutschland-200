@@ -54,6 +54,13 @@ export default async function EingaengePage({
     }),
   )
 
+  // PKV-Bedarfe nach oben: privat wird i. d. R. höher abgerechnet (mehr Marge),
+  // ist für den Dienst also attraktiver. Stabile Sortierung — innerhalb der
+  // Gruppen bleibt die bestehende Reihenfolge erhalten.
+  offeneMitFit.sort(
+    (a, b) => Number(b.kostentraegerArt === 'privat') - Number(a.kostentraegerArt === 'privat'),
+  )
+
   return (
     <main className="container-page max-w-3xl py-10 sm:py-14">
       <h1 className="text-3xl font-bold sm:text-4xl">{t('dienstTitel')}</h1>
