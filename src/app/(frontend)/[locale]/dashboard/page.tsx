@@ -61,15 +61,11 @@ export default async function DashboardPage({
   const passend = eingaengeFit.filter(Boolean).length
   const ohneUmweg = eingaengeFit.filter((m) => m && m.mehrwegMin === 0).length
 
-  // PKV/GKV-Verteilung der offenen Bedarfe — Margen-Mix der Gelegenheiten.
-  const kvMix = { privat: 0, gesetzlich: 0, ohne: 0 }
-  for (const b of eingaenge) {
-    if (b.kostentraegerArt === 'privat') kvMix.privat++
-    else if (b.kostentraegerArt === 'gesetzlich') kvMix.gesetzlich++
-    else kvMix.ohne++
-  }
-  const kvGesamt = eingaenge.length
-  const pct = (n: number) => (kvGesamt > 0 ? Math.round((n / kvGesamt) * 100) : 0)
+  // PKV/GKV-Margen-Mix: einmal über die offenen Bedarfe (Gelegenheiten), einmal
+  // über den aktiven Klientenstamm (bestehendes Portfolio).
+  const kvBedarfe = zaehleKv(eingaenge)
+  const kvStamm = zaehleKv(klienten)
+  const kvLabels = { privat: t('kvPrivat'), gesetzlich: t('kvGesetzlich'), ohne: t('kvOhne') }
 
   // Offene Bedarfe (noch in keiner Tour) als einplanbare Marktplatz-Kandidaten.
   const bedarfeKandidaten = eingaenge
@@ -128,40 +124,23 @@ export default async function DashboardPage({
         </Link>
       </section>
 
-      {/* Kostenträger-Mix der offenen Bedarfe — PKV (höhere Marge) hervorgehoben. */}
-      <section className="card mb-6 p-5">
-        <div className="flex items-baseline justify-between gap-3">
-          <h2 className="font-display text-lg font-semibold">{t('kvMixTitel')}</h2>
-          <span className="text-sm text-[var(--color-muted)]">{t('kvMixGesamt', { n: kvGesamt })}</span>
-        </div>
-        {kvGesamt === 0 ? (
-          <p className="mt-3 text-sm text-[var(--color-faint)]">{t('kvMixLeer')}</p>
-        ) : (
-          <>
-            {/* Gestapelter Balken: privat | gesetzlich | ohne Angabe. */}
-            <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-[var(--color-line)]">
-              <div className="bg-[var(--color-accent-strong)]" style={{ width: `${pct(kvMix.privat)}%` }} />
-              <div className="bg-[var(--color-accent)]" style={{ width: `${pct(kvMix.gesetzlich)}%` }} />
-            </div>
-            <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
-              <span className="flex items-center gap-2">
-                <span className="inline-block h-3 w-3 rounded-sm bg-[var(--color-accent-strong)]" />
-                {t('kvPrivat')}: <strong>{kvMix.privat}</strong> ({pct(kvMix.privat)}%)
-              </span>
-              <span className="flex items-center gap-2">
-                <span className="inline-block h-3 w-3 rounded-sm bg-[var(--color-accent)]" />
-                {t('kvGesetzlich')}: <strong>{kvMix.gesetzlich}</strong> ({pct(kvMix.gesetzlich)}%)
-              </span>
-              {kvMix.ohne > 0 && (
-                <span className="flex items-center gap-2 text-[var(--color-muted)]">
-                  <span className="inline-block h-3 w-3 rounded-sm bg-[var(--color-line)]" />
-                  {t('kvOhne')}: <strong>{kvMix.ohne}</strong> ({pct(kvMix.ohne)}%)
-                </span>
-              )}
-            </div>
-          </>
-        )}
-      </section>
+      {/* Kostenträger-Mix: offene Bedarfe (Gelegenheiten) + Klientenstamm (Portfolio). */}
+      <div className="mb-6 grid gap-4 lg:grid-cols-2">
+        <KvMixCard
+          titel={t('kvMixTitel')}
+          gesamtText={t('kvMixGesamt', { n: eingaenge.length })}
+          leerText={t('kvMixLeer')}
+          mix={kvBedarfe}
+          labels={kvLabels}
+        />
+        <KvMixCard
+          titel={t('kvStammTitel')}
+          gesamtText={t('kvStammGesamt', { n: klienten.length })}
+          leerText={t('kvStammLeer')}
+          mix={kvStamm}
+          labels={kvLabels}
+        />
+      </div>
 
       <DashboardClient
         tenantId={TENANT}
@@ -170,5 +149,71 @@ export default async function DashboardPage({
         bedarfe={bedarfeKandidaten}
       />
     </main>
+  )
+}
+
+// Zählt Einträge je Kostenträger-Art (privat/gesetzlich/ohne Angabe).
+function zaehleKv(items: { kostentraegerArt?: 'gesetzlich' | 'privat' }[]) {
+  const m = { privat: 0, gesetzlich: 0, ohne: 0 }
+  for (const it of items) {
+    if (it.kostentraegerArt === 'privat') m.privat++
+    else if (it.kostentraegerArt === 'gesetzlich') m.gesetzlich++
+    else m.ohne++
+  }
+  return m
+}
+
+type KvMix = { privat: number; gesetzlich: number; ohne: number }
+
+// Karte: gestapelter Balken + Legende für eine Kostenträger-Verteilung.
+// PKV (privat) ist farblich hervorgehoben (höhere Marge).
+function KvMixCard({
+  titel,
+  gesamtText,
+  leerText,
+  mix,
+  labels,
+}: {
+  titel: string
+  gesamtText: string
+  leerText: string
+  mix: KvMix
+  labels: { privat: string; gesetzlich: string; ohne: string }
+}) {
+  const total = mix.privat + mix.gesetzlich + mix.ohne
+  const pct = (n: number) => (total > 0 ? Math.round((n / total) * 100) : 0)
+  return (
+    <section className="card p-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="font-display text-lg font-semibold">{titel}</h2>
+        <span className="text-sm text-[var(--color-muted)]">{gesamtText}</span>
+      </div>
+      {total === 0 ? (
+        <p className="mt-3 text-sm text-[var(--color-faint)]">{leerText}</p>
+      ) : (
+        <>
+          <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-[var(--color-line)]">
+            <div className="bg-[var(--color-accent-strong)]" style={{ width: `${pct(mix.privat)}%` }} />
+            <div className="bg-[var(--color-accent)]" style={{ width: `${pct(mix.gesetzlich)}%` }} />
+          </div>
+          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+            <span className="flex items-center gap-2">
+              <span className="inline-block h-3 w-3 rounded-sm bg-[var(--color-accent-strong)]" />
+              {labels.privat}: <strong>{mix.privat}</strong> ({pct(mix.privat)}%)
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="inline-block h-3 w-3 rounded-sm bg-[var(--color-accent)]" />
+              {labels.gesetzlich}: <strong>{mix.gesetzlich}</strong> ({pct(mix.gesetzlich)}%)
+            </span>
+            {mix.ohne > 0 && (
+              <span className="flex items-center gap-2 text-[var(--color-muted)]">
+                <span className="inline-block h-3 w-3 rounded-sm bg-[var(--color-line)]" />
+                {labels.ohne}: <strong>{mix.ohne}</strong> ({pct(mix.ohne)}%)
+              </span>
+            )}
+          </div>
+        </>
+      )}
+    </section>
   )
 }
