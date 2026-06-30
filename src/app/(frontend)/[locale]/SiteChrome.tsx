@@ -7,38 +7,9 @@ import { zaehleOffeneAngebote } from '@/server/marketplace/service'
 import { LocaleSwitcher } from './LocaleSwitcher'
 import { LogoutButton } from './LogoutButton'
 import { DesktopNav, MobileMenu } from './SiteNav'
+import { Wordmark } from './Wordmark'
 
 const DIENST_ROLLEN = ['disponent', 'admin', 'pflegekraft']
-
-// Wortmarke: „Pflege" in Tinte, „Lotse" im Gold-Akzent — ruhige, eigenständige
-// Marke statt generischem Logo.
-function Wordmark() {
-  return (
-    <Link
-      href="/"
-      className="whitespace-nowrap font-display text-lg font-bold tracking-tight"
-      aria-label="PflegeLotse Deutschland — Startseite"
-    >
-      <span className="text-[var(--color-ink)]">Pflege</span>
-      <span className="text-[var(--color-accent)]">Lotse</span>{' '}
-      {/* „Deutschland" in Schwarz-Rot-Gold: vertikaler Verlauf mit harten
-          Stopps (drei Bänder wie die Flagge), per background-clip auf den
-          Text geclippt. -webkit-* für Safari. */}
-      <span
-        style={{
-          backgroundImage:
-            'linear-gradient(to bottom, #000000 0 33.333%, #DD0000 33.333% 66.666%, #FFCE00 66.666% 100%)',
-          WebkitBackgroundClip: 'text',
-          backgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          color: 'transparent',
-        }}
-      >
-        Deutschland
-      </span>
-    </Link>
-  )
-}
 
 // Sitzungs-/Navigationskontext, einmal pro Request geladen — von Header UND
 // Bottom-Bar genutzt, damit die Auth-Abfrage nicht doppelt läuft.
@@ -161,10 +132,7 @@ export function SiteFooter() {
     <footer className="mt-20 border-t border-[var(--color-line)]">
       <div className="container-page flex flex-col gap-4 py-10 text-sm text-[var(--color-muted)] sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <span className="font-display font-bold">
-            <span className="text-[var(--color-ink)]">Pflege</span>
-            <span className="text-[var(--color-accent)]">Lotse</span>
-          </span>
+          <Wordmark className="text-base" />
           <span className="text-[var(--color-faint)]">· {t('app.tagline')}</span>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-2">
