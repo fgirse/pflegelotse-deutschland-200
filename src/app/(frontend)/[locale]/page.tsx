@@ -30,7 +30,16 @@ function HomeInner() {
         <div>
           <span className="eyebrow">{t('heroEyebrow')}</span>
           <h1 className="mt-4 text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
-            {t('heroTitle')}
+            {t.rich('heroTitle', {
+              // Hebt „ambulante Pflegedienste:" hervor: Amber-Verlauf (oben
+              // amber-600 → unten amber-300) als geclonte Inline-Fläche plus
+              // mehrlagiger Text-Schatten für einen plastischen 3D-Eindruck.
+              hl: (chunks) => (
+                <span className="box-decoration-clone rounded-md bg-[linear-gradient(to_bottom,#d97706,#fcd34d)] px-2 text-[var(--color-ink)] [text-shadow:0_1px_0_rgba(255,255,255,0.7),0_2px_3px_rgba(120,53,15,0.45)]">
+                  {chunks}
+                </span>
+              ),
+            })}
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted">
             {t('heroSub')}
