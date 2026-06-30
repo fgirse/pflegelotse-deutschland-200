@@ -32,12 +32,12 @@ function HomeInner() {
           <h1 className="mt-4 text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
             {t.rich('heroTitle', {
               // „Angehörige, Patienten und Sozialdienste": Amber-Verlauf (oben
-              // amber-700 → unten amber-500, kontraststärker auf hellem Grund)
+              // amber-800 → unten amber-600, kräftig/kontraststark auf hellem Grund)
               // direkt auf den Text geclippt (background-clip: text), -webkit-* für Safari.
               cg: (chunks) => (
                 <span
                   style={{
-                    backgroundImage: 'linear-gradient(to bottom, #b45309, #f59e0b)',
+                    backgroundImage: 'linear-gradient(to bottom, #92400e, #d97706)',
                     WebkitBackgroundClip: 'text',
                     backgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -48,11 +48,11 @@ function HomeInner() {
                 </span>
               ),
               // „ambulante Pflegedienste:" — gleicher geclippter Amber-Verlauf
-              // (amber-700 → amber-500) wie oben; background-clip: text.
+              // (amber-800 → amber-600) wie oben; background-clip: text.
               hl: (chunks) => (
                 <span
                   style={{
-                    backgroundImage: 'linear-gradient(to bottom, #b45309, #f59e0b)',
+                    backgroundImage: 'linear-gradient(to bottom, #92400e, #d97706)',
                     WebkitBackgroundClip: 'text',
                     backgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
