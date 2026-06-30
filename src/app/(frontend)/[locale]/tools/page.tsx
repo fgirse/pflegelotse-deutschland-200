@@ -11,7 +11,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'tools' })
-  return { title: `${t('title')} — PflegeLotse`, description: t('subtitle') }
+  return { title: `${t('title')} — PflegeLotse Deutschland`, description: t('subtitle') }
 }
 
 export default async function ToolsPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -26,13 +26,13 @@ function ToolsInner() {
     <main className="container-page py-12">
       <span className="eyebrow">PflegeLotse</span>
       <h1 className="mt-2 text-3xl font-bold">{t('title')}</h1>
-      <p className="mt-2 max-w-2xl text-[var(--color-muted)]">{t('subtitle')}</p>
+      <p className="mt-2 max-w-2xl text-muted">{t('subtitle')}</p>
 
       <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {/* Aktives Tool: Pflegegrad-Rechner */}
         <Link href="/tools/pflegegrad" className="tile">
           <h2 className="font-semibold">{t('pflegegradName')}</h2>
-          <p className="mt-1 text-sm text-[var(--color-muted)]">{t('pflegegradDesc')}</p>
+          <p className="mt-1 text-sm text-muted">{t('pflegegradDesc')}</p>
         </Link>
 
         {/* In Vorbereitung */}
@@ -42,7 +42,7 @@ function ToolsInner() {
             className="card border-dashed p-5 opacity-70"
           >
             <h2 className="font-semibold">{name}</h2>
-            <p className="mt-1 text-sm text-[var(--color-faint)]">{t('bald')}</p>
+            <p className="mt-1 text-sm text-faint">{t('bald')}</p>
           </div>
         ))}
       </div>

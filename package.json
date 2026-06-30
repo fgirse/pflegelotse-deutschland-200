@@ -1,7 +1,7 @@
 {
   "name": "pflegelotse",
   "version": "0.1.0",
-  "description": "PflegeLotse — Tourenoptimierung für ambulante Pflegedienste",
+  "description": "PflegeLotse Deutschland — Tourenoptimierung für ambulante Pflegedienste",
   "private": true,
   "type": "module",
   "scripts": {
