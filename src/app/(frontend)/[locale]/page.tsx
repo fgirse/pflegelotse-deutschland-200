@@ -31,11 +31,28 @@ function HomeInner() {
           <span className="eyebrow">{t('heroEyebrow')}</span>
           <h1 className="mt-4 text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
             {t.rich('heroTitle', {
+              // „Angehörige, Patienten und Sozialdienste": Amber-Verlauf (oben
+              // amber-600 → unten amber-300) direkt auf den Text geclippt
+              // (background-clip: text), -webkit-* für Safari.
+              cg: (chunks) => (
+                <span
+                  style={{
+                    backgroundImage: 'linear-gradient(to bottom, #d97706, #fcd34d)',
+                    WebkitBackgroundClip: 'text',
+                    backgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    color: 'transparent',
+                  }}
+                >
+                  {chunks}
+                </span>
+              ),
               // Hebt „ambulante Pflegedienste:" hervor: Amber-Verlauf (oben
               // amber-600 → unten amber-300) als geclonte Inline-Fläche plus
               // mehrlagiger Text-Schatten für einen plastischen 3D-Eindruck.
               hl: (chunks) => (
-                <span className="box-decoration-clone rounded-md bg-[linear-gradient(to_bottom,#d97706,#fcd34d)] px-2 text-[var(--color-ink)] [text-shadow:0_-1px_0_rgba(255,255,255,0.55),0_1px_0_#b45309,0_2px_0_#92400e,0_3px_0_#7c360c,0_4px_0_#5c2a0c,0_6px_8px_rgba(0,0,0,0.40)]">
+                <span className="box-decoration-clone rounded-md bg-[linear-gradient(to_bottom,#d97706,#fcd34d)] px-2 text-
+                ink [text-shadow:0_-1px_0_rgba(255,255,255,0.55),0_1px_0_#b45309,0_2px_0_#92400e,0_3px_0_#7c360c,0_4px_0_#5c2a0c,0_6px_8px_rgba(0,0,0,0.40)]">
                   {chunks}
                 </span>
               ),
@@ -59,7 +76,7 @@ function HomeInner() {
         <div className="relative">
           <div
             aria-hidden
-            className="absolute -inset-3 -z-10 rounded-[2rem] bg-accent-soft opacity-70 blur-2xl"
+            className="absolute -inset-3 -z-10 rounded-4xl bg-accent-soft opacity-70 blur-2xl"
           />
           <Image
             src="/Assets/Img/pflegedienst_team.png"
@@ -68,7 +85,7 @@ function HomeInner() {
             height={1024}
             priority
             sizes="(min-width: 1024px) 45vw, 100vw"
-            className="h-auto w-full rounded-2xl border border-[var(--color-line)] object-cover shadow-xl"
+            className="h-auto w-full rounded-2xl border border-line object-cover shadow-xl"
           />
         </div>
       </section>
