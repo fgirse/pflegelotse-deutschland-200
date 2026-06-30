@@ -41,6 +41,14 @@ function IconArea({ className }: IconProps) {
     </svg>
   )
 }
+function IconHome({ className }: IconProps) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M3 10.5 12 3l9 7.5" />
+      <path d="M5 9.5V21h14V9.5" />
+    </svg>
+  )
+}
 function IconMenu({ className }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" aria-hidden>
@@ -68,7 +76,9 @@ function useNavItems(): NavItem[] {
 }
 
 // Aktiv, wenn der Pfad die Route oder eine Unterseite davon ist.
+// Sonderfall „/“: nur exakt aktiv (sonst würde startsWith alles matchen).
 function istAktiv(pathname: string, href: string): boolean {
+  if (href === '/') return pathname === '/'
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
@@ -127,6 +137,7 @@ export function MobileMenu({
   // beim Schließen Fokus zurück auf den Hamburger (Tastatur-Bedienung).
   useEffect(() => {
     if (!open) return
+    const trigger = triggerRef.current // beim Schließen den Fokus hierher zurück
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
     closeRef.current?.focus()
@@ -137,7 +148,7 @@ export function MobileMenu({
     return () => {
       document.body.style.overflow = prev
       window.removeEventListener('keydown', onKey)
-      triggerRef.current?.focus()
+      trigger?.focus()
     }
   }, [open])
 
@@ -259,5 +270,55 @@ export function MobileMenu({
         </div>
       )}
     </div>
+  )
+}
+
+// ── Bottom-Tab-Bar (nur Telefon < 768px): die wichtigsten Ziele per Daumen. ──
+// Top-Level-Ziele, Icon + kurzes Label, Aktiv-Zustand, Safe-Area unten.
+export function BottomNav({ bereichHref, angeboteBadge }: { bereichHref: string; angeboteBadge: number }) {
+  const t = useTranslations()
+  const pathname = usePathname()
+  const tabs: { href: string; label: string; Icon: (p: IconProps) => ReactElement; badge?: number }[] = [
+    { href: '/', label: t('nav.tabStart'), Icon: IconHome },
+    { href: '/markt', label: t('nav.tabFinden'), Icon: IconSearch },
+    { href: '/lotse', label: t('nav.tabLotse'), Icon: IconChat },
+    { href: bereichHref, label: t('nav.tabBereich'), Icon: IconArea, badge: angeboteBadge },
+  ]
+  return (
+    <nav
+      aria-label={t('nav.navigation')}
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--color-line)] bg-[var(--color-paper)]/95 backdrop-blur md:hidden"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      <ul className="mx-auto flex max-w-md">
+        {tabs.map(({ href, label, Icon, badge }) => {
+          const aktiv = istAktiv(pathname, href)
+          return (
+            <li key={href} className="flex-1">
+              <Link
+                href={href}
+                aria-current={aktiv ? 'page' : undefined}
+                className={`flex min-h-16 flex-col items-center justify-center gap-1 px-1 text-center transition-colors ${
+                  aktiv ? 'text-[var(--color-accent)]' : 'text-[var(--color-muted)]'
+                }`}
+              >
+                <span className="relative">
+                  <Icon className="h-6 w-6" />
+                  {badge && badge > 0 ? (
+                    <span
+                      className="absolute -right-2 -top-1 min-w-4 rounded-full bg-[var(--color-accent-strong)] px-1 text-[10px] font-bold leading-4 text-white"
+                      aria-label={`${badge} neue Angebote`}
+                    >
+                      {badge}
+                    </span>
+                  ) : null}
+                </span>
+                <span className="text-[11px] font-medium leading-none">{label}</span>
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
+    </nav>
   )
 }

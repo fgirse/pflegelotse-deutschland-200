@@ -13,7 +13,11 @@
     "menueSchliessen": "Menü schließen",
     "navigation": "Navigation",
     "meinBereich": "Mein Bereich",
-    "sprache": "Sprache"
+    "sprache": "Sprache",
+    "tabStart": "Start",
+    "tabFinden": "Pflege finden",
+    "tabLotse": "KI-Lotse",
+    "tabBereich": "Mein Bereich"
   },
   "home": {
     "title": "PflegeLotse Deutschland",

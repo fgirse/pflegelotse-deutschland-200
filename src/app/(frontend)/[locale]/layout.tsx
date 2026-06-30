@@ -6,7 +6,8 @@ import { setRequestLocale, getMessages } from 'next-intl/server'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import { routing } from '@/i18n/routing'
-import { SiteHeader, SiteFooter } from './SiteChrome'
+import { SiteHeader, SiteFooter, ladeNavContext } from './SiteChrome'
+import { BottomNav } from './SiteNav'
 // Globales Stylesheet (Tailwind + Theme-Tokens) — MUSS importiert werden,
 // sonst werden keine Styles angewendet.
 import '@/app/(frontend)/globals.css'
@@ -43,17 +44,22 @@ export default async function LocaleLayout({
   setRequestLocale(locale)
   const messages = await getMessages()
   const skip = locale === 'en' ? 'Skip to content' : 'Zum Inhalt springen'
+  // Sitzungskontext einmal laden — Header und Bottom-Bar teilen ihn sich.
+  const ctx = await ladeNavContext()
 
   return (
     <html lang={locale} className={`${figtree.variable} ${noto.variable}`}>
-      <body>
+      {/* Unten Platz für die fixe Bottom-Bar reservieren (nur Telefon < md),
+          inkl. Safe-Area, damit kein Inhalt verdeckt wird. */}
+      <body className="pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-0">
         <NextIntlClientProvider messages={messages}>
           <a href="#inhalt" className="skip-link">
             {skip}
           </a>
-          <SiteHeader locale={locale} />
+          <SiteHeader locale={locale} ctx={ctx} />
           <div id="inhalt">{children}</div>
           <SiteFooter />
+          <BottomNav bereichHref={ctx.bereichHref} angeboteBadge={ctx.angeboteBadge} />
         </NextIntlClientProvider>
         {/* Vercel Monitoring: Traffic (Analytics) + Web-Vitals (Speed Insights).
             Cookielos, ohne PII; senden nur in der Vercel-Produktion. */}

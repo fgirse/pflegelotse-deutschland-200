@@ -21,10 +21,19 @@ function Wordmark() {
   )
 }
 
-// Serverseitig gerenderter Header: der Anmeldestatus ist sofort im ersten
-// HTML sichtbar (kein Client-Flash). Liest die Sitzung aus dem Cookie —
-// dadurch werden die Seiten dynamisch gerendert.
-export async function SiteHeader({ locale }: { locale: string }) {
+// Sitzungs-/Navigationskontext, einmal pro Request geladen — von Header UND
+// Bottom-Bar genutzt, damit die Auth-Abfrage nicht doppelt läuft.
+export interface NavContext {
+  isLoggedIn: boolean
+  istDienst: boolean
+  bereichHref: string
+  bereichLabel: string
+  userLabel: string
+  userEmail: string
+  angeboteBadge: number
+}
+
+export async function ladeNavContext(): Promise<NavContext> {
   const t = await getTranslations()
   // headers() BEWUSST außerhalb des try/catch: der Aufruf signalisiert Next das
   // dynamische Rendering (Bailout). Würde der catch ihn schlucken, prerenderte
@@ -38,9 +47,6 @@ export async function SiteHeader({ locale }: { locale: string }) {
   }
 
   const istDienst = user ? DIENST_ROLLEN.includes(user.role) : false
-  const bereichHref = istDienst ? '/dashboard' : '/meine-bedarfe'
-  const bereichLabel = istDienst ? t('nav.dashboard') : t('meineBedarfe.title')
-
   // In-App-Hinweis für Suchende: Anzahl Bedarfe mit neuen/offenen Angeboten.
   let angeboteBadge = 0
   if (user && !istDienst) {
@@ -50,6 +56,23 @@ export async function SiteHeader({ locale }: { locale: string }) {
       angeboteBadge = 0
     }
   }
+
+  return {
+    isLoggedIn: !!user,
+    istDienst,
+    bereichHref: istDienst ? '/dashboard' : '/meine-bedarfe',
+    bereichLabel: istDienst ? t('nav.dashboard') : t('meineBedarfe.title'),
+    userLabel: user ? user.dienstName || user.email : '',
+    userEmail: user?.email ?? '',
+    angeboteBadge,
+  }
+}
+
+// Serverseitig gerenderter Header: der Anmeldestatus ist sofort im ersten
+// HTML sichtbar (kein Client-Flash).
+export async function SiteHeader({ locale, ctx }: { locale: string; ctx: NavContext }) {
+  const t = await getTranslations()
+  const { isLoggedIn, bereichHref, bereichLabel, userLabel, userEmail, angeboteBadge } = ctx
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-line)] bg-[var(--color-paper)]/85 backdrop-blur">
@@ -62,7 +85,7 @@ export async function SiteHeader({ locale }: { locale: string }) {
           {/* Desktop-Aktionen ab 1024px. */}
           <div className="hidden items-center gap-3 lg:flex">
             <LocaleSwitcher locale={locale} />
-            {user ? (
+            {isLoggedIn ? (
               <>
                 <Link href={bereichHref} className="btn btn-outline min-h-11">
                   {bereichLabel}
@@ -77,9 +100,9 @@ export async function SiteHeader({ locale }: { locale: string }) {
                 </Link>
                 <span
                   className="max-w-[12rem] truncate text-sm text-[var(--color-muted)]"
-                  title={user.email}
+                  title={userEmail}
                 >
-                  {user.dienstName || user.email}
+                  {userLabel}
                 </span>
                 <LogoutButton locale={locale} />
               </>
@@ -101,10 +124,10 @@ export async function SiteHeader({ locale }: { locale: string }) {
           {/* Mobiles/Tablet-Menü unter 1024px. */}
           <MobileMenu
             locale={locale}
-            isLoggedIn={!!user}
+            isLoggedIn={isLoggedIn}
             bereichHref={bereichHref}
             bereichLabel={bereichLabel}
-            userLabel={user ? user.dienstName || user.email : ''}
+            userLabel={userLabel}
             angeboteBadge={angeboteBadge}
           />
         </div>

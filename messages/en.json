@@ -13,7 +13,11 @@
     "menueSchliessen": "Close menu",
     "navigation": "Navigation",
     "meinBereich": "My area",
-    "sprache": "Language"
+    "sprache": "Language",
+    "tabStart": "Home",
+    "tabFinden": "Find care",
+    "tabLotse": "AI guide",
+    "tabBereich": "My area"
   },
   "home": {
     "title": "Pflegelotse Deutschland",
