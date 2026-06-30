@@ -34,7 +34,7 @@ export function BedarfForm() {
   const [qualifikation, setQualifikation] = useState('grundpflege')
   // Bundesland steuert den anzuwendenden Leistungskatalog (Pilot: BW).
   const [bundesland, setBundesland] = useState<Bundesland>('Baden-Württemberg')
-  const [leistungen, setLeistungen] = useState<string[]>(['LK01'])
+  const [leistungen, setLeistungen] = useState<string[]>([])
   // Kostenträger: Art (gesetzlich/privat) + konkrete Kasse. Beides optional.
   const [kvArt, setKvArt] = useState<'' | KostentraegerArt>('')
   const [kasse, setKasse] = useState('')
@@ -209,39 +209,30 @@ export function BedarfForm() {
             {istVorlaeufigerKatalog(bundesland) && (
               <p className="mt-1 text-xs text-[var(--color-faint)]">{t('leistungenVorlaeufig')}</p>
             )}
-            <div className="mt-2 flex flex-col gap-3 rounded-lg border border-[var(--color-line)] p-3">
-              {(['grundpflege', 'behandlungspflege'] as const).map((q) => (
-                <div key={q}>
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-faint)]">
-                    {t(q)}
-                  </p>
-                  <div className="flex flex-col">
-                    {leistungenFuerBundesland(bundesland)
-                      .filter((l) => l.qualifikation === q)
-                      .map((l) => (
-                      <label
-                        key={l.code}
-                        className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-[var(--color-ink)]"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={leistungen.includes(l.code)}
-                          onChange={() =>
-                            setLeistungen((prev) =>
-                              prev.includes(l.code)
-                                ? prev.filter((c) => c !== l.code)
-                                : [...prev, l.code],
-                            )
-                          }
-                          className="h-5 w-5 shrink-0 accent-[var(--color-accent-strong)]"
-                        />
-                        <span>
-                          <span className="font-medium">{l.code}</span> · {l.bezeichnung}
-                        </span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+            {/* Flache Liste je Bundesland-Katalog (amtliche Tabellen sind
+                nummerierte Listen ohne Grund-/Behandlungspflege-Kategorie). */}
+            <div className="mt-2 flex max-h-72 flex-col overflow-y-auto rounded-lg border border-[var(--color-line)] p-3">
+              {leistungenFuerBundesland(bundesland).map((l) => (
+                <label
+                  key={l.code}
+                  className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-[var(--color-ink)]"
+                >
+                  <input
+                    type="checkbox"
+                    checked={leistungen.includes(l.code)}
+                    onChange={() =>
+                      setLeistungen((prev) =>
+                        prev.includes(l.code)
+                          ? prev.filter((c) => c !== l.code)
+                          : [...prev, l.code],
+                      )
+                    }
+                    className="h-5 w-5 shrink-0 accent-[var(--color-accent-strong)]"
+                  />
+                  <span>
+                    <span className="font-medium">{l.code}</span> · {l.bezeichnung}
+                  </span>
+                </label>
               ))}
             </div>
           </fieldset>

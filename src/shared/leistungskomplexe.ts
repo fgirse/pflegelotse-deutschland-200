@@ -10,8 +10,10 @@
 export interface Leistungskomplex {
   code: string
   bezeichnung: string
-  qualifikation: 'grundpflege' | 'behandlungspflege'
-  stichworte: string[]
+  // Optional: nur im Standard-Fallback gesetzt (KI-Suche). Die amtlichen
+  // Landeskataloge sind flache, nummerierte Listen ohne diese Kategorisierung.
+  qualifikation?: 'grundpflege' | 'behandlungspflege'
+  stichworte?: string[]
 }
 
 // Die 16 Bundesländer (für die landesspezifische Katalog-Auswahl).
@@ -58,7 +60,32 @@ export const LEISTUNGSKOMPLEXE: Leistungskomplex[] = [
 //     { code: 'LK01', bezeichnung: '…', qualifikation: 'grundpflege', stichworte: ['…'] },
 //     …
 //   ],
-export const KATALOG_NACH_BUNDESLAND: Partial<Record<Bundesland, Leistungskomplex[]>> = {}
+export const KATALOG_NACH_BUNDESLAND: Partial<Record<Bundesland, Leistungskomplex[]>> = {
+  // Baden-Württemberg — verifiziert aus der BMG-Übersicht (Stand 01.07.2021).
+  // Nur die auswählbaren Leistungspakete; Wegepauschalen/Zuschläge ausgelassen.
+  // Quelle/Hinweise: docs/leistungskomplexe-quelle.md
+  'Baden-Württemberg': [
+    { code: 'LK1', bezeichnung: 'Große Körperpflege' },
+    { code: 'LK2', bezeichnung: 'Kleine Körperpflege' },
+    { code: 'LK3', bezeichnung: 'Transfer/An-/Auskleiden' },
+    { code: 'LK4', bezeichnung: 'Hilfe bei Ausscheidungen' },
+    { code: 'LK6', bezeichnung: 'Lagern' },
+    { code: 'LK7', bezeichnung: 'Mobilisation' },
+    { code: 'LK8', bezeichnung: 'Einfache Hilfe bei der Nahrungsaufnahme' },
+    { code: 'LK9', bezeichnung: 'Umfangreiche Hilfe bei der Nahrungsaufnahme' },
+    { code: 'LK10', bezeichnung: 'Verabreichung von Sondennahrung mittels Spritze, Schwerkraft oder Pumpe' },
+    { code: 'LK11', bezeichnung: 'Hilfestellung beim Verlassen und Wiederaufsuchen der Wohnung (ohne außerhäusliche Begleitung)' },
+    { code: 'LK12', bezeichnung: 'Zubereitung einer einfachen Mahlzeit' },
+    { code: 'LK13', bezeichnung: 'Essen auf Rädern / stationärer Mittagstisch' },
+    { code: 'LK14', bezeichnung: 'Zubereitung einer (i. d. R. warmen) Mahlzeit in der Häuslichkeit' },
+    { code: 'LK15', bezeichnung: 'Einkauf/Besorgungen (1/4 Std.)' },
+    { code: 'LK16', bezeichnung: 'Waschen, Bügeln, Reinigen (1/4 Std.)' },
+    { code: 'LK17', bezeichnung: 'Vollständiges Ab- und Beziehen eines Bettes' },
+    { code: 'LK18', bezeichnung: 'Beheizen' },
+    { code: 'LK21', bezeichnung: 'Pflegerische Betreuungsmaßnahmen (1/4 Std.)' },
+    { code: 'LK22', bezeichnung: 'Organisation des Alltags und der Haushaltsführung (1/4 Std.)' },
+  ],
+}
 
 // Liefert den Leistungskatalog für ein Bundesland: die offizielle Landestabelle,
 // falls hinterlegt — sonst den vorläufigen Standard-Fallback.

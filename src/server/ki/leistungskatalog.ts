@@ -13,6 +13,6 @@ export function sucheLeistungen(stichwort: string): Leistungskomplex[] {
     (lk) =>
       lk.bezeichnung.toLowerCase().includes(s) ||
       lk.code.toLowerCase() === s ||
-      lk.stichworte.some((w) => w.includes(s) || s.includes(w)),
+      (lk.stichworte ?? []).some((w) => w.includes(s) || s.includes(w)),
   )
 }
