@@ -6,6 +6,7 @@ import { Link, useRouter } from '@/i18n/navigation'
 import { hhmmToMin } from '@/shared/time'
 import { ORTE } from '@/shared/orte'
 import { kassenFuerArt, type KostentraegerArt } from '@/shared/krankenkassen'
+import { LEISTUNGSKOMPLEXE } from '@/shared/leistungskomplexe'
 
 // Zweistufiges Bedarfsformular. Schritt 1: Pflegesituation (operative Daten),
 // Schritt 2: Kontakt (PII). Beim Absenden POST /api/v1/bedarfe.
@@ -26,7 +27,7 @@ export function BedarfForm() {
   const [geoBusy, setGeoBusy] = useState(false)
   const [pflegegrad, setPflegegrad] = useState(3)
   const [qualifikation, setQualifikation] = useState('grundpflege')
-  const [leistungen, setLeistungen] = useState('LK01')
+  const [leistungen, setLeistungen] = useState<string[]>(['LK01'])
   // Kostenträger: Art (gesetzlich/privat) + konkrete Kasse. Beides optional.
   const [kvArt, setKvArt] = useState<'' | KostentraegerArt>('')
   const [kasse, setKasse] = useState('')
@@ -53,7 +54,7 @@ export function BedarfForm() {
       if (e.ort && e.ort in ORTE) setOrt(e.ort as keyof typeof ORTE)
       if (typeof e.pflegegrad === 'number') setPflegegrad(e.pflegegrad)
       if (Array.isArray(e.qualifikation) && e.qualifikation[0]) setQualifikation(e.qualifikation[0])
-      if (Array.isArray(e.leistungen) && e.leistungen.length) setLeistungen(e.leistungen.join(', '))
+      if (Array.isArray(e.leistungen) && e.leistungen.length) setLeistungen(e.leistungen.map(String))
       if (e.zeitVon) setVon(e.zeitVon)
       if (e.zeitBis) setBis(e.zeitBis)
       if (typeof e.dauerMin === 'number') setDauer(e.dauerMin)
@@ -98,7 +99,7 @@ export function BedarfForm() {
           geo: geocodedGeo ?? ORTE[ort],
           pflegegrad,
           qualifikation: [qualifikation],
-          leistungen: leistungen.split(',').map((s) => s.trim()).filter(Boolean),
+          leistungen,
           kostentraegerArt: kvArt || undefined,
           krankenversicherer: kasse || undefined,
           zeitfenster: { von: hhmmToMin(von), bis: hhmmToMin(bis) },
@@ -174,10 +175,44 @@ export function BedarfForm() {
               <option value="behandlungspflege">{t('behandlungspflege')}</option>
             </select>
           </label>
-          <label className="label">
-            {t('leistungen')}
-            <input value={leistungen} onChange={(e) => setLeistungen(e.target.value)} className={inputCls} />
-          </label>
+          {/* Leistungen als Auswahl-Liste (Checkboxen) mit Klartext statt
+              kryptischer Code-Eingabe — für Angehörige verständlich. */}
+          <fieldset>
+            <legend className="text-sm font-medium text-[var(--color-ink)]">{t('leistungen')}</legend>
+            <div className="mt-2 flex flex-col gap-3 rounded-lg border border-[var(--color-line)] p-3">
+              {(['grundpflege', 'behandlungspflege'] as const).map((q) => (
+                <div key={q}>
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-faint)]">
+                    {t(q)}
+                  </p>
+                  <div className="flex flex-col">
+                    {LEISTUNGSKOMPLEXE.filter((l) => l.qualifikation === q).map((l) => (
+                      <label
+                        key={l.code}
+                        className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-[var(--color-ink)]"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={leistungen.includes(l.code)}
+                          onChange={() =>
+                            setLeistungen((prev) =>
+                              prev.includes(l.code)
+                                ? prev.filter((c) => c !== l.code)
+                                : [...prev, l.code],
+                            )
+                          }
+                          className="h-5 w-5 shrink-0 accent-[var(--color-accent-strong)]"
+                        />
+                        <span>
+                          <span className="font-medium">{l.code}</span> · {l.bezeichnung}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </fieldset>
           {/* Kostenträger: Art wählen, dann (optional) die konkrete Kasse. */}
           <label className="label">
             {t('kostentraegerArt')}

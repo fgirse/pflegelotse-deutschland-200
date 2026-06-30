@@ -295,7 +295,7 @@
     "qualifikation": "Required qualification",
     "grundpflege": "Basic care",
     "behandlungspflege": "Medical care",
-    "leistungen": "Services (codes, comma-separated)",
+    "leistungen": "Required services",
     "kostentraegerArt": "Payer",
     "kostentraegerKeineAngabe": "Not specified",
     "kostentraegerGesetzlich": "Statutory (GKV)",

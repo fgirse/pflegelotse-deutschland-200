@@ -295,7 +295,7 @@
     "qualifikation": "Benötigte Qualifikation",
     "grundpflege": "Grundpflege",
     "behandlungspflege": "Behandlungspflege",
-    "leistungen": "Leistungen (Codes, kommagetrennt)",
+    "leistungen": "Benötigte Leistungen",
     "kostentraegerArt": "Kostenträger",
     "kostentraegerKeineAngabe": "Keine Angabe",
     "kostentraegerGesetzlich": "Gesetzlich (GKV)",
