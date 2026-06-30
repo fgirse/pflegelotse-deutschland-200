@@ -32,12 +32,12 @@ function HomeInner() {
           <h1 className="mt-4 text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
             {t.rich('heroTitle', {
               // „Angehörige, Patienten und Sozialdienste": Amber-Verlauf (oben
-              // amber-600 → unten amber-300) direkt auf den Text geclippt
-              // (background-clip: text), -webkit-* für Safari.
+              // amber-700 → unten amber-500, kontraststärker auf hellem Grund)
+              // direkt auf den Text geclippt (background-clip: text), -webkit-* für Safari.
               cg: (chunks) => (
                 <span
                   style={{
-                    backgroundImage: 'linear-gradient(to bottom, #d97706, #fcd34d)',
+                    backgroundImage: 'linear-gradient(to bottom, #b45309, #f59e0b)',
                     WebkitBackgroundClip: 'text',
                     backgroundClip: 'text',
                     WebkitTextFillColor: 'transparent',
@@ -48,11 +48,10 @@ function HomeInner() {
                 </span>
               ),
               // Hebt „ambulante Pflegedienste:" hervor: Amber-Verlauf (oben
-              // amber-600 → unten amber-300) als geclonte Inline-Fläche plus
+              // amber-700 → unten amber-500) als geclonte Inline-Fläche plus
               // mehrlagiger Text-Schatten für einen plastischen 3D-Eindruck.
               hl: (chunks) => (
-                <span className="box-decoration-clone rounded-md bg-[linear-gradient(to_bottom,#d97706,#fcd34d)] px-2 text-
-                ink [text-shadow:0_-1px_0_rgba(255,255,255,0.55),0_1px_0_#b45309,0_2px_0_#92400e,0_3px_0_#7c360c,0_4px_0_#5c2a0c,0_6px_8px_rgba(0,0,0,0.40)]">
+                <span className="box-decoration-clone rounded-md bg-[linear-gradient(to_bottom,#b45309,#f59e0b)] px-2 text-ink [text-shadow:0_-1px_0_rgba(255,255,255,0.5),0_1px_0_#92400e,0_2px_0_#7c360c,0_3px_0_#5c2a0c,0_4px_0_#43210a,0_6px_8px_rgba(0,0,0,0.42)]">
                   {chunks}
                 </span>
               ),
