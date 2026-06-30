@@ -296,6 +296,8 @@
     "grundpflege": "Grundpflege",
     "behandlungspflege": "Behandlungspflege",
     "leistungen": "Benötigte Leistungen",
+    "bundesland": "Bundesland",
+    "leistungenVorlaeufig": "Vorläufiger Standard-Katalog — die landesspezifischen Codes folgen für den Produktivbetrieb.",
     "kostentraegerArt": "Kostenträger",
     "kostentraegerKeineAngabe": "Keine Angabe",
     "kostentraegerGesetzlich": "Gesetzlich (GKV)",

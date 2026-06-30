@@ -296,6 +296,8 @@
     "grundpflege": "Basic care",
     "behandlungspflege": "Medical care",
     "leistungen": "Required services",
+    "bundesland": "Federal state",
+    "leistungenVorlaeufig": "Provisional standard catalogue — state-specific codes to follow for production.",
     "kostentraegerArt": "Payer",
     "kostentraegerKeineAngabe": "Not specified",
     "kostentraegerGesetzlich": "Statutory (GKV)",

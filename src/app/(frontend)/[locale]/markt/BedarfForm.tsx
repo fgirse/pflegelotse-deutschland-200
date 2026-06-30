@@ -6,7 +6,12 @@ import { Link, useRouter } from '@/i18n/navigation'
 import { hhmmToMin } from '@/shared/time'
 import { ORTE } from '@/shared/orte'
 import { kassenFuerArt, type KostentraegerArt } from '@/shared/krankenkassen'
-import { LEISTUNGSKOMPLEXE } from '@/shared/leistungskomplexe'
+import {
+  BUNDESLAENDER,
+  leistungenFuerBundesland,
+  istVorlaeufigerKatalog,
+  type Bundesland,
+} from '@/shared/leistungskomplexe'
 
 // Zweistufiges Bedarfsformular. Schritt 1: Pflegesituation (operative Daten),
 // Schritt 2: Kontakt (PII). Beim Absenden POST /api/v1/bedarfe.
@@ -27,6 +32,8 @@ export function BedarfForm() {
   const [geoBusy, setGeoBusy] = useState(false)
   const [pflegegrad, setPflegegrad] = useState(3)
   const [qualifikation, setQualifikation] = useState('grundpflege')
+  // Bundesland steuert den anzuwendenden Leistungskatalog (Pilot: BW).
+  const [bundesland, setBundesland] = useState<Bundesland>('Baden-Württemberg')
   const [leistungen, setLeistungen] = useState<string[]>(['LK01'])
   // Kostenträger: Art (gesetzlich/privat) + konkrete Kasse. Beides optional.
   const [kvArt, setKvArt] = useState<'' | KostentraegerArt>('')
@@ -175,10 +182,33 @@ export function BedarfForm() {
               <option value="behandlungspflege">{t('behandlungspflege')}</option>
             </select>
           </label>
+          {/* Bundesland steuert den Leistungskatalog (Codes je Land verschieden). */}
+          <label className="label">
+            {t('bundesland')}
+            <select
+              value={bundesland}
+              onChange={(e) => {
+                const bl = e.target.value as Bundesland
+                setBundesland(bl)
+                // Vorauswahl auf Codes beschränken, die es im neuen Katalog gibt.
+                const codes = leistungenFuerBundesland(bl).map((l) => l.code)
+                setLeistungen((prev) => prev.filter((c) => codes.includes(c)))
+              }}
+              className={inputCls}
+            >
+              {BUNDESLAENDER.map((bl) => (
+                <option key={bl} value={bl}>{bl}</option>
+              ))}
+            </select>
+          </label>
+
           {/* Leistungen als Auswahl-Liste (Checkboxen) mit Klartext statt
               kryptischer Code-Eingabe — für Angehörige verständlich. */}
           <fieldset>
             <legend className="text-sm font-medium text-[var(--color-ink)]">{t('leistungen')}</legend>
+            {istVorlaeufigerKatalog(bundesland) && (
+              <p className="mt-1 text-xs text-[var(--color-faint)]">{t('leistungenVorlaeufig')}</p>
+            )}
             <div className="mt-2 flex flex-col gap-3 rounded-lg border border-[var(--color-line)] p-3">
               {(['grundpflege', 'behandlungspflege'] as const).map((q) => (
                 <div key={q}>
@@ -186,7 +216,9 @@ export function BedarfForm() {
                     {t(q)}
                   </p>
                   <div className="flex flex-col">
-                    {LEISTUNGSKOMPLEXE.filter((l) => l.qualifikation === q).map((l) => (
+                    {leistungenFuerBundesland(bundesland)
+                      .filter((l) => l.qualifikation === q)
+                      .map((l) => (
                       <label
                         key={l.code}
                         className="flex min-h-11 cursor-pointer items-center gap-3 text-sm text-[var(--color-ink)]"
