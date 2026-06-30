@@ -14,9 +14,28 @@ const DIENST_ROLLEN = ['disponent', 'admin', 'pflegekraft']
 // Marke statt generischem Logo.
 function Wordmark() {
   return (
-    <Link href="/" className="font-display text-lg font-bold tracking-tight">
+    <Link
+      href="/"
+      className="whitespace-nowrap font-display text-lg font-bold tracking-tight"
+      aria-label="PflegeLotse Deutschland — Startseite"
+    >
       <span className="text-[var(--color-ink)]">Pflege</span>
-      <span className="text-[var(--color-accent)]">Lotse</span>
+      <span className="text-[var(--color-accent)]">Lotse</span>{' '}
+      {/* „Deutschland" in Schwarz-Rot-Gold: vertikaler Verlauf mit harten
+          Stopps (drei Bänder wie die Flagge), per background-clip auf den
+          Text geclippt. -webkit-* für Safari. */}
+      <span
+        style={{
+          backgroundImage:
+            'linear-gradient(to bottom, #000000 0 33.333%, #DD0000 33.333% 66.666%, #FFCE00 66.666% 100%)',
+          WebkitBackgroundClip: 'text',
+          backgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          color: 'transparent',
+        }}
+      >
+        Deutschland
+      </span>
     </Link>
   )
 }
