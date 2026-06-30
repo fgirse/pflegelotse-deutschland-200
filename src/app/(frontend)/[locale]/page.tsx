@@ -35,7 +35,7 @@ function HomeInner() {
               // amber-600 → unten amber-300) als geclonte Inline-Fläche plus
               // mehrlagiger Text-Schatten für einen plastischen 3D-Eindruck.
               hl: (chunks) => (
-                <span className="box-decoration-clone rounded-md bg-[linear-gradient(to_bottom,#d97706,#fcd34d)] px-2 text-[var(--color-ink)] [text-shadow:0_1px_0_rgba(255,255,255,0.7),0_2px_3px_rgba(120,53,15,0.45)]">
+                <span className="box-decoration-clone rounded-md bg-[linear-gradient(to_bottom,#d97706,#fcd34d)] px-2 text-[var(--color-ink)] [text-shadow:0_-1px_0_rgba(255,255,255,0.55),0_1px_0_#b45309,0_2px_0_#92400e,0_3px_0_#7c360c,0_4px_0_#5c2a0c,0_6px_8px_rgba(0,0,0,0.40)]">
                   {chunks}
                 </span>
               ),
