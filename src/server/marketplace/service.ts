@@ -40,6 +40,8 @@ export async function erstelleBedarf(
 
   // Säule 1: Kontaktdaten (Hooks verschlüsseln) + Konto-Verknüpfung +
   // Einwilligungs-Nachweis (Zeitpunkt + Fassung, serverseitig gesetzt).
+  // Nur die bekannten PII-Felder übernehmen — neue Kontaktfelder (Beratungs-
+  // stelle, Kontaktpräferenz) werden erst in einer späteren Phase persistiert.
   await payload.create({
     collection: 'angehoerige_identitaet',
     data: {
@@ -47,7 +49,11 @@ export async function erstelleBedarf(
       ownerUserId,
       einwilligungAt: new Date().toISOString(),
       einwilligungVersion: EINWILLIGUNG_VERSION,
-      ...input.kontakt,
+      vorname: input.kontakt.vorname,
+      nachname: input.kontakt.nachname,
+      telefon: input.kontakt.telefon ?? '',
+      email: input.kontakt.email,
+      adresse: input.kontakt.adresse ?? '',
     },
     overrideAccess: true,
   })

@@ -76,7 +76,7 @@ export type Bedarf = z.infer<typeof bedarfSchema>
 export const kontaktSchema = z.object({
   vorname: z.string().min(1),
   nachname: z.string().min(1),
-  telefon: z.string().min(1),
+  telefon: z.string().optional(), // im neuen Formular kein Pflichtfeld
   email: z.string().email().optional().or(z.literal('')),
   adresse: z.string().optional(),
   // Erweiterte Kontaktangaben (Screenshot Schritt 3) — additiv/optional.
