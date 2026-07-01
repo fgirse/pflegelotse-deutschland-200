@@ -37,6 +37,19 @@ export const Bedarfe: CollectionConfig = {
       index: true,
     },
     { name: 'krankenversicherer', type: 'text' },
+    // ── Neue operative Felder aus dem 3-Schritt-Aufnahmeformular (Säule 2,
+    // pseudonym, KEIN PII). Freitext (Erläuterung/Besonderheiten) ist operativ
+    // gedacht; das Formular weist darauf hin, keine Namen einzutragen. ──
+    { name: 'bundesland', type: 'text', index: true },
+    { name: 'stadtteil', type: 'text' },
+    { name: 'alter', type: 'number', min: 1, max: 120 },
+    { name: 'wohnsituation', type: 'select', options: ['alleinlebend', 'gemeinschaft'] },
+    { name: 'startDatum', type: 'date' }, // ab wann Pflege benötigt
+    { name: 'abwesenheiten', type: 'json', defaultValue: [] },
+    { name: 'abwesenheitErlaeuterung', type: 'text' },
+    { name: 'besonderheiten', type: 'text' },
+    // Strukturierte Leistungsauswahl je Gruppe inkl. Häufigkeit (Tage/Woche, mal/Tag).
+    { name: 'leistungsauswahl', type: 'json' },
     {
       name: 'zeitfenster',
       type: 'group',

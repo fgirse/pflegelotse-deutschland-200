@@ -12,17 +12,40 @@ interface FitInfo {
   position: number
 }
 
+interface GruppeAuswahl {
+  positionen?: string[]
+  andere?: string
+  beschreibung?: string
+  tageProWoche?: number
+  malProTag?: number
+}
 interface OffenerBedarf {
   pseudonymId: string
   pflegegrad?: number
   qualifikation: string[]
   kostentraegerArt?: 'gesetzlich' | 'privat'
   krankenversicherer?: string
+  alter?: number
+  wohnsituation?: 'alleinlebend' | 'gemeinschaft'
+  stadtteil?: string
+  startDatum?: string
+  abwesenheiten?: string[]
+  besonderheiten?: string
+  leistungsauswahl?: Record<string, GruppeAuswahl>
   zeitfenster: { von: number; bis: number }
   dauerMin: number
   express: boolean
   status: string
   fit: FitInfo | null
+}
+
+// Klartext-Titel je Leistungsgruppe (für die Häufigkeits-Zusammenfassung).
+const GRUPPEN_TITEL: Record<string, string> = {
+  koerperpflege: 'Körperpflege',
+  medizinisch: 'Medizinisch',
+  begleitung: 'Begleitung',
+  hauswirtschaft: 'Hauswirtschaft',
+  beratung: 'Beratung',
 }
 
 interface Props {
@@ -128,6 +151,39 @@ export function EingaengeClient({ tenantId, offene, gewonnen }: Props) {
                   {b.krankenversicherer && (
                     <span className="ml-2 text-[var(--color-muted)]">{b.krankenversicherer}</span>
                   )}
+                </p>
+              )}
+
+              {/* Neue Angaben aus dem Aufnahmeformular (Person, Zeit, Leistungen). */}
+              {(b.alter || b.wohnsituation || b.stadtteil || b.startDatum) && (
+                <p className="mt-2 text-xs text-[var(--color-muted)]">
+                  {[
+                    b.alter ? `${b.alter} J.` : null,
+                    b.wohnsituation === 'alleinlebend' ? 'alleinlebend' : b.wohnsituation === 'gemeinschaft' ? 'in Gemeinschaft' : null,
+                    b.stadtteil || null,
+                    b.startDatum ? `ab ${new Date(b.startDatum).toLocaleDateString('de-DE')}` : null,
+                  ].filter(Boolean).join(' · ')}
+                </p>
+              )}
+              {b.leistungsauswahl && Object.keys(b.leistungsauswahl).length > 0 && (
+                <ul className="mt-1 flex flex-wrap gap-1.5">
+                  {Object.entries(b.leistungsauswahl).map(([k, v]) => (
+                    <li key={k} className="chip text-xs">
+                      {GRUPPEN_TITEL[k] ?? k}
+                      {v?.tageProWoche ? ` · ${v.tageProWoche}×/Wo` : ''}
+                      {v?.malProTag ? ` · ${v.malProTag}×/Tag` : ''}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {b.abwesenheiten && b.abwesenheiten.length > 0 && (
+                <p className="mt-1 text-xs text-[var(--color-faint)]">
+                  Abwesend: {b.abwesenheiten.join(', ')}
+                </p>
+              )}
+              {b.besonderheiten && (
+                <p className="mt-1 text-xs text-[var(--color-faint)]">
+                  Besonderheiten: {b.besonderheiten}
                 </p>
               )}
               {/* Fit-Vorschau: passt der Bedarf in eine Tour? */}

@@ -303,6 +303,7 @@
     "abwPlatzhalter": "Weekdays, times",
     "besonderheiten": "Special notes",
     "besonderheitenPlatzhalter": "Language, preference for same-gender care, etc.",
+    "freitextHinweis": "Please do not enter names — these details are shown to services anonymously.",
     "weiter": "Next",
     "zurueck": "Back",
     "leistungenTitel": "Services",

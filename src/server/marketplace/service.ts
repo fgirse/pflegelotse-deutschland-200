@@ -40,8 +40,6 @@ export async function erstelleBedarf(
 
   // Säule 1: Kontaktdaten (Hooks verschlüsseln) + Konto-Verknüpfung +
   // Einwilligungs-Nachweis (Zeitpunkt + Fassung, serverseitig gesetzt).
-  // Nur die bekannten PII-Felder übernehmen — neue Kontaktfelder (Beratungs-
-  // stelle, Kontaktpräferenz) werden erst in einer späteren Phase persistiert.
   await payload.create({
     collection: 'angehoerige_identitaet',
     data: {
@@ -54,6 +52,10 @@ export async function erstelleBedarf(
       telefon: input.kontakt.telefon ?? '',
       email: input.kontakt.email,
       adresse: input.kontakt.adresse ?? '',
+      // Neue Kontaktfelder: Beratungsstelle (verschlüsselt) + Präferenzen.
+      beratungsstelle: input.kontakt.beratungsstelle,
+      kontaktart: input.kontakt.kontaktart ?? [],
+      kontaktzeitraum: input.kontakt.kontaktzeitraum,
     },
     overrideAccess: true,
   })
@@ -78,6 +80,16 @@ export async function erstelleBedarf(
         istGueltigeKasse(input.kostentraegerArt, input.krankenversicherer)
           ? input.krankenversicherer
           : undefined,
+      // Neue operative Felder aus dem 3-Schritt-Formular (Säule 2).
+      bundesland: input.bundesland,
+      stadtteil: input.stadtteil,
+      alter: input.alter,
+      wohnsituation: input.wohnsituation,
+      startDatum: input.startDatum,
+      abwesenheiten: input.abwesenheiten ?? [],
+      abwesenheitErlaeuterung: input.abwesenheitErlaeuterung,
+      besonderheiten: input.besonderheiten,
+      leistungsauswahl: input.leistungsauswahl,
       zeitfenster: input.zeitfenster,
       dauerMin: input.dauerMin,
       express: input.express,
@@ -565,6 +577,11 @@ export async function holeKontaktIntern(bedarfId: string): Promise<Kontakt | nul
     telefon: doc.telefon ?? '',
     email: doc.email ?? '',
     adresse: doc.adresse ?? undefined,
+    beratungsstelle: doc.beratungsstelle ?? undefined,
+    kontaktart: Array.isArray(doc.kontaktart)
+      ? (doc.kontaktart as ('telefon' | 'email')[])
+      : undefined,
+    kontaktzeitraum: doc.kontaktzeitraum ?? undefined,
   }
 }
 
@@ -719,6 +736,15 @@ export function bedarfAusDoc(d: any): unknown {
     qualifikation: Array.isArray(d.qualifikation) ? d.qualifikation : [],
     kostentraegerArt: d.kostentraegerArt ?? undefined,
     krankenversicherer: d.krankenversicherer ?? undefined,
+    bundesland: d.bundesland ?? undefined,
+    stadtteil: d.stadtteil ?? undefined,
+    alter: d.alter ?? undefined,
+    wohnsituation: d.wohnsituation ?? undefined,
+    startDatum: d.startDatum ? new Date(d.startDatum).toISOString() : undefined,
+    abwesenheiten: Array.isArray(d.abwesenheiten) ? d.abwesenheiten : [],
+    abwesenheitErlaeuterung: d.abwesenheitErlaeuterung ?? undefined,
+    besonderheiten: d.besonderheiten ?? undefined,
+    leistungsauswahl: d.leistungsauswahl ?? undefined,
     zeitfenster: d.zeitfenster,
     dauerMin: d.dauerMin ?? 30,
     express: Boolean(d.express),

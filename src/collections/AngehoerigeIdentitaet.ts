@@ -6,7 +6,8 @@ import { piiFeld } from './piiHooks'
 // gesperrt: Das Lesen läuft ausschließlich serverseitig über den
 // Marktplatz-Service (holeKontakt), der erst NACH der Dienstauswahl und nur an
 // genau den gewählten Dienst freigibt (Anti-Leakage /F340/, P6).
-const PII_FELDER = ['vorname', 'nachname', 'telefon', 'email', 'adresse'] as const
+// beratungsstelle kann Klarnamen/Aktenzeichen enthalten → verschlüsselt (PII).
+const PII_FELDER = ['vorname', 'nachname', 'telefon', 'email', 'adresse', 'beratungsstelle'] as const
 
 export const AngehoerigeIdentitaet: CollectionConfig = {
   slug: 'angehoerige_identitaet',
@@ -28,6 +29,9 @@ export const AngehoerigeIdentitaet: CollectionConfig = {
     // Einwilligungs-Nachweis (Art. 7 Abs. 1 DSGVO): wann + auf welche Fassung.
     { name: 'einwilligungAt', type: 'date' },
     { name: 'einwilligungVersion', type: 'text' },
+    // Kontaktpräferenzen (kein PII, aber Teil des freizugebenden Kontakts).
+    { name: 'kontaktart', type: 'json', defaultValue: [] }, // ['telefon','email']
+    { name: 'kontaktzeitraum', type: 'text' }, // gewünschter Zeitraum der Kontaktaufnahme
     ...PII_FELDER.map(piiFeld),
   ],
 }

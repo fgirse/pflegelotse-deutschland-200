@@ -327,6 +327,7 @@ export function BedarfForm() {
               className={inputCls}
             />
           </label>
+          <p className="-mt-2 text-xs text-[var(--color-faint)]">{t('bedarf.freitextHinweis')}</p>
 
           <button onClick={() => setSchritt(2)} disabled={!step1Ok} className="btn btn-primary">
             {t('bedarf.weiter')}

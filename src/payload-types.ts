@@ -332,6 +332,31 @@ export interface Bedarfe {
     | null;
   kostentraegerArt?: ('gesetzlich' | 'privat') | null;
   krankenversicherer?: string | null;
+  bundesland?: string | null;
+  stadtteil?: string | null;
+  alter?: number | null;
+  wohnsituation?: ('alleinlebend' | 'gemeinschaft') | null;
+  startDatum?: string | null;
+  abwesenheiten?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  abwesenheitErlaeuterung?: string | null;
+  besonderheiten?: string | null;
+  leistungsauswahl?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   zeitfenster: {
     von: number;
     bis: number;
@@ -365,11 +390,22 @@ export interface AngehoerigeIdentitaet {
   ownerUserId?: string | null;
   einwilligungAt?: string | null;
   einwilligungVersion?: string | null;
+  kontaktart?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  kontaktzeitraum?: string | null;
   vorname?: string | null;
   nachname?: string | null;
   telefon?: string | null;
   email?: string | null;
   adresse?: string | null;
+  beratungsstelle?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -719,6 +755,15 @@ export interface BedarfeSelect<T extends boolean = true> {
   qualifikation?: T;
   kostentraegerArt?: T;
   krankenversicherer?: T;
+  bundesland?: T;
+  stadtteil?: T;
+  alter?: T;
+  wohnsituation?: T;
+  startDatum?: T;
+  abwesenheiten?: T;
+  abwesenheitErlaeuterung?: T;
+  besonderheiten?: T;
+  leistungsauswahl?: T;
   zeitfenster?:
     | T
     | {
@@ -745,11 +790,14 @@ export interface AngehoerigeIdentitaetSelect<T extends boolean = true> {
   ownerUserId?: T;
   einwilligungAt?: T;
   einwilligungVersion?: T;
+  kontaktart?: T;
+  kontaktzeitraum?: T;
   vorname?: T;
   nachname?: T;
   telefon?: T;
   email?: T;
   adresse?: T;
+  beratungsstelle?: T;
   updatedAt?: T;
   createdAt?: T;
 }
