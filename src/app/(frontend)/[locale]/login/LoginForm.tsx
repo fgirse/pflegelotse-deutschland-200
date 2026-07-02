@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { CodeInput } from './CodeInput'
+import { PasswortFeld } from '../PasswortFeld'
 
 type Schritt = 'login' | 'enroll' | 'verify'
 
@@ -102,7 +103,13 @@ export function LoginForm({ locale }: { locale: string }) {
           </label>
           <label className="label">
             {t('password')}
-            <input value={password} onChange={(e) => setPassword(e.target.value)} className={inputCls} type="password" />
+            <PasswortFeld
+              value={password}
+              onChange={setPassword}
+              autoComplete="current-password"
+              labelAnzeigen={t('passwortAnzeigen')}
+              labelVerbergen={t('passwortVerbergen')}
+            />
           </label>
           <button onClick={login} disabled={busy || !email || !password} className="btn btn-primary mt-1">
             {t('anmelden')}

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { ORTE } from '@/shared/orte'
+import { PasswortFeld } from '../PasswortFeld'
 
 type Typ = 'suchende' | 'dienst'
 
@@ -191,7 +192,13 @@ export function RegistrierenForm({ locale }: { locale: string }) {
         </label>
         <label className="label">
           {t('password')}
-          <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          <PasswortFeld
+            value={password}
+            onChange={setPassword}
+            autoComplete="new-password"
+            labelAnzeigen={t('passwortAnzeigen')}
+            labelVerbergen={t('passwortVerbergen')}
+          />
         </label>
 
         {/* Pflicht-Einwilligung mit Verweis auf die Datenschutzerklärung. */}
