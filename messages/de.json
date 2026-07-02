@@ -93,7 +93,9 @@
     "einzugsgebietTitel": "Einzugsgebiet",
     "einzugsgebietHinweis": "Standort & Radius festlegen, um passende Bedarfe zu erhalten",
     "importTitel": "Klienten importieren",
-    "importHinweis": "Klientenliste aus der Pflegesoftware (CSV/Excel) übernehmen"
+    "importHinweis": "Klientenliste aus der Pflegesoftware (CSV/Excel) übernehmen",
+    "importDropHinweis": "CSV/Excel-Export aus deiner Pflegesoftware (z. B. MediFox) hierher ziehen oder auswählen — die Spalten werden automatisch erkannt.",
+    "importDateiWaehlen": "Datei wählen"
   },
   "einzugsgebiet": {
     "eyebrow": "Dienst-Einstellungen",

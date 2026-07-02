@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { ZIELFELDER, rateMapping } from '@/shared/importMapping'
 
@@ -21,10 +21,9 @@ export function ImportClient() {
   const [fehler, setFehler] = useState<string | null>(null)
   const [ergebnis, setErgebnis] = useState<Ergebnis | null>(null)
 
-  async function dateiGewaehlt(file: File) {
+  async function verarbeiteText(text: string) {
     setFehler(null)
     setErgebnis(null)
-    const text = await file.text()
     setCsv(text)
     const res = await fetch('/api/v1/import/preview', {
       method: 'POST',
@@ -41,6 +40,25 @@ export function ImportClient() {
     // Automatische Spaltenzuordnung (auf deutsche Pflegesoftware getrimmt).
     setMapping(rateMapping(d.headers ?? []))
   }
+
+  async function dateiGewaehlt(file: File) {
+    await verarbeiteText(await file.text())
+  }
+
+  // Vom Dashboard-Upload (Drag & Drop) übergebene Datei automatisch laden.
+  useEffect(() => {
+    try {
+      const text = sessionStorage.getItem('importCsv')
+      if (text) {
+        sessionStorage.removeItem('importCsv')
+        sessionStorage.removeItem('importName')
+        verarbeiteText(text)
+      }
+    } catch {
+      /* sessionStorage nicht verfügbar — ignorieren */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function importieren() {
     setBusy(true)

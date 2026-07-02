@@ -5,6 +5,7 @@ import { planeTour, berechneFitScore } from '@/server/matching/service'
 import { listeBedarfeFuerDienst } from '@/server/marketplace/service'
 import { requireDienstSeite } from '@/server/auth/page'
 import { DashboardClient } from './DashboardClient'
+import { DashboardImport } from './DashboardImport'
 
 // Das Dashboard liest zur Laufzeit aus der Datenbank (Säule 2) — es darf
 // nicht statisch vorgerendert werden.
@@ -97,8 +98,8 @@ export default async function DashboardPage({
         <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
       </header>
 
-      {/* Marktplatz-Eingänge sichtbar machen + Einzugsgebiet/Import. */}
-      <section className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Marktplatz-Eingänge + Einzugsgebiet. */}
+      <section className="mb-6 grid gap-4 sm:grid-cols-2">
         <Link href="/eingaenge" className="tile flex items-center justify-between gap-3">
           <div>
             <div className="font-display text-lg font-semibold">{t('eingaengeTitel')}</div>
@@ -120,14 +121,10 @@ export default async function DashboardPage({
           </div>
           <span aria-hidden>→</span>
         </Link>
-        <Link href="/dienst/import" className="tile flex items-center justify-between gap-3">
-          <div>
-            <div className="font-display text-lg font-semibold">{t('importTitel')}</div>
-            <div className="text-sm text-[var(--color-muted)]">{t('importHinweis')}</div>
-          </div>
-          <span aria-hidden>→</span>
-        </Link>
       </section>
+
+      {/* Prominenter CSV/Excel-Upload (Drag & Drop) — Klienten aus der Pflegesoftware. */}
+      <DashboardImport />
 
       {/* Kostenträger-Mix: offene Bedarfe (Gelegenheiten) + Klientenstamm (Portfolio). */}
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
