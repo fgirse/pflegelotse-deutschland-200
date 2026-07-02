@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { CodeInput } from './CodeInput'
 
 type Schritt = 'login' | 'enroll' | 'verify'
 
@@ -62,17 +63,20 @@ export function LoginForm({ locale }: { locale: string }) {
     }
   }
 
-  async function code2fa(pfad: 'activate' | 'verify') {
+  async function code2fa(pfad: 'activate' | 'verify', codeArg?: string) {
+    const c = codeArg ?? code
+    if (c.length < 6 || busy) return
     setBusy(true)
     setFehler(null)
     try {
       const res = await fetch(`/api/v1/auth/2fa/${pfad}`, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code: c }),
       })
       if (!res.ok) {
         setFehler(t('fehlerCode'))
+        setCode('') // Kästchen für neue Eingabe leeren
         return
       }
       window.location.href = ziel
@@ -130,10 +134,18 @@ export function LoginForm({ locale }: { locale: string }) {
               {t('secret')}: <code>{secret}</code>
             </div>
           </div>
-          <label className="label">
-            {t('code')}
-            <input value={code} onChange={(e) => setCode(e.target.value)} className={inputCls} inputMode="numeric" />
-          </label>
+          <div>
+            <span className="label">{t('code')}</span>
+            <div className="mt-2">
+              <CodeInput
+                value={code}
+                onChange={setCode}
+                onComplete={(v) => code2fa('activate', v)}
+                autoFocus
+                ariaLabel={t('code')}
+              />
+            </div>
+          </div>
           <button onClick={() => code2fa('activate')} disabled={busy || code.length < 6} className="btn btn-accent mt-1">
             {t('bestaetigen')}
           </button>
@@ -142,10 +154,18 @@ export function LoginForm({ locale }: { locale: string }) {
 
       {schritt === 'verify' && (
         <div className="flex flex-col gap-3">
-          <label className="label">
-            {t('code')}
-            <input value={code} onChange={(e) => setCode(e.target.value)} className={inputCls} inputMode="numeric" autoFocus />
-          </label>
+          <div>
+            <span className="label">{t('code')}</span>
+            <div className="mt-2">
+              <CodeInput
+                value={code}
+                onChange={setCode}
+                onComplete={(v) => code2fa('verify', v)}
+                autoFocus
+                ariaLabel={t('code')}
+              />
+            </div>
+          </div>
           <button onClick={() => code2fa('verify')} disabled={busy || code.length < 6} className="btn btn-accent mt-1">
             {t('bestaetigen')}
           </button>
