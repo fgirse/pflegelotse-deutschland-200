@@ -291,6 +291,10 @@
     "alleinlebend": "alleinlebend",
     "gemeinschaft": "in Gemeinschaft lebend",
     "startDatum": "Zeitpunkt des Bedarfs (ab wann wird die Pflege benötigt)",
+    "uhrzeit": "Bevorzugte Uhrzeit des Einsatzes (optional)",
+    "uhrzeitVon": "frühester Beginn",
+    "uhrzeitBis": "spätester Beginn",
+    "uhrzeitHinweis": "Wenn angegeben, plant der Dienst den Einsatz gezielt in dieses Zeitfenster.",
     "abwesenheiten": "Regelmäßige Abwesenheitszeiten der betroffenen Person",
     "abw": {
       "tagespflege": "Tagespflege",

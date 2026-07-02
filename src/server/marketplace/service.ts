@@ -31,12 +31,14 @@ export async function erstelleBedarf(
   const payload = await payloadClient()
   const pseudonymId = neuePseudonymId()
 
-  // Zeitfenster + Dauer aus dem neuen Modell ableiten, damit Fan-out-Matching
-  // UND Speicherung konsistent zur Dienst-Ansicht sind (sonst würde das
-  // pauschale Default-Fenster falsche Treffer erzeugen). Fallback: Eingabewerte.
-  const zeitfenster = input.leistungsauswahl
-    ? abgeleitetesZeitfenster(input.leistungsauswahl, input.abwesenheiten)
-    : input.zeitfenster
+  // Zeitfenster: explizite Wunsch-Uhrzeit hat Vorrang (präzises Slotting);
+  // sonst aus dem Modell ableiten (Leistungen/Abwesenheiten); sonst Eingabewert.
+  // So sind Fan-out-Matching, Speicherung und Dienst-Ansicht konsistent.
+  const zeitfenster = input.bevorzugteUhrzeit
+    ? input.bevorzugteUhrzeit
+    : input.leistungsauswahl
+      ? abgeleitetesZeitfenster(input.leistungsauswahl, input.abwesenheiten)
+      : input.zeitfenster
   const dauerMin = input.leistungsauswahl
     ? geschaetzteEinsatzdauer(input.leistungsauswahl)
     : input.dauerMin

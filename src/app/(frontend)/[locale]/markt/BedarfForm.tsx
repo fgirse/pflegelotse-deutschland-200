@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
 import { ORTE } from '@/shared/orte'
+import { hhmmToMin } from '@/shared/time'
 import { kassenFuerArt, type KostentraegerArt } from '@/shared/krankenkassen'
 import { BUNDESLAENDER, type Bundesland } from '@/shared/leistungskomplexe'
 import {
@@ -52,6 +53,8 @@ export function BedarfForm() {
   const [wohnsituation, setWohnsituation] = useState<'' | 'alleinlebend' | 'gemeinschaft'>('')
   const [pflegegrad, setPflegegrad] = useState('')
   const [startDatum, setStartDatum] = useState('')
+  const [uhrzeitVon, setUhrzeitVon] = useState('')
+  const [uhrzeitBis, setUhrzeitBis] = useState('')
   const [abwesenheiten, setAbwesenheiten] = useState<string[]>([])
   const [abwesenheitErlaeuterung, setAbwesenheitErlaeuterung] = useState('')
   const [besonderheiten, setBesonderheiten] = useState('')
@@ -120,6 +123,14 @@ export function BedarfForm() {
           quali.add('grundpflege')
       }
 
+      // Wunsch-Uhrzeit nur senden, wenn beide gesetzt und von ≤ bis.
+      let bevorzugteUhrzeit: { von: number; bis: number } | undefined
+      if (uhrzeitVon && uhrzeitBis) {
+        const von = hhmmToMin(uhrzeitVon)
+        const bis = hhmmToMin(uhrzeitBis)
+        if (von <= bis) bevorzugteUhrzeit = { von, bis }
+      }
+
       // Vollständigen Namen in Vor-/Nachname aufteilen (Säule-1-Kompatibilität).
       const teile = name.trim().split(/\s+/)
       const vorname = teile[0] || name.trim()
@@ -140,7 +151,8 @@ export function BedarfForm() {
           abwesenheitErlaeuterung: abwesenheitErlaeuterung || undefined,
           besonderheiten: besonderheiten || undefined,
           leistungsauswahl,
-          // legacy-kompatibel (bis Tour-Optimizer-Umbau):
+          bevorzugteUhrzeit, // Wunsch-Uhrzeit (falls angegeben) → präzises Slotting
+          // legacy-kompatibel; Server leitet Zeitfenster/Dauer final ab:
           leistungen: [...lkCodes],
           qualifikation: [...quali],
           zeitfenster: { von: 480, bis: 1080 },
@@ -293,6 +305,28 @@ export function BedarfForm() {
             {t('bedarf.startDatum')} *
             <input type="date" value={startDatum} onChange={(e) => setStartDatum(e.target.value)} className={inputCls} />
           </label>
+          {/* Optionale Wunsch-Uhrzeit — ermöglicht präzises Tour-Slotting. */}
+          <div>
+            <span className="label">{t('bedarf.uhrzeit')}</span>
+            <div className="mt-1 flex items-center gap-2">
+              <input
+                type="time"
+                aria-label={t('bedarf.uhrzeitVon')}
+                value={uhrzeitVon}
+                onChange={(e) => setUhrzeitVon(e.target.value)}
+                className={inputCls}
+              />
+              <span className="text-[var(--color-muted)]">–</span>
+              <input
+                type="time"
+                aria-label={t('bedarf.uhrzeitBis')}
+                value={uhrzeitBis}
+                onChange={(e) => setUhrzeitBis(e.target.value)}
+                className={inputCls}
+              />
+            </div>
+            <p className="mt-1 text-xs text-[var(--color-faint)]">{t('bedarf.uhrzeitHinweis')}</p>
+          </div>
           <div>
             <span className="label">{t('bedarf.abwesenheiten')}</span>
             <div className="mt-1 flex flex-col">

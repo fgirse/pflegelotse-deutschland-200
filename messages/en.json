@@ -291,6 +291,10 @@
     "alleinlebend": "living alone",
     "gemeinschaft": "living in a community",
     "startDatum": "When is care needed from?",
+    "uhrzeit": "Preferred time of day (optional)",
+    "uhrzeitVon": "earliest start",
+    "uhrzeitBis": "latest start",
+    "uhrzeitHinweis": "If given, the service schedules the visit into this time window.",
     "abwesenheiten": "Regular times the person is away",
     "abw": {
       "tagespflege": "Day care",

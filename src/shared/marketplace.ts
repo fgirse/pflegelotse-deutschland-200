@@ -97,6 +97,9 @@ export const bedarfErstellenSchema = z
     kostentraegerArt: kostentraegerArtSchema.optional(),
     krankenversicherer: z.string().optional(),
     ...neueOperativeFelder,
+    // Optionale, explizite Wunsch-Uhrzeit (frühester–spätester Beginn). Wenn
+    // gesetzt, hat sie Vorrang vor der heuristischen Ableitung → präzises Slotting.
+    bevorzugteUhrzeit: zeitfensterSchema.optional(),
     zeitfenster: zeitfensterSchema,
     dauerMin: z.number().int().positive().default(30),
     express: z.boolean().default(false),
