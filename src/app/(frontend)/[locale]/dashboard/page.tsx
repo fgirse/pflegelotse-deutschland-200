@@ -3,6 +3,7 @@ import { Link } from '@/i18n/navigation'
 import { ladeTouren, ladeKlientenOperativ } from '@/server/repo'
 import { planeTour, berechneFitScore } from '@/server/matching/service'
 import { listeBedarfeFuerDienst } from '@/server/marketplace/service'
+import { abgeleitetesZeitfenster, geschaetzteEinsatzdauer } from '@/shared/tourableitung'
 import { requireDienstSeite } from '@/server/auth/page'
 import { DashboardClient } from './DashboardClient'
 
@@ -52,8 +53,10 @@ export default async function DashboardPage({
     eingaenge.map((b) =>
       berechneFitScore(touren, {
         geo: b.geo,
-        zeitfenster: b.zeitfenster,
-        dauerMin: b.dauerMin,
+        zeitfenster: b.leistungsauswahl
+          ? abgeleitetesZeitfenster(b.leistungsauswahl, b.abwesenheiten)
+          : b.zeitfenster,
+        dauerMin: b.leistungsauswahl ? geschaetzteEinsatzdauer(b.leistungsauswahl) : b.dauerMin,
         qualifikation: b.qualifikation,
       }).then((r) => r.matches[0] ?? null),
     ),
@@ -78,8 +81,10 @@ export default async function DashboardPage({
     .map((b) => ({
       pseudonymId: b.pseudonymId,
       geo: b.geo,
-      zeitfenster: b.zeitfenster,
-      dauerMin: b.dauerMin,
+      zeitfenster: b.leistungsauswahl
+        ? abgeleitetesZeitfenster(b.leistungsauswahl, b.abwesenheiten)
+        : b.zeitfenster,
+      dauerMin: b.leistungsauswahl ? geschaetzteEinsatzdauer(b.leistungsauswahl) : b.dauerMin,
       qualifikation: b.qualifikation,
       pflegegrad: b.pflegegrad,
       quelle: 'bedarf' as const,

@@ -1,6 +1,7 @@
 import { setRequestLocale, getTranslations } from 'next-intl/server'
 import { listeBedarfeFuerDienst, listeVergebenFuerDienst } from '@/server/marketplace/service'
 import { berechneFitScore } from '@/server/matching/service'
+import { abgeleitetesZeitfenster, geschaetzteEinsatzdauer } from '@/shared/tourableitung'
 import { ladeTouren } from '@/server/repo'
 import { requireDienstSeite } from '@/server/auth/page'
 import { EingaengeClient } from './EingaengeClient'
@@ -30,10 +31,16 @@ export default async function EingaengePage({
   // Position). Läuft serverseitig — die Geo des Bedarfs bleibt im Server.
   const offeneMitFit = await Promise.all(
     offene.map(async (b) => {
+      // Zeitfenster + Dauer aus dem neuen Bedarfsmodell ableiten (Leistungen/
+      // Häufigkeit/Abwesenheiten); Fallback auf die gespeicherten Werte.
+      const zeitfenster = b.leistungsauswahl
+        ? abgeleitetesZeitfenster(b.leistungsauswahl, b.abwesenheiten)
+        : b.zeitfenster
+      const dauerMin = b.leistungsauswahl ? geschaetzteEinsatzdauer(b.leistungsauswahl) : b.dauerMin
       const { matches } = await berechneFitScore(touren, {
         geo: b.geo,
-        zeitfenster: b.zeitfenster,
-        dauerMin: b.dauerMin,
+        zeitfenster,
+        dauerMin,
         qualifikation: b.qualifikation,
       })
       const best = matches[0]
@@ -50,8 +57,8 @@ export default async function EingaengePage({
         abwesenheiten: b.abwesenheiten,
         besonderheiten: b.besonderheiten,
         leistungsauswahl: b.leistungsauswahl,
-        zeitfenster: b.zeitfenster,
-        dauerMin: b.dauerMin,
+        zeitfenster, // abgeleitet (s. o.)
+        dauerMin, // abgeleitet (s. o.)
         express: b.express,
         status: b.status,
         fit: best
