@@ -11,7 +11,7 @@ interface Knoten {
 type Kandidat = FitScoreRequest['kandidat']
 
 // Prüft, ob die Pflegekraft alle vom Kandidaten geforderten Qualifikationen hat.
-function qualifikationErfuellt(tour: Tour, kandidat: Kandidat): boolean {
+export function qualifikationErfuellt(tour: Tour, kandidat: Kandidat): boolean {
   const vorhanden = new Set(tour.pflegekraftQualifikation)
   return kandidat.qualifikation.every((q) => vorhanden.has(q))
 }

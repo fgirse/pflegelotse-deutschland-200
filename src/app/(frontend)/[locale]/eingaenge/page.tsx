@@ -32,7 +32,7 @@ export default async function EingaengePage({
     offene.map(async (b) => {
       // Zeitfenster/Dauer sind beim Anlegen final berechnet (Wunsch-Uhrzeit oder
       // Ableitung) und gespeichert — hier direkt verwenden.
-      const { matches } = await berechneFitScore(touren, {
+      const { matches, grund } = await berechneFitScore(touren, {
         geo: b.geo,
         zeitfenster: b.zeitfenster,
         dauerMin: b.dauerMin,
@@ -59,6 +59,7 @@ export default async function EingaengePage({
         fit: best
           ? { pflegekraftId: best.pflegekraftId, mehrwegMin: best.mehrwegMin, position: best.position }
           : null,
+        fitGrund: best ? null : grund, // Grund, warum kein Slot (für konkrete Meldung)
       }
     }),
   )

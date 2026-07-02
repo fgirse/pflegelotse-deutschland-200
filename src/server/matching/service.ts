@@ -3,9 +3,12 @@ import { OsrmRoutingProvider } from '@/server/routing/OsrmRoutingProvider'
 import { FallbackRoutingProvider } from '@/server/routing/FallbackRoutingProvider'
 import type { RoutingProvider } from '@/server/routing/RoutingProvider'
 import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
-import { fitScore } from './fitScore'
+import { fitScore, qualifikationErfuellt } from './fitScore'
 import { env } from '@/lib/env'
 import type { FitScoreRequest, FitMatch, Tour } from '@/shared/domain'
+
+// Grund, warum kein Treffer zustande kam (für konkrete UI-Meldung).
+export type KeinTrefferGrund = 'keineTouren' | 'qualifikation' | 'zeitfenster'
 
 // Composition Root des Routings: wählt den Adapter anhand der Env. Bei 'osrm'
 // echtes Straßenrouting mit Haversine als Sicherheitsnetz; sonst die
@@ -30,13 +33,27 @@ const routing = baueRouting()
 export async function berechneFitScore(
   touren: Tour[],
   kandidat: FitScoreRequest['kandidat'],
-): Promise<{ matches: FitMatch[]; geprueft: number; rechenzeitMs: number }> {
+): Promise<{
+  matches: FitMatch[]
+  geprueft: number
+  rechenzeitMs: number
+  grund: KeinTrefferGrund | null
+}> {
   const start = performance.now()
   const matches = await fitScore(touren, kandidat, routing)
+  // Bei keinem Treffer den konkreten Grund bestimmen: gar keine Touren, keine
+  // Tour mit passender Qualifikation, oder qualifiziert aber kein Zeitfenster frei.
+  let grund: KeinTrefferGrund | null = null
+  if (matches.length === 0) {
+    if (touren.length === 0) grund = 'keineTouren'
+    else if (!touren.some((t) => qualifikationErfuellt(t, kandidat))) grund = 'qualifikation'
+    else grund = 'zeitfenster'
+  }
   return {
     matches,
     geprueft: touren.length,
     rechenzeitMs: Math.round((performance.now() - start) * 10) / 10,
+    grund,
   }
 }
 

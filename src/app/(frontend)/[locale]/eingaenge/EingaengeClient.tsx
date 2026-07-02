@@ -37,6 +37,7 @@ interface OffenerBedarf {
   express: boolean
   status: string
   fit: FitInfo | null
+  fitGrund?: 'keineTouren' | 'qualifikation' | 'zeitfenster' | null
 }
 
 // Klartext-Titel je Leistungsgruppe (für die Häufigkeits-Zusammenfassung).
@@ -196,7 +197,9 @@ export function EingaengeClient({ tenantId, offene, gewonnen }: Props) {
                   })}
                 </p>
               ) : (
-                <p className="mt-2 text-sm text-[var(--color-faint)]">{t('fitKeinSlot')}</p>
+                <p className="mt-2 text-sm text-[var(--color-faint)]">
+                  {t(b.fitGrund ? `noMatch_${b.fitGrund}` : 'fitKeinSlot')}
+                </p>
               )}
               {gesendet[b.pseudonymId] ? (
                 <p className="mt-2 font-medium text-[var(--color-success)]">✓ {t('angebotGesendet')}</p>

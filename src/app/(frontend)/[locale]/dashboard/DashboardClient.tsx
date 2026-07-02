@@ -42,6 +42,7 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
 
   const [selected, setSelected] = useState<PlanKandidat | null>(null)
   const [matches, setMatches] = useState<FitMatch[] | null>(null)
+  const [grund, setGrund] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [view, setView] = useState<'map' | 'table'>('map')
   const [angebotGesendet, setAngebotGesendet] = useState(false)
@@ -60,6 +61,7 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
   async function waehleKandidat(k: PlanKandidat) {
     setSelected(k)
     setMatches(null)
+    setGrund(null)
     setAngebotGesendet(false)
     setLoading(true)
     try {
@@ -79,6 +81,7 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
       })
       const data = await res.json()
       setMatches(data.matches ?? [])
+      setGrund(data.grund ?? null)
     } finally {
       setLoading(false)
     }
@@ -224,7 +227,9 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
         {!selected && <p className="text-sm text-[var(--color-faint)]">{t('noSelection')}</p>}
         {loading && <p className="text-sm text-[var(--color-faint)]">{t('calculating')}</p>}
         {selected && !loading && matches && matches.length === 0 && (
-          <p className="text-sm font-medium text-[var(--color-danger)]">⚠ {t('noMatch')}</p>
+          <p className="text-sm font-medium text-[var(--color-danger)]">
+            ⚠ {t(grund ? `noMatch_${grund}` : 'noMatch')}
+          </p>
         )}
 
         {/* Marktplatz-Bedarf: Hinweis + „gewinnen" (Angebot abgeben). */}
