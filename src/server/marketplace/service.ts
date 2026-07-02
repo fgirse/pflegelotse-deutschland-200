@@ -9,6 +9,7 @@ import { ladeAlleTouren, ladeTour, speichereEinsaetze } from '@/server/repo'
 import { minToHHMM } from '@/shared/time'
 import { haversineKm } from '@/shared/orte'
 import { EINWILLIGUNG_VERSION } from '@/shared/consent'
+import { abgeleitetesZeitfenster, geschaetzteEinsatzdauer } from '@/shared/tourableitung'
 import { istGueltigeKasse } from '@/shared/krankenkassen'
 import { env } from '@/lib/env'
 import { bedarfSchema, type Bedarf, type BedarfErstellen, type Kontakt } from '@/shared/marketplace'
@@ -30,11 +31,21 @@ export async function erstelleBedarf(
   const payload = await payloadClient()
   const pseudonymId = neuePseudonymId()
 
+  // Zeitfenster + Dauer aus dem neuen Modell ableiten, damit Fan-out-Matching
+  // UND Speicherung konsistent zur Dienst-Ansicht sind (sonst würde das
+  // pauschale Default-Fenster falsche Treffer erzeugen). Fallback: Eingabewerte.
+  const zeitfenster = input.leistungsauswahl
+    ? abgeleitetesZeitfenster(input.leistungsauswahl, input.abwesenheiten)
+    : input.zeitfenster
+  const dauerMin = input.leistungsauswahl
+    ? geschaetzteEinsatzdauer(input.leistungsauswahl)
+    : input.dauerMin
+
   // Passende Dienste über den Fit-Score bestimmen (vor dem Schreiben).
   const matchingTenants = await findePassendeDienste({
     geo: input.geo,
-    zeitfenster: input.zeitfenster,
-    dauerMin: input.dauerMin,
+    zeitfenster,
+    dauerMin,
     qualifikation: input.qualifikation,
   })
 
@@ -90,8 +101,8 @@ export async function erstelleBedarf(
       abwesenheitErlaeuterung: input.abwesenheitErlaeuterung,
       besonderheiten: input.besonderheiten,
       leistungsauswahl: input.leistungsauswahl,
-      zeitfenster: input.zeitfenster,
-      dauerMin: input.dauerMin,
+      zeitfenster, // abgeleitet (s. o.), konsistent mit Matching & Ansicht
+      dauerMin, // abgeleitet (s. o.)
       express: input.express,
       status: 'offen',
       matchingTenants,
