@@ -1,5 +1,6 @@
 import { HaversineRoutingProvider } from '@/server/routing/HaversineRoutingProvider'
 import { OsrmRoutingProvider } from '@/server/routing/OsrmRoutingProvider'
+import { HereRoutingProvider } from '@/server/routing/HereRoutingProvider'
 import { FallbackRoutingProvider } from '@/server/routing/FallbackRoutingProvider'
 import type { RoutingProvider } from '@/server/routing/RoutingProvider'
 import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
@@ -23,6 +24,10 @@ function baueRouting(): RoutingProvider {
       env.OSRM_API_KEY,
     )
     inner = new FallbackRoutingProvider(osrm, haversine)
+  } else if (env.ROUTING_PROVIDER === 'here' && env.HERE_API_KEY) {
+    // Verkehrsbewusstes Routing über HERE; Haversine als Sicherheitsnetz.
+    const here = new HereRoutingProvider(env.HERE_API_KEY)
+    inner = new FallbackRoutingProvider(here, haversine)
   }
   return new CachedRoutingProvider(inner, new InMemoryMatrixCache())
 }

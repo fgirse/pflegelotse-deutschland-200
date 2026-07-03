@@ -10,15 +10,19 @@ const schema = z.object({
   AUDIT_PEPPER: z.string().min(1, 'AUDIT_PEPPER fehlt'),
   AUDIT_PEPPER_VERSION: z.string().default('2026-v1'),
   NEXT_PUBLIC_SERVER_URL: z.string().default('http://localhost:3000'),
-  // Routing: 'haversine' (Heuristik, keine Infra) oder 'osrm' (echtes
-  // Straßenrouting über einen OSRM-Server). Bei 'osrm' muss OSRM_BASE_URL
-  // gesetzt sein; fällt bei Ausfall automatisch auf Haversine zurück.
-  ROUTING_PROVIDER: z.enum(['haversine', 'osrm']).default('haversine'),
+  // Routing: 'haversine' (Heuristik, keine Infra), 'osrm' (eigenes Straßen-
+  // routing) oder 'here' (verkehrsbewusstes Routing über HERE Matrix v8,
+  // EU-Anbieter). Bei 'osrm'/'here' muss die jeweilige Konfiguration gesetzt
+  // sein; fällt bei Ausfall automatisch auf Haversine zurück.
+  ROUTING_PROVIDER: z.enum(['haversine', 'osrm', 'here']).default('haversine'),
   OSRM_BASE_URL: z.string().optional(), // z. B. https://router.project-osrm.org
   OSRM_PROFILE: z.string().default('driving'),
   // Optionaler API-Key für den eigenen, abgesicherten OSRM-Server (wird als
   // X-Api-Key-Header gesendet; vom Reverse-Proxy geprüft).
   OSRM_API_KEY: z.string().optional(),
+  // API-Key für HERE (nur bei ROUTING_PROVIDER=here). Verkehrsbewusste
+  // Fahrzeit-Matrix; ohne Key wird auf Haversine zurückgefallen.
+  HERE_API_KEY: z.string().optional(),
   // Geocoding (Adresse → Koordinaten) über Nominatim/OpenStreetMap.
   // Für Produktion idealerweise eigene Instanz; User-Agent mit Kontakt (Policy).
   NOMINATIM_BASE_URL: z.string().default('https://nominatim.openstreetmap.org'),
