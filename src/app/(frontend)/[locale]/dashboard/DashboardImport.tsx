@@ -2,27 +2,45 @@
 
 import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { useRouter } from '@/i18n/navigation'
+import { ImportClient } from '../dienst/import/ImportClient'
 
-// Prominenter CSV/Excel-Upload direkt im Dashboard: Datei per Klick wählen oder
-// hineinziehen (Drag & Drop). Die Datei wird an die Import-Seite übergeben
-// (via sessionStorage), wo Spaltenzuordnung + Import laufen.
+// Prominenter CSV/Excel-Upload direkt im Dashboard: Datei per Button wählen oder
+// hineinziehen (Drag & Drop). Ist eine Datei gewählt, läuft der komplette Import
+// (Spaltenzuordnung + Import) INLINE hier — ohne Seitenwechsel.
 export function DashboardImport() {
   const t = useTranslations('dashboard')
-  const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
   const [drueber, setDrueber] = useState(false)
+  const [text, setText] = useState<string | null>(null)
+  const [dateiName, setDateiName] = useState('')
 
   async function nimmDatei(file?: File | null) {
     if (!file) return
-    const text = await file.text()
-    try {
-      sessionStorage.setItem('importCsv', text)
-      sessionStorage.setItem('importName', file.name)
-    } catch {
-      /* sessionStorage nicht verfügbar — Import-Seite öffnet dann leer */
-    }
-    router.push('/dienst/import')
+    setDateiName(file.name)
+    setText(await file.text())
+  }
+
+  // Ist eine Datei gewählt → kompletten Import inline anzeigen.
+  if (text !== null) {
+    return (
+      <section className="mb-6 card p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="font-display text-lg font-semibold">{t('importTitel')}</div>
+          <button
+            type="button"
+            onClick={() => {
+              setText(null)
+              setDateiName('')
+            }}
+            className="text-sm text-[var(--color-accent)] hover:underline"
+          >
+            {t('importAndereDatei')}
+          </button>
+        </div>
+        {dateiName && <p className="mt-1 text-sm text-[var(--color-muted)]">{dateiName}</p>}
+        <ImportClient initialText={text} />
+      </section>
+    )
   }
 
   return (

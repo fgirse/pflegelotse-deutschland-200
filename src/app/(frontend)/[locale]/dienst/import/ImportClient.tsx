@@ -11,7 +11,7 @@ type Ergebnis = {
   fehler: { externalId: string; grund: string }[]
 }
 
-export function ImportClient() {
+export function ImportClient({ initialText }: { initialText?: string } = {}) {
   const t = useTranslations('import')
   const [csv, setCsv] = useState('')
   const [headers, setHeaders] = useState<string[]>([])
@@ -45,20 +45,11 @@ export function ImportClient() {
     await verarbeiteText(await file.text())
   }
 
-  // Vom Dashboard-Upload (Drag & Drop) übergebene Datei automatisch laden.
+  // Vom Dashboard-Upload übergebene Datei beim Öffnen automatisch verarbeiten.
   useEffect(() => {
-    try {
-      const text = sessionStorage.getItem('importCsv')
-      if (text) {
-        sessionStorage.removeItem('importCsv')
-        sessionStorage.removeItem('importName')
-        verarbeiteText(text)
-      }
-    } catch {
-      /* sessionStorage nicht verfügbar — ignorieren */
-    }
+    if (initialText) verarbeiteText(initialText)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [initialText])
 
   async function importieren() {
     setBusy(true)

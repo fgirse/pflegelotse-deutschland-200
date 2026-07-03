@@ -95,7 +95,8 @@
     "importTitel": "Klienten importieren",
     "importHinweis": "Klientenliste aus der Pflegesoftware (CSV/Excel) übernehmen",
     "importDropHinweis": "CSV/Excel-Export aus deiner Pflegesoftware (z. B. MediFox) hierher ziehen oder auswählen — die Spalten werden automatisch erkannt.",
-    "importDateiWaehlen": "Datei wählen"
+    "importDateiWaehlen": "Datei wählen",
+    "importAndereDatei": "andere Datei"
   },
   "einzugsgebiet": {
     "eyebrow": "Dienst-Einstellungen",

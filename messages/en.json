@@ -96,7 +96,8 @@
     "importTitel": "Import clients",
     "importHinweis": "Import a client list from your care software (CSV/Excel)",
     "importDropHinweis": "Drag your care-software CSV/Excel export (e.g. MediFox) here or choose a file — columns are detected automatically.",
-    "importDateiWaehlen": "Choose file"
+    "importDateiWaehlen": "Choose file",
+    "importAndereDatei": "different file"
   },
   "einzugsgebiet": {
     "eyebrow": "Service settings",
