@@ -20,6 +20,7 @@ export function ImportClient({ initialText }: { initialText?: string } = {}) {
   const [busy, setBusy] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
   const [ergebnis, setErgebnis] = useState<Ergebnis | null>(null)
+  const [fortschritt, setFortschritt] = useState<{ fertig: number; gesamt: number } | null>(null)
 
   async function verarbeiteText(text: string) {
     setFehler(null)
@@ -51,24 +52,55 @@ export function ImportClient({ initialText }: { initialText?: string } = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialText])
 
+  // Import in Blöcken (Client-Chunking): große Dateien würden in EINEM Request
+  // das Serverless-Timeout reißen. Wir senden je BLOCK Zeilen nacheinander,
+  // aggregieren die Ergebnisse und zeigen den Fortschritt. Header wird jedem
+  // Block vorangestellt (zeilenbasiert — behält die Originalformatierung).
+  const BLOCK = 40
   async function importieren() {
     setBusy(true)
     setFehler(null)
+    setErgebnis(null)
+    const zeilen = csv.split(/\r?\n/)
+    const header = zeilen[0] ?? ''
+    const daten = zeilen.slice(1).filter((z) => z.trim() !== '')
+    const gesamt = daten.length
+    setFortschritt({ fertig: 0, gesamt })
+
+    let neu = 0
+    let aktualisiert = 0
+    let verarbeitet = 0
+    const alleFehler: Ergebnis['fehler'] = []
     try {
-      const res = await fetch('/api/v1/import/clients', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ csv, mapping }),
-      })
-      if (!res.ok) {
-        setFehler(t('fehlerImport'))
-        return
+      for (let i = 0; i < daten.length; i += BLOCK) {
+        const block = daten.slice(i, i + BLOCK)
+        const blockCsv = `${header}\n${block.join('\n')}\n`
+        try {
+          const res = await fetch('/api/v1/import/clients', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ csv: blockCsv, mapping }),
+          })
+          if (res.ok) {
+            const d = (await res.json()) as Ergebnis
+            neu += d.neu
+            aktualisiert += d.aktualisiert
+            verarbeitet += d.verarbeitet
+            alleFehler.push(...(d.fehler ?? []))
+          } else {
+            alleFehler.push({ externalId: `Block ${Math.floor(i / BLOCK) + 1}`, grund: t('fehlerImport') })
+          }
+        } catch {
+          alleFehler.push({ externalId: `Block ${Math.floor(i / BLOCK) + 1}`, grund: t('fehlerImport') })
+        }
+        setFortschritt({ fertig: Math.min(i + BLOCK, gesamt), gesamt })
       }
-      setErgebnis(await res.json())
+      setErgebnis({ neu, aktualisiert, verarbeitet, fehler: alleFehler })
     } catch {
       setFehler(t('fehlerImport'))
     } finally {
       setBusy(false)
+      setFortschritt(null)
     }
   }
 
@@ -137,6 +169,29 @@ export function ImportClient({ initialText }: { initialText?: string } = {}) {
           >
             {busy ? t('importiereLaedt') : t('importieren', { n: anzahl })}
           </button>
+
+          {/* Fortschritt beim Blockweise-Import (große Dateien). */}
+          {fortschritt && (
+            <div className="mt-4" aria-live="polite">
+              <div className="flex justify-between text-sm text-[var(--color-muted)]">
+                <span>{t('fortschritt', { fertig: fortschritt.fertig, gesamt: fortschritt.gesamt })}</span>
+                <span>
+                  {fortschritt.gesamt > 0
+                    ? Math.round((fortschritt.fertig / fortschritt.gesamt) * 100)
+                    : 0}
+                  %
+                </span>
+              </div>
+              <div className="mt-1 h-2 overflow-hidden rounded-full bg-[var(--color-line)]">
+                <div
+                  className="h-full bg-[var(--color-accent-strong)] transition-all"
+                  style={{
+                    width: `${fortschritt.gesamt > 0 ? (fortschritt.fertig / fortschritt.gesamt) * 100 : 0}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       )}
 

@@ -125,6 +125,7 @@
     "geoNoetig": "Für die Tourenplanung wird ein Standort gebraucht: ordne entweder „Adresse“ zu (wird geokodiert) oder Breiten- und Längengrad.",
     "importieren": "{n} Datensätze importieren",
     "importiereLaedt": "Importiere … (Adressen werden geokodiert)",
+    "fortschritt": "{fertig} von {gesamt} Klienten importiert",
     "fertig": "Import abgeschlossen",
     "ergebnis": "{neu} neu angelegt, {aktualisiert} aktualisiert.",
     "fehlerTitel": "{n} Datensätze übersprungen:",

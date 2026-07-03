@@ -126,6 +126,7 @@
     "geoNoetig": "Route planning needs a location: map either \"Address\" (will be geocoded) or latitude and longitude.",
     "importieren": "Import {n} records",
     "importiereLaedt": "Importing … (geocoding addresses)",
+    "fortschritt": "{fertig} of {gesamt} clients imported",
     "fertig": "Import complete",
     "ergebnis": "{neu} created, {aktualisiert} updated.",
     "fehlerTitel": "{n} records skipped:",
