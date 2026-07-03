@@ -23,23 +23,68 @@ export interface ImportErgebnis {
 // teilt sie SOFORT in beide Säulen (/F550/): PII → Säule 1 (verschlüsselt via
 // Collection-Hooks), operative Daten → Säule 2. Idempotent über externalId
 // (/F540/). Fehlen Koordinaten, wird die Adresse geokodiert.
+// Begrenzte Nebenläufigkeit: höchstens `limit` gleichzeitige Aufgaben.
+async function poolMap<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const ergebnisse: R[] = new Array(items.length)
+  let naechster = 0
+  async function worker() {
+    while (naechster < items.length) {
+      const i = naechster++
+      ergebnisse[i] = await fn(items[i])
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker))
+  return ergebnisse
+}
+
+// Einfaches Semaphor: begrenzt gleichzeitige Aufrufe (z. B. für die Geokodierung,
+// damit die Parallelisierung nicht die Nominatim-Nutzungslimits reißt).
+function macheSemaphor(max: number) {
+  let aktiv = 0
+  const warteschlange: (() => void)[] = []
+  return async function <T>(fn: () => Promise<T>): Promise<T> {
+    if (aktiv >= max) await new Promise<void>((r) => warteschlange.push(r))
+    aktiv++
+    try {
+      return await fn()
+    } finally {
+      aktiv--
+      warteschlange.shift()?.()
+    }
+  }
+}
+
+type EinzelErgebnis =
+  | { status: 'neu' }
+  | { status: 'aktualisiert' }
+  | { status: 'fehler'; fehler: ImportFehler }
+
 export async function importiereKlienten(
   tenantId: string,
   rows: Record<string, string>[],
 ): Promise<ImportErgebnis> {
   const payload = await payloadClient()
-  let neu = 0
-  let aktualisiert = 0
   const fehler: ImportFehler[] = []
 
+  // Innerhalb eines Blocks nach external_id deduplizieren (last wins) — sonst
+  // könnten zwei parallele Zeilen mit gleicher Kennung ein Duplikat erzeugen.
+  const gueltig = new Map<string, Record<string, string>>()
   for (const row of rows) {
     const externalId = (row.external_id || row.externalId || '').trim()
     if (!externalId) {
       fehler.push({ externalId: '(leer)', grund: 'Eindeutige Kennung (external_id) fehlt' })
       continue
     }
+    gueltig.set(externalId, row)
+  }
 
-    // Koordinaten: direkt aus lat/lng oder per Geokodierung der Adresse.
+  // Geokodierung gedrosselt (max. 2 gleichzeitig); DB-Schreiben parallel (8).
+  const geoLimiter = macheSemaphor(2)
+
+  async function verarbeiteEinen(row: Record<string, string>): Promise<EinzelErgebnis> {
+    const externalId = (row.external_id || row.externalId || '').trim()
+
+    // Koordinaten: direkt aus lat/lng oder per (gedrosselter) Geokodierung.
     // Wichtig: leere Felder als „fehlt" behandeln (Number('') === 0!).
     const latStr = (row.lat ?? '').replace(',', '.').trim()
     const lngStr = (row.lng ?? '').replace(',', '.').trim()
@@ -48,7 +93,7 @@ export async function importiereKlienten(
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
       const adresse = [row.adresse, row.ort].map((x) => x?.trim()).filter(Boolean).join(', ')
       if (adresse) {
-        const treffer = await geocode(adresse)
+        const treffer = await geoLimiter(() => geocode(adresse))
         if (treffer) {
           lat = treffer.lat
           lng = treffer.lng
@@ -56,8 +101,7 @@ export async function importiereKlienten(
       }
     }
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-      fehler.push({ externalId, grund: 'Keine Koordinaten (Adresse nicht gefunden)' })
-      continue
+      return { status: 'fehler', fehler: { externalId, grund: 'Keine Koordinaten (Adresse nicht gefunden)' } }
     }
 
     const treffer = await payload.find({
@@ -112,9 +156,6 @@ export async function importiereKlienten(
       await payload.create({ collection: 'klienten_operativ', data: operativDaten, overrideAccess: true })
     }
 
-    if (vorhanden) aktualisiert++
-    else neu++
-
     // Audit-Eintrag (ohne Klarnamen).
     const { hash, pepperVersion } = identityHash(`${tenantId}:${externalId}`)
     await payload.create({
@@ -129,6 +170,19 @@ export async function importiereKlienten(
       },
       overrideAccess: true,
     })
+
+    return { status: vorhanden ? 'aktualisiert' : 'neu' }
+  }
+
+  // Klienten eines Blocks parallel anlegen (begrenzte Nebenläufigkeit).
+  const ergebnisse = await poolMap([...gueltig.values()], 8, verarbeiteEinen)
+
+  let neu = 0
+  let aktualisiert = 0
+  for (const e of ergebnisse) {
+    if (e.status === 'neu') neu++
+    else if (e.status === 'aktualisiert') aktualisiert++
+    else fehler.push(e.fehler)
   }
 
   return { verarbeitet: neu + aktualisiert, neu, aktualisiert, fehler }
