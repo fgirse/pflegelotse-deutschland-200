@@ -77,22 +77,31 @@ export function ImportClient({ initialText }: { initialText?: string } = {}) {
 
   return (
     <div className="mt-6 flex flex-col gap-5">
-      {/* Datei wählen */}
-      <div className="card p-5">
-        <span className="label">{t('datei')}</span>
-        <input
-          type="file"
-          accept=".csv,.txt,text/csv,text/plain"
-          onChange={(e) => e.target.files?.[0] && dateiGewaehlt(e.target.files[0])}
-          className="mt-2 block w-full text-sm"
-        />
-        <p className="mt-2 text-xs text-[var(--color-faint)]">{t('dateiHinweis')}</p>
-        {headers.length > 0 && (
-          <p className="mt-2 text-sm text-[var(--color-muted)]">
+      {/* Datei wählen — nur im Standalone-Modus. Inline (vom Dashboard) kommt
+          die Datei bereits mit; dann nur die Spalten-Erkennung anzeigen. */}
+      {initialText ? (
+        headers.length > 0 && (
+          <p className="text-sm text-[var(--color-muted)]">
             {t('erkannt', { spalten: headers.length, zeilen: anzahl })}
           </p>
-        )}
-      </div>
+        )
+      ) : (
+        <div className="card p-5">
+          <span className="label">{t('datei')}</span>
+          <input
+            type="file"
+            accept=".csv,.txt,text/csv,text/plain"
+            onChange={(e) => e.target.files?.[0] && dateiGewaehlt(e.target.files[0])}
+            className="mt-2 block w-full text-sm"
+          />
+          <p className="mt-2 text-xs text-[var(--color-faint)]">{t('dateiHinweis')}</p>
+          {headers.length > 0 && (
+            <p className="mt-2 text-sm text-[var(--color-muted)]">
+              {t('erkannt', { spalten: headers.length, zeilen: anzahl })}
+            </p>
+          )}
+        </div>
+      )}
 
       {fehler && <p className="text-sm text-[var(--color-danger)]">⚠ {fehler}</p>}
 
