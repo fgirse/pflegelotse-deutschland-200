@@ -3,7 +3,7 @@ import { OsrmRoutingProvider } from '@/server/routing/OsrmRoutingProvider'
 import { FallbackRoutingProvider } from '@/server/routing/FallbackRoutingProvider'
 import type { RoutingProvider } from '@/server/routing/RoutingProvider'
 import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
-import { fitScore, qualifikationErfuellt } from './fitScore'
+import { fitScore, qualifikationErfuellt, ARBZG, HAUSBESUCH_GRUNDZEIT_MIN } from './fitScore'
 import { env } from '@/lib/env'
 import type { FitScoreRequest, FitMatch, Tour } from '@/shared/domain'
 
@@ -58,12 +58,15 @@ export async function berechneFitScore(
 }
 
 // Plant eine Tour: berechnet je Einsatz die Ankunftszeit und liefert
-// zusätzlich die Kennzahlen (Gesamtfahrzeit, Auslastung in Prozent der
-// verfügbaren Zeit). Wird nach dem Aufnehmen eines Klienten aufgerufen.
+// zusätzlich die Kennzahlen (Gesamtfahrzeit, Auslastung, Arbeitszeit,
+// ArbZG-Konformität). Berücksichtigt die Pflichtpause nach 6 h (§4 ArbZG)
+// im Zeitplan. Wird nach dem Aufnehmen eines Klienten aufgerufen.
 export async function planeTour(tour: Tour): Promise<{
   einsaetze: Tour['einsaetze']
   fahrzeitMin: number
   auslastungProzent: number
+  arbeitszeitMin: number
+  arbzgKonform: boolean
 }> {
   const punkte = [tour.start, ...tour.einsaetze.map((e) => e.geo)]
   const matrix = await routing.travelMatrix(punkte)
@@ -71,18 +74,34 @@ export async function planeTour(tour: Tour): Promise<{
   let t = tour.startZeit
   let fahrzeit = 0
   let pflege = 0
+  let arbeit = 0 // Arbeitszeit = Fahrt + Leistung (ohne Warte-/Pausenzeit)
+  let pauseGesetzt = false
   const einsaetze = tour.einsaetze.map((e, i) => {
     const reise = matrix[i][i + 1] // von vorherigem Punkt zu diesem Einsatz
     fahrzeit += reise
-    const ankunft = t + reise
+    arbeit += reise
+    let ankunft = t + reise
+    // ArbZG §4: nach 6 h Arbeit einmalig 30 min Pause einschieben.
+    if (!pauseGesetzt && arbeit >= ARBZG.schwelle6hMin) {
+      ankunft += ARBZG.pauseNach6hMin
+      pauseGesetzt = true
+    }
     const beginn = Math.max(ankunft, e.zeitfenster.von)
-    t = beginn + e.dauerMin
-    pflege += e.dauerMin
+    const dauer = e.dauerMin + HAUSBESUCH_GRUNDZEIT_MIN
+    t = beginn + dauer
+    pflege += dauer
+    arbeit += dauer
     return { ...e, ankunft: Math.round(ankunft) }
   })
 
   // Auslastung = Pflegezeit / (Pflegezeit + Fahrzeit), grob als Effizienzmaß.
   const gesamt = pflege + fahrzeit
   const auslastung = gesamt > 0 ? Math.round((pflege / gesamt) * 100) : 0
-  return { einsaetze, fahrzeitMin: Math.round(fahrzeit), auslastungProzent: auslastung }
+  return {
+    einsaetze,
+    fahrzeitMin: Math.round(fahrzeit),
+    auslastungProzent: auslastung,
+    arbeitszeitMin: Math.round(arbeit),
+    arbzgKonform: arbeit <= ARBZG.maxArbeitszeitMin,
+  }
 }

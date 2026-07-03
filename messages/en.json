@@ -59,6 +59,9 @@
     "position": "Insert position",
     "qualificationOk": "Qualification matches",
     "qualificationMissing": "Qualification missing",
+    "bezugspflegeOk": "Preferred carer (continuity)",
+    "arbeitszeit": "Working time",
+    "arbzgWarnung": "Over 10 h working time (ArbZG)",
     "assign": "Add to tour",
     "assigned": "Added",
     

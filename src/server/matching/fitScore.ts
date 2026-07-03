@@ -1,6 +1,19 @@
 import type { FitScoreRequest, FitMatch, Tour, Zeitfenster } from '@/shared/domain'
 import type { RoutingProvider } from '@/server/routing/RoutingProvider'
 
+// ── Restriktionen aus dem Pflichtenheft (Kap. 5.2.1 VRPTW, 5.1.3) ──────────
+// Arbeitszeitgesetz (ArbZG): harte Restriktionen der Tourenplanung.
+export const ARBZG = {
+  maxArbeitszeitMin: 600, // §3: max. 10 h Arbeitszeit/Tag
+  schwelle6hMin: 360, // §4: Pause nach >6 h Arbeit
+  pauseNach6hMin: 30, // §4: mind. 30 min Pause bei 6–9 h
+} as const
+
+// Hausbesuchsgrundzeit (Kap. 5.1.3): fällt einmalig je Besuch an (Begrüßung,
+// Krankenbeobachtung, Dokumentation), zusätzlich zur reinen Leistungszeit.
+// Konfigurierbar; Standard 0 (jeder Dienst setzt seinen eigenen Wert).
+export const HAUSBESUCH_GRUNDZEIT_MIN = 0
+
 // Ein Knoten in der Tour-Simulation: Depot (ohne Fenster) oder Einsatz.
 interface Knoten {
   von: number
@@ -17,36 +30,50 @@ export function qualifikationErfuellt(tour: Tour, kandidat: Kandidat): boolean {
 }
 
 // Simuliert eine Einsatzfolge ab dem Depot und liefert Machbarkeit,
-// Gesamtfahrzeit und die Ankunftszeiten je Knoten.
+// Gesamtfahrzeit, Ankunftszeiten je Knoten und die Arbeitszeit.
 // `order` enthält Matrix-Indizes; order[0] ist immer das Depot.
+// Harte Restriktionen: Zeitfenster (hard), ArbZG max. 10 h/Tag (hard);
+// nach 6 h Arbeit wird einmalig eine Pflichtpause eingeschoben (§4 ArbZG).
 function simuliere(
   order: number[],
   startZeit: number,
   matrix: number[][],
   knoten: Knoten[],
-): { machbar: boolean; fahrzeit: number; ankunft: number[] } {
+): { machbar: boolean; fahrzeit: number; ankunft: number[]; arbeitszeit: number } {
   let t = startZeit // Abfahrt am Depot
   let fahrzeit = 0
+  let arbeit = 0 // Arbeitszeit = Fahrt + Leistung (ohne Wartezeit/Pause)
+  let pauseGesetzt = false
   const ankunft = new Array(order.length).fill(0)
 
   for (let k = 1; k < order.length; k++) {
     const reise = matrix[order[k - 1]][order[k]]
     fahrzeit += reise
-    const ank = t + reise
+    arbeit += reise
+    let ank = t + reise
+    // ArbZG §4: nach 6 h Arbeit einmalig 30 min Pause einschieben.
+    if (!pauseGesetzt && arbeit >= ARBZG.schwelle6hMin) {
+      ank += ARBZG.pauseNach6hMin
+      pauseGesetzt = true
+    }
     ankunft[k] = ank
     const n = knoten[order[k]]
     // Wartet die Kraft, falls sie vor dem frühesten Beginn ankommt.
     const beginn = Math.max(ank, n.von)
-    // Spätester Beginn überschritten → Zeitfenster verletzt.
-    if (beginn > n.bis) return { machbar: false, fahrzeit, ankunft }
+    // Spätester Beginn überschritten → Zeitfenster verletzt (hard).
+    if (beginn > n.bis) return { machbar: false, fahrzeit, ankunft, arbeitszeit: arbeit }
+    arbeit += n.dauer
     t = beginn + n.dauer
   }
-  return { machbar: true, fahrzeit, ankunft }
+  // ArbZG §3: max. 10 h Arbeitszeit/Tag (hard).
+  const machbar = arbeit <= ARBZG.maxArbeitszeitMin
+  return { machbar, fahrzeit, ankunft, arbeitszeit: arbeit }
 }
 
 // Berechnet den besten (geringsten) Mehrweg, mit dem sich der Kandidat in
-// EINE Tour einfügen lässt, ohne ein Zeitfenster zu verletzen. Gibt null
-// zurück, wenn keine Position machbar ist oder die Qualifikation fehlt.
+// EINE Tour einfügen lässt, ohne eine harte Restriktion zu verletzen
+// (Zeitfenster, Qualifikation, ArbZG). Gibt null zurück, wenn keine Position
+// machbar ist. Bezugspflege wird als weiche Restriktion mitgeführt.
 export async function fitScoreFuerTour(
   tour: Tour,
   kandidat: Kandidat,
@@ -62,10 +89,11 @@ export async function fitScoreFuerTour(
     ...tour.einsaetze.map((e) => e.geo),
     kandidat.geo,
   ]
+  // Leistungszeit + Hausbesuchsgrundzeit je Besuch (Kap. 5.1.3).
   const knoten: Knoten[] = [
     { von: 0, bis: 1439, dauer: 0 }, // Depot ohne Fenster
-    ...tour.einsaetze.map((e) => fensterKnoten(e.zeitfenster, e.dauerMin)),
-    fensterKnoten(kandidat.zeitfenster, kandidat.dauerMin),
+    ...tour.einsaetze.map((e) => fensterKnoten(e.zeitfenster, e.dauerMin + HAUSBESUCH_GRUNDZEIT_MIN)),
+    fensterKnoten(kandidat.zeitfenster, kandidat.dauerMin + HAUSBESUCH_GRUNDZEIT_MIN),
   ]
   const kandidatIdx = n + 1
 
@@ -78,6 +106,11 @@ export async function fitScoreFuerTour(
     matrix,
     knoten,
   )
+
+  // Weiche Restriktion (Bezugspflege): gehört die Tour der bevorzugten Kraft?
+  const bezugspflegeErfuellt = kandidat.bezugspflege
+    ? tour.pflegekraftId === kandidat.bezugspflege
+    : false
 
   let best: FitMatch | null = null
 
@@ -100,6 +133,8 @@ export async function fitScoreFuerTour(
         position: p,
         ankunft,
         qualifikationOk: true,
+        arbeitszeitMin: Math.round(sim.arbeitszeit),
+        bezugspflegeErfuellt,
       }
     }
   }
@@ -108,7 +143,8 @@ export async function fitScoreFuerTour(
 }
 
 // Bewertet den Kandidaten gegen mehrere Touren und liefert die Treffer
-// sortiert nach Mehrweg (aufsteigend) — die beste Lückenfüllung zuerst.
+// sortiert: Bezugspflege zuerst (weiche Restriktion), dann nach Mehrweg
+// aufsteigend — die beste, präferenzkonforme Lückenfüllung zuerst.
 export async function fitScore(
   touren: Tour[],
   kandidat: Kandidat,
@@ -119,7 +155,11 @@ export async function fitScore(
   )
   return ergebnisse
     .filter((m): m is FitMatch => m !== null)
-    .sort((a, b) => a.mehrwegMin - b.mehrwegMin)
+    .sort(
+      (a, b) =>
+        Number(b.bezugspflegeErfuellt) - Number(a.bezugspflegeErfuellt) ||
+        a.mehrwegMin - b.mehrwegMin,
+    )
 }
 
 // ── Hilfen ────────────────────────────────────────────────────────────────

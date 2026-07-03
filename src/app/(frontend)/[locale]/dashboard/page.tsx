@@ -38,6 +38,8 @@ export default async function DashboardPage({
         tour: { ...tour, einsaetze: plan.einsaetze },
         fahrzeitMin: plan.fahrzeitMin,
         auslastungProzent: plan.auslastungProzent,
+        arbeitszeitMin: plan.arbeitszeitMin,
+        arbzgKonform: plan.arbzgKonform,
       }
     }),
   )

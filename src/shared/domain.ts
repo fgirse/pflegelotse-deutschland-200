@@ -85,6 +85,9 @@ export const fitScoreRequestSchema = z.object({
     zeitfenster: zeitfensterSchema,
     dauerMin: z.number().int().positive().default(30),
     qualifikation: z.array(z.string()).default([]),
+    // Weiche Restriktion (Pflichtenheft 5.2.1): bevorzugte Pflegekraft
+    // (Bezugspflege). Touren dieser Kraft werden bevorzugt gereiht.
+    bezugspflege: z.string().optional(),
   }),
   // Touren, gegen die geprüft wird (optional — sonst lädt die API alle).
   tourIds: z.array(z.string()).optional(),
@@ -102,6 +105,10 @@ export const fitMatchSchema = z.object({
   // Geplante Ankunft des Kandidaten an dieser Position.
   ankunft: z.number().int(),
   qualifikationOk: z.literal(true),
+  // Arbeitszeit der Tour NACH Aufnahme des Kandidaten (Minuten) — ArbZG-Nachweis.
+  arbeitszeitMin: z.number().int().default(0),
+  // Weiche Restriktion erfüllt: Tour gehört der bevorzugten Pflegekraft.
+  bezugspflegeErfuellt: z.boolean().default(false),
 })
 export type FitMatch = z.infer<typeof fitMatchSchema>
 

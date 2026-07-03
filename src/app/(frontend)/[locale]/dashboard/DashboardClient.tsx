@@ -12,6 +12,8 @@ export interface TourMitKennzahlen {
   tour: Tour
   fahrzeitMin: number
   auslastungProzent: number
+  arbeitszeitMin: number
+  arbzgKonform: boolean
 }
 
 // Gemeinsame Form für einplanbare Kandidaten — eigene Klienten UND offene
@@ -23,6 +25,7 @@ export interface PlanKandidat {
   dauerMin: number
   qualifikation: string[]
   pflegegrad?: number
+  bezugspflege?: string // bevorzugte Pflegekraft (weiche Restriktion)
   quelle: 'klient' | 'bedarf'
 }
 
@@ -55,6 +58,7 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
     dauerMin: k.dauerMin,
     qualifikation: k.qualifikation,
     pflegegrad: k.pflegegrad,
+    bezugspflege: k.bezugspflege,
     quelle: 'klient',
   }))
 
@@ -76,6 +80,7 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
             zeitfenster: k.zeitfenster,
             dauerMin: k.dauerMin,
             qualifikation: k.qualifikation,
+            bezugspflege: k.bezugspflege,
           },
         }),
       })
@@ -266,6 +271,12 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
                 {t('minutes')} {minToHHMM(mm.ankunft)}
               </p>
               <p className="text-xs font-medium text-[var(--color-success)]">✓ {t('qualificationOk')}</p>
+              {mm.bezugspflegeErfuellt && (
+                <p className="text-xs font-medium text-[var(--color-accent-strong)]">★ {t('bezugspflegeOk')}</p>
+              )}
+              <p className="text-xs text-[var(--color-muted)]">
+                {t('arbeitszeit')} {minToHHMM(mm.arbeitszeitMin)} h
+              </p>
               <button
                 onClick={() => aufnehmen(mm, selected?.quelle === 'bedarf')}
                 disabled={loading}
@@ -327,7 +338,11 @@ function TourTable({ tours }: { tours: TourMitKennzahlen[] }) {
         <div key={x.tour.id} className="mb-4">
           <h3 className="text-sm font-semibold text-[var(--color-muted)]">
             {x.tour.pflegekraftId} — {x.tour.datum} · {t('tourDuration')} {x.fahrzeitMin}{' '}
-            {t('minutes')} · {t('utilization')} {x.auslastungProzent}%
+            {t('minutes')} · {t('utilization')} {x.auslastungProzent}% · {t('arbeitszeit')}{' '}
+            {minToHHMM(x.arbeitszeitMin)} h
+            {!x.arbzgKonform && (
+              <span className="ml-2 font-medium text-[var(--color-danger)]">⚠ {t('arbzgWarnung')}</span>
+            )}
           </h3>
           <table className="mt-1 w-full border-collapse text-sm">
             <thead>
