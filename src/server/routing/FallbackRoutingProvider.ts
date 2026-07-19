@@ -6,9 +6,11 @@ import type { RoutingProvider } from './RoutingProvider'
 // Ersatz (z. B. Haversine) zurück. So liefert die Tourenplanung immer ein
 // Ergebnis; im Störfall nur gröber statt gar nicht.
 export class FallbackRoutingProvider implements RoutingProvider {
+  // public readonly, damit der Composition-Test die gewählte Kette
+  // (welcher Provider ist primär?) inspizieren kann.
   constructor(
-    private readonly primaer: RoutingProvider,
-    private readonly ersatz: RoutingProvider,
+    readonly primaer: RoutingProvider,
+    readonly ersatz: RoutingProvider,
   ) {}
 
   async travelMatrix(points: Geo[]): Promise<number[][]> {

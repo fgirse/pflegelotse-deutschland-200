@@ -20,11 +20,13 @@ Aufwand grob: **S** = < 1 Tag, **M** = 1–3 Tage, **L** = > 3 Tage / eigenes Ko
 
 Baut nur auf Vorhandenem auf. Reihenfolge: **1.1 zuerst** (größter Hebel, kleinster Aufwand), **1.2 + 1.5 bündeln** (fassen dieselbe Mehrweg-/Auslastungsrechnung in `simuliere()` an).
 
-### 1.1 HERE als Default absichern — S, **Hoch**
+### 1.1 HERE als Default absichern — S, **Hoch** — ✅ ERLEDIGT (2026-07-19)
 Heute ist Haversine (Luftlinie, 30 km/h fix) der Default; der HERE-Provider mit Live-Verkehr existiert, wird aber nicht standardmäßig genutzt. Der zentrale Produktnutzen („passgenaue Zusatzmarge auf reale Route") hängt an realer Fahrzeit.
 
 - **Fertig, wenn** bei gesetztem `HERE_API_KEY` der `FallbackRoutingProvider` HERE als Primär nutzt und bei Timeout/Fehler nachweisbar auf Haversine zurückfällt, ohne dass der Request scheitert. Der Mehrweg in `FitMatch` basiert dann auf verkehrsbewussten Zeiten.
 - **Test:** Erweiterung in `HereRoutingProvider.test.ts` — Mock liefert Fehler → Assertion, dass die Fallback-Kette eine gültige Matrix aus Haversine zurückgibt (kein Throw); zweiter Fall: HERE liefert → Matrixwerte weichen von Haversine ab.
+
+**Umsetzung:** Provider-Auswahl in reine, testbare Funktion `waehleRoutingKern()` extrahiert (`src/server/routing/waehleRouting.ts`); `matching/service.ts` nutzt sie jetzt. Fehlkonfiguration (`ROUTING_PROVIDER=here`/`osrm` ohne Key/URL) degradiert nicht mehr still, sondern warnt laut und fällt auf Haversine zurück. Neue Tests: `FallbackRoutingProvider.test.ts` (Kette: Primär liefert → Ersatz ungenutzt; Fehler/Timeout → Ersatz, kein Throw) und `waehleRouting.test.ts` (Auswahl + Degradierungs-Warnung). **Bewusst nicht** der Laufzeit-Default auf `here` geflippt — man kann nicht auf einen Provider defaulten, der einen kostenpflichtigen API-Key braucht (sonst treffen Dev/Tests ungewollt die HERE-API). Aktivierung bleibt explizit über `ROUTING_PROVIDER=here` + `HERE_API_KEY`.
 
 ### 1.2 Hausbesuchsgrundzeit je Leistung/Patient — M, **Hoch**
 `HAUSBESUCH_GRUNDZEIT_MIN` steht global auf `0`. Das Pflichtenheft (§5.1.3) fordert eine je Besuch anfallende, separat ausgewiesene Grundzeit. Ohne sie sind Auslastung und ArbZG-Rechnung zu optimistisch → falsche „passt"-Aussagen.

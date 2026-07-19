@@ -1,8 +1,5 @@
-import { HaversineRoutingProvider } from '@/server/routing/HaversineRoutingProvider'
-import { OsrmRoutingProvider } from '@/server/routing/OsrmRoutingProvider'
-import { HereRoutingProvider } from '@/server/routing/HereRoutingProvider'
-import { FallbackRoutingProvider } from '@/server/routing/FallbackRoutingProvider'
 import type { RoutingProvider } from '@/server/routing/RoutingProvider'
+import { waehleRoutingKern } from '@/server/routing/waehleRouting'
 import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
 import { fitScore, qualifikationErfuellt, ARBZG, HAUSBESUCH_GRUNDZEIT_MIN } from './fitScore'
 import { env } from '@/lib/env'
@@ -11,25 +8,19 @@ import type { FitScoreRequest, FitMatch, Tour } from '@/shared/domain'
 // Grund, warum kein Treffer zustande kam (für konkrete UI-Meldung).
 export type KeinTrefferGrund = 'keineTouren' | 'qualifikation' | 'zeitfenster'
 
-// Composition Root des Routings: wählt den Adapter anhand der Env. Bei 'osrm'
-// echtes Straßenrouting mit Haversine als Sicherheitsnetz; sonst die
-// Heuristik. Alles wird in den Matrix-Cache gehüllt (interaktive Antwort).
+// Composition Root des Routings: wählt den Adapter (Haversine/OSRM/HERE) anhand
+// der Env inkl. Fallback auf Haversine und hüllt ihn in den Matrix-Cache
+// (interaktive Antwortzeit). Die Auswahllogik selbst liegt testbar in
+// routing/waehleRouting.ts.
 function baueRouting(): RoutingProvider {
-  const haversine = new HaversineRoutingProvider()
-  let inner: RoutingProvider = haversine
-  if (env.ROUTING_PROVIDER === 'osrm' && env.OSRM_BASE_URL) {
-    const osrm = new OsrmRoutingProvider(
-      env.OSRM_BASE_URL,
-      env.OSRM_PROFILE,
-      env.OSRM_API_KEY,
-    )
-    inner = new FallbackRoutingProvider(osrm, haversine)
-  } else if (env.ROUTING_PROVIDER === 'here' && env.HERE_API_KEY) {
-    // Verkehrsbewusstes Routing über HERE; Haversine als Sicherheitsnetz.
-    const here = new HereRoutingProvider(env.HERE_API_KEY)
-    inner = new FallbackRoutingProvider(here, haversine)
-  }
-  return new CachedRoutingProvider(inner, new InMemoryMatrixCache())
+  const kern = waehleRoutingKern({
+    provider: env.ROUTING_PROVIDER,
+    osrmBaseUrl: env.OSRM_BASE_URL,
+    osrmProfile: env.OSRM_PROFILE,
+    osrmApiKey: env.OSRM_API_KEY,
+    hereApiKey: env.HERE_API_KEY,
+  })
+  return new CachedRoutingProvider(kern, new InMemoryMatrixCache())
 }
 
 const routing = baueRouting()
