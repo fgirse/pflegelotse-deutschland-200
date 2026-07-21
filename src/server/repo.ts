@@ -31,6 +31,37 @@ export async function ladeAlleTouren(): Promise<Tour[]> {
   return res.docs.map((d) => tourSchema.parse(normTour(d)))
 }
 
+// Eingabe zum Anlegen einer neuen (leeren) Tour. tenantId kommt serverseitig
+// aus dem angemeldeten Nutzer; id vergibt die DB.
+export type NeueTour = {
+  tenantId: string
+  datum: string // ISO YYYY-MM-DD
+  pflegekraftId: string
+  pflegekraftQualifikation?: string[]
+  start: { lat: number; lng: number } // Depot/Startpunkt
+  startZeit?: number // Min seit Mitternacht, Standard 08:00
+}
+
+// Legt eine neue Tour ohne Einsätze an (Disponent plant sie danach voll).
+export async function erstelleTour(input: NeueTour): Promise<Tour> {
+  const payload = await payloadClient()
+  const d = await payload.create({
+    collection: 'touren',
+    data: {
+      tenantId: input.tenantId,
+      datum: input.datum,
+      pflegekraftId: input.pflegekraftId,
+      pflegekraftQualifikation: input.pflegekraftQualifikation ?? [],
+      start: input.start,
+      startZeit: input.startZeit ?? 480,
+      einsaetze: [],
+    },
+    overrideAccess: true,
+    depth: 0,
+  })
+  return tourSchema.parse(normTour(d))
+}
+
 export async function ladeTour(id: string): Promise<Tour | null> {
   const payload = await payloadClient()
   try {

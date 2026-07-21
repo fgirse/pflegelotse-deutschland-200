@@ -100,7 +100,29 @@
     "importHinweis": "Import a client list from your care software (CSV/Excel)",
     "importDropHinweis": "Drag your care-software CSV/Excel export (e.g. MediFox) here or choose a file — columns are detected automatically.",
     "importDateiWaehlen": "Choose file",
-    "importAndereDatei": "different file"
+    "importAndereDatei": "different file",
+    "tourErstellen": "Create new tour"
+  },
+  "tourNeu": {
+    "title": "Create new tour",
+    "subtitle": "Set the carer, day and start point — you plan the visits afterwards.",
+    "zurueck": "Back to dashboard",
+    "datum": "Date",
+    "pflegekraft": "Carer (ID/name)",
+    "pflegekraftPlatzhalter": "e.g. pk-001 or initials",
+    "qualifikation": "Qualifications (optional, comma-separated)",
+    "qualifikationPlatzhalter": "e.g. grundpflege, behandlungspflege",
+    "startZeit": "Start time (departure from depot)",
+    "startAdresse": "Start point / depot (address)",
+    "startAdressePlatzhalter": "Street, ZIP or city",
+    "suchen": "Search",
+    "adresseNichtGefunden": "Address not found — please be more specific.",
+    "speichern": "Create tour",
+    "speichert": "Creating …",
+    "fehlerPflicht": "Please provide a date and a carer.",
+    "fehlerAdresse": "Please set a start point via the address search.",
+    "fehlerZeit": "Please provide a valid start time.",
+    "fehlerSpeichern": "The tour could not be created. Please try again."
   },
   "einzugsgebiet": {
     "eyebrow": "Service settings",

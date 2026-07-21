@@ -92,12 +92,18 @@ export default async function DashboardPage({
 
   return (
     <main className="container-page max-w-7xl py-8">
-      <header className="mb-6">
-        <span className="chip">
-          {tl('angemeldetAls')}: {user.dienstName || user.email}
-        </span>
-        <h1 className="mt-3 text-3xl font-bold">{t('title')}</h1>
-        <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <span className="chip">
+            {tl('angemeldetAls')}: {user.dienstName || user.email}
+          </span>
+          <h1 className="mt-3 text-3xl font-bold">{t('title')}</h1>
+          <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
+        </div>
+        {/* Primäraktion: neue Tour anlegen. */}
+        <Link href="/dashboard/tour-neu" className="btn btn-primary shrink-0">
+          + {t('tourErstellen')}
+        </Link>
       </header>
 
       {/* Marktplatz-Eingänge + Einzugsgebiet. */}

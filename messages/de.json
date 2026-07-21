@@ -99,7 +99,29 @@
     "importHinweis": "Klientenliste aus der Pflegesoftware (CSV/Excel) übernehmen",
     "importDropHinweis": "CSV/Excel-Export aus deiner Pflegesoftware (z. B. MediFox) hierher ziehen oder auswählen — die Spalten werden automatisch erkannt.",
     "importDateiWaehlen": "Datei wählen",
-    "importAndereDatei": "andere Datei"
+    "importAndereDatei": "andere Datei",
+    "tourErstellen": "Neue Tour erstellen"
+  },
+  "tourNeu": {
+    "title": "Neue Tour erstellen",
+    "subtitle": "Pflegekraft, Tag und Startpunkt festlegen — Einsätze planst du danach.",
+    "zurueck": "Zurück zum Dashboard",
+    "datum": "Datum",
+    "pflegekraft": "Pflegekraft (Kennung/Name)",
+    "pflegekraftPlatzhalter": "z. B. pk-001 oder Kürzel",
+    "qualifikation": "Qualifikationen (optional, kommagetrennt)",
+    "qualifikationPlatzhalter": "z. B. grundpflege, behandlungspflege",
+    "startZeit": "Startzeit (Abfahrt am Depot)",
+    "startAdresse": "Startpunkt / Depot (Adresse)",
+    "startAdressePlatzhalter": "Straße, PLZ oder Ort",
+    "suchen": "Suchen",
+    "adresseNichtGefunden": "Adresse nicht gefunden — bitte genauer angeben.",
+    "speichern": "Tour erstellen",
+    "speichert": "Wird erstellt …",
+    "fehlerPflicht": "Bitte Datum und Pflegekraft angeben.",
+    "fehlerAdresse": "Bitte einen Startpunkt über die Adresssuche festlegen.",
+    "fehlerZeit": "Bitte eine gültige Startzeit angeben.",
+    "fehlerSpeichern": "Die Tour konnte nicht erstellt werden. Bitte erneut versuchen."
   },
   "einzugsgebiet": {
     "eyebrow": "Dienst-Einstellungen",
