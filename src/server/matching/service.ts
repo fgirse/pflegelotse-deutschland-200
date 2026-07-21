@@ -1,7 +1,7 @@
 import type { RoutingProvider } from '@/server/routing/RoutingProvider'
 import { waehleRoutingKern } from '@/server/routing/waehleRouting'
 import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
-import { fitScore, qualifikationErfuellt, ARBZG, HAUSBESUCH_GRUNDZEIT_MIN } from './fitScore'
+import { fitScore, qualifikationErfuellt, ARBZG, besuchsdauer } from './fitScore'
 import { env } from '@/lib/env'
 import type { FitScoreRequest, FitMatch, Tour } from '@/shared/domain'
 
@@ -60,6 +60,8 @@ export async function berechneFitScore(
 export async function planeTour(tour: Tour): Promise<{
   einsaetze: Tour['einsaetze']
   fahrzeitMin: number
+  pflegezeitMin: number
+  grundzeitMin: number
   auslastungProzent: number
   arbeitszeitMin: number
   arbzgKonform: boolean
@@ -69,8 +71,9 @@ export async function planeTour(tour: Tour): Promise<{
 
   let t = tour.startZeit
   let fahrzeit = 0
-  let pflege = 0
-  let arbeit = 0 // Arbeitszeit = Fahrt + Leistung (ohne Warte-/Pausenzeit)
+  let pflege = 0 // reine Leistungszeit (Pflichtenheft 5.1.3: getrennt von Grundzeit)
+  let grundzeit = 0 // Hausbesuchsgrundzeit, separat ausgewiesen
+  let arbeit = 0 // Arbeitszeit = Fahrt + Leistung + Grundzeit (ohne Warte-/Pausenzeit)
   let pauseGesetzt = false
   const einsaetze = tour.einsaetze.map((e, i) => {
     const reise = matrix[i][i + 1] // von vorherigem Punkt zu diesem Einsatz
@@ -83,19 +86,26 @@ export async function planeTour(tour: Tour): Promise<{
       pauseGesetzt = true
     }
     const beginn = Math.max(ankunft, e.zeitfenster.von)
-    const dauer = e.dauerMin + HAUSBESUCH_GRUNDZEIT_MIN
+    const grund = e.grundzeitMin ?? 0
+    const dauer = besuchsdauer(e.dauerMin, e.grundzeitMin) // Leistung + Grundzeit
     t = beginn + dauer
-    pflege += dauer
+    pflege += e.dauerMin
+    grundzeit += grund
     arbeit += dauer
     return { ...e, ankunft: Math.round(ankunft) }
   })
 
-  // Auslastung = Pflegezeit / (Pflegezeit + Fahrzeit), grob als Effizienzmaß.
-  const gesamt = pflege + fahrzeit
-  const auslastung = gesamt > 0 ? Math.round((pflege / gesamt) * 100) : 0
+  // Auslastung = Zeit am Klienten (Leistung + Grundzeit) / (davon + Fahrzeit),
+  // grob als Effizienzmaß. Grundzeit ist echte Zeit beim Patienten, zählt also
+  // zur produktiven Seite; sie wird zusätzlich separat ausgewiesen.
+  const amKlienten = pflege + grundzeit
+  const gesamt = amKlienten + fahrzeit
+  const auslastung = gesamt > 0 ? Math.round((amKlienten / gesamt) * 100) : 0
   return {
     einsaetze,
     fahrzeitMin: Math.round(fahrzeit),
+    pflegezeitMin: Math.round(pflege),
+    grundzeitMin: Math.round(grundzeit),
     auslastungProzent: auslastung,
     arbeitszeitMin: Math.round(arbeit),
     arbzgKonform: arbeit <= ARBZG.maxArbeitszeitMin,

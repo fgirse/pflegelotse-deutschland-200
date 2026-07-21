@@ -48,7 +48,9 @@ export const Touren: CollectionConfig = {
             { name: 'bis', type: 'number', required: true },
           ],
         },
-        { name: 'dauerMin', type: 'number', defaultValue: 30 },
+        { name: 'dauerMin', type: 'number', defaultValue: 30 }, // reine Leistungszeit
+        // Hausbesuchsgrundzeit je Besuch (Pflichtenheft 5.1.3), separat von dauerMin.
+        { name: 'grundzeitMin', type: 'number', defaultValue: 0 },
         { name: 'qualifikation', type: 'json', defaultValue: [] },
         { name: 'ankunft', type: 'number' }, // geplante Ankunft (Min seit Mitternacht)
         { name: 'probe', type: 'checkbox', defaultValue: false }, // unverbindliche Probe-Einplanung

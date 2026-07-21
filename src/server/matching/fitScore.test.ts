@@ -141,6 +141,47 @@ describe('Fit-Score (ArbZG-Restriktionen)', () => {
   })
 })
 
+// Pflichtenheft 5.1.3: Hausbesuchsgrundzeit je Besuch, separat von der reinen
+// Leistungszeit. Sie fließt in Zeitplan und ArbZG-Rechnung ein.
+describe('Fit-Score (Hausbesuchsgrundzeit)', () => {
+  // Basis (Position 1): Fahrzeit 20 + Leistung 3×30 = 110 Min Arbeitszeit.
+  it('addiert die Grundzeit je Besuch auf Arbeitszeit und Ankunft', async () => {
+    const ohne = await fitScoreFuerTour(basisTour(), kandidat(), stubRouting)
+    expect(ohne!.arbeitszeitMin).toBe(110)
+    expect(ohne!.ankunft).toBe(525) // 480 +10 (0→1) +30 (E1) +5 (1→kand)
+
+    // Grundzeit je 10 Min auf E1, E2 und Kandidat → +30 Min Arbeitszeit gesamt.
+    const tour = basisTour({
+      einsaetze: [
+        { pseudonymId: '00000000-0000-4000-8000-000000000001', geo: g(1), zeitfenster: weit, dauerMin: 30, grundzeitMin: 10, qualifikation: [] },
+        { pseudonymId: '00000000-0000-4000-8000-000000000002', geo: g(2), zeitfenster: weit, dauerMin: 30, grundzeitMin: 10, qualifikation: [] },
+      ],
+    })
+    const mit = await fitScoreFuerTour(tour, kandidat({ grundzeitMin: 10 }), stubRouting)
+    expect(mit!.arbeitszeitMin).toBe(140) // 110 + 3×10
+    // Nur die Grundzeit VOR dem Kandidaten (E1: +10) verschiebt dessen Ankunft.
+    expect(mit!.ankunft).toBe(535)
+    // Position und Mehrweg bleiben, da die Grundzeit nicht in die Fahrzeit zählt.
+    expect(mit!.position).toBe(ohne!.position)
+    expect(mit!.mehrwegMin).toBe(ohne!.mehrwegMin)
+  })
+
+  // Dieselbe Tour, die ohne Grundzeit knapp machbar ist (590 ≤ 600), kippt mit
+  // Grundzeit über die 10-h-Grenze (§3 ArbZG) → kein Treffer.
+  it('lässt die Grundzeit eine sonst machbare Einfügung über 10 h kippen', async () => {
+    const einsaetze = [
+      { pseudonymId: '00000000-0000-4000-8000-000000000001', geo: g(1), zeitfenster: weit, dauerMin: 270, qualifikation: [] },
+      { pseudonymId: '00000000-0000-4000-8000-000000000002', geo: g(2), zeitfenster: weit, dauerMin: 270, qualifikation: [] },
+    ]
+    // Ohne Grundzeit: machbar (590 Min).
+    const ohne = await fitScoreFuerTour(basisTour({ einsaetze }), kandidat(), stubRouting)
+    expect(ohne).not.toBeNull()
+    // Kandidat mit 20 Min Grundzeit → 610 Min > 600 → nicht machbar.
+    const mit = await fitScoreFuerTour(basisTour({ einsaetze }), kandidat({ grundzeitMin: 20 }), stubRouting)
+    expect(mit).toBeNull()
+  })
+})
+
 // Pflichtenheft 5.2.1: Bezugspflege als weiche Restriktion.
 describe('Fit-Score (Bezugspflege, weiche Restriktion)', () => {
   it('reiht die Tour der Wunsch-Pflegekraft nach vorne', async () => {

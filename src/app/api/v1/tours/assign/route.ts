@@ -15,6 +15,7 @@ const bodySchema = z.object({
     geo: geoSchema,
     zeitfenster: zeitfensterSchema,
     dauerMin: z.number().int().positive().default(30),
+    grundzeitMin: z.number().int().min(0).optional(),
     qualifikation: z.array(z.string()).default([]),
   }),
 })
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
     geo: kandidat.geo,
     zeitfenster: kandidat.zeitfenster,
     dauerMin: kandidat.dauerMin,
+    grundzeitMin: kandidat.grundzeitMin,
     qualifikation: kandidat.qualifikation,
     probe: probe ?? false,
   }
@@ -61,6 +63,8 @@ export async function POST(req: NextRequest) {
     tour: gespeichert,
     kennzahlen: {
       fahrzeitMin: geplant.fahrzeitMin,
+      pflegezeitMin: geplant.pflegezeitMin,
+      grundzeitMin: geplant.grundzeitMin, // separat ausgewiesen (Pflichtenheft 5.1.3)
       auslastungProzent: geplant.auslastungProzent,
     },
   })

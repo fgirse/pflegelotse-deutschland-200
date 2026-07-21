@@ -58,7 +58,9 @@ export const Bedarfe: CollectionConfig = {
         { name: 'bis', type: 'number', required: true },
       ],
     },
-    { name: 'dauerMin', type: 'number', defaultValue: 30 },
+    { name: 'dauerMin', type: 'number', defaultValue: 30 }, // reine Leistungszeit
+    // Hausbesuchsgrundzeit je Besuch (Pflichtenheft 5.1.3), separat von dauerMin.
+    { name: 'grundzeitMin', type: 'number', defaultValue: 0 },
     { name: 'express', type: 'checkbox', defaultValue: false },
     {
       name: 'status',

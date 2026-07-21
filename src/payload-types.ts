@@ -268,6 +268,7 @@ export interface Touren {
           bis: number;
         };
         dauerMin?: number | null;
+        grundzeitMin?: number | null;
         qualifikation?:
           | {
               [k: string]: unknown;
@@ -362,6 +363,7 @@ export interface Bedarfe {
     bis: number;
   };
   dauerMin?: number | null;
+  grundzeitMin?: number | null;
   express?: boolean | null;
   status?: ('offen' | 'in_bearbeitung' | 'vergeben' | 'abgesagt') | null;
   matchingTenants?:
@@ -716,6 +718,7 @@ export interface TourenSelect<T extends boolean = true> {
               bis?: T;
             };
         dauerMin?: T;
+        grundzeitMin?: T;
         qualifikation?: T;
         ankunft?: T;
         probe?: T;
@@ -771,6 +774,7 @@ export interface BedarfeSelect<T extends boolean = true> {
         bis?: T;
       };
   dauerMin?: T;
+  grundzeitMin?: T;
   express?: T;
   status?: T;
   matchingTenants?: T;

@@ -11,8 +11,14 @@ export const ARBZG = {
 
 // Hausbesuchsgrundzeit (Kap. 5.1.3): fällt einmalig je Besuch an (Begrüßung,
 // Krankenbeobachtung, Dokumentation), zusätzlich zur reinen Leistungszeit.
-// Konfigurierbar; Standard 0 (jeder Dienst setzt seinen eigenen Wert).
-export const HAUSBESUCH_GRUNDZEIT_MIN = 0
+// Wird pro Einsatz/Kandidat geführt (Feld grundzeitMin); fehlt der Wert, gilt
+// dieser Default. So kann jeder Dienst je Patient/Leistung einen Wert setzen.
+export const GRUNDZEIT_DEFAULT_MIN = 0
+
+// Gesamtzeit am Klienten für einen Besuch: reine Leistungszeit + Grundzeit.
+export function besuchsdauer(dauerMin: number, grundzeitMin?: number): number {
+  return dauerMin + (grundzeitMin ?? GRUNDZEIT_DEFAULT_MIN)
+}
 
 // Ein Knoten in der Tour-Simulation: Depot (ohne Fenster) oder Einsatz.
 interface Knoten {
@@ -92,8 +98,8 @@ export async function fitScoreFuerTour(
   // Leistungszeit + Hausbesuchsgrundzeit je Besuch (Kap. 5.1.3).
   const knoten: Knoten[] = [
     { von: 0, bis: 1439, dauer: 0 }, // Depot ohne Fenster
-    ...tour.einsaetze.map((e) => fensterKnoten(e.zeitfenster, e.dauerMin + HAUSBESUCH_GRUNDZEIT_MIN)),
-    fensterKnoten(kandidat.zeitfenster, kandidat.dauerMin + HAUSBESUCH_GRUNDZEIT_MIN),
+    ...tour.einsaetze.map((e) => fensterKnoten(e.zeitfenster, besuchsdauer(e.dauerMin, e.grundzeitMin))),
+    fensterKnoten(kandidat.zeitfenster, besuchsdauer(kandidat.dauerMin, kandidat.grundzeitMin)),
   ]
   const kandidatIdx = n + 1
 

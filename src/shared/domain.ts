@@ -37,7 +37,11 @@ export const klientOperativSchema = z.object({
   leistungen: z.array(z.string()).default([]), // Leistungskomplex-Codes, z. B. "LK01"
   qualifikation: z.array(z.string()).default([]), // nötige Qualifikationen
   zeitfenster: zeitfensterSchema,
-  dauerMin: z.number().int().positive().default(30), // Einsatzdauer
+  dauerMin: z.number().int().positive().default(30), // reine Leistungszeit
+  // Hausbesuchsgrundzeit (Pflichtenheft 5.1.3): fällt EINMALIG je Besuch an
+  // (Begrüßung, Krankenbeobachtung, Dokumentation), separat von der reinen
+  // Leistungszeit. Optional je Patient/Leistung; ohne Angabe 0.
+  grundzeitMin: z.number().int().min(0).optional(),
   // Kostenträger aus dem übernommenen Bedarf (Abrechnung).
   kostentraegerArt: z.enum(KOSTENTRAEGER_ARTEN).optional(),
   krankenversicherer: z.string().optional(),
@@ -51,7 +55,9 @@ export const einsatzSchema = z.object({
   pseudonymId: pseudonymIdSchema,
   geo: geoSchema,
   zeitfenster: zeitfensterSchema,
-  dauerMin: z.number().int().positive().default(30),
+  dauerMin: z.number().int().positive().default(30), // reine Leistungszeit
+  // Hausbesuchsgrundzeit je Besuch (Pflichtenheft 5.1.3); optional, sonst 0.
+  grundzeitMin: z.number().int().min(0).optional(),
   qualifikation: z.array(z.string()).default([]),
   // Geplante Ankunftszeit (Minuten seit Mitternacht), vom Planer gesetzt.
   ankunft: z.number().int().min(0).max(1439).optional(),
@@ -83,7 +89,9 @@ export const fitScoreRequestSchema = z.object({
     pseudonymId: pseudonymIdSchema.optional(),
     geo: geoSchema,
     zeitfenster: zeitfensterSchema,
-    dauerMin: z.number().int().positive().default(30),
+    dauerMin: z.number().int().positive().default(30), // reine Leistungszeit
+    // Hausbesuchsgrundzeit je Besuch (Pflichtenheft 5.1.3); optional, sonst 0.
+    grundzeitMin: z.number().int().min(0).optional(),
     qualifikation: z.array(z.string()).default([]),
     // Weiche Restriktion (Pflichtenheft 5.2.1): bevorzugte Pflegekraft
     // (Bezugspflege). Touren dieser Kraft werden bevorzugt gereiht.

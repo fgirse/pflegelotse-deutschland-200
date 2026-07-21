@@ -28,11 +28,15 @@ Heute ist Haversine (Luftlinie, 30 km/h fix) der Default; der HERE-Provider mit 
 
 **Umsetzung:** Provider-Auswahl in reine, testbare Funktion `waehleRoutingKern()` extrahiert (`src/server/routing/waehleRouting.ts`); `matching/service.ts` nutzt sie jetzt. Fehlkonfiguration (`ROUTING_PROVIDER=here`/`osrm` ohne Key/URL) degradiert nicht mehr still, sondern warnt laut und fällt auf Haversine zurück. Neue Tests: `FallbackRoutingProvider.test.ts` (Kette: Primär liefert → Ersatz ungenutzt; Fehler/Timeout → Ersatz, kein Throw) und `waehleRouting.test.ts` (Auswahl + Degradierungs-Warnung). **Bewusst nicht** der Laufzeit-Default auf `here` geflippt — man kann nicht auf einen Provider defaulten, der einen kostenpflichtigen API-Key braucht (sonst treffen Dev/Tests ungewollt die HERE-API). Aktivierung bleibt explizit über `ROUTING_PROVIDER=here` + `HERE_API_KEY`.
 
-### 1.2 Hausbesuchsgrundzeit je Leistung/Patient — M, **Hoch**
+### 1.2 Hausbesuchsgrundzeit je Leistung/Patient — M, **Hoch** — ✅ ERLEDIGT (2026-07-19)
 `HAUSBESUCH_GRUNDZEIT_MIN` steht global auf `0`. Das Pflichtenheft (§5.1.3) fordert eine je Besuch anfallende, separat ausgewiesene Grundzeit. Ohne sie sind Auslastung und ArbZG-Rechnung zu optimistisch → falsche „passt"-Aussagen.
 
 - **Fertig, wenn** `grundzeitMin` als Feld am Einsatz/Bedarf existiert (nicht mehr global `0`), in `simuliere()` pro Stopp statt der Konstante addiert wird, und in Auslastung/ArbZG-Rechnung separat ausgewiesen ist.
 - **Test:** `fitScore.test.ts` — Golden-Case mit zwei Einsätzen unterschiedlicher Grundzeit → geplante Ankunftszeiten und `arbeitszeitMin` verschieben sich exakt um die Summe der Grundzeiten; ein Fall kippt dadurch nachweisbar von `machbar=true` auf `false` am ArbZG-Deckel.
+
+**Umsetzung:** Globale Konstante durch optionales Feld `grundzeitMin` ersetzt — in `domain.ts` an `einsatzSchema`, `klientOperativSchema` und `fitScoreRequest.kandidat`, in den Payload-Collections `Touren`/`Bedarfe` (defaultValue 0) und in der Assign-Route. Neue Hilfe `besuchsdauer(dauerMin, grundzeitMin)` in `fitScore.ts` addiert die Grundzeit je Besuch. `planeTour()` führt reine Leistungszeit (`pflegezeitMin`) und Grundzeit (`grundzeitMin`) getrennt und weist beide in den Kennzahlen aus; Grundzeit zählt (als echte Zeit am Klienten) zu Arbeitszeit/ArbZG und zur produktiven Seite der Auslastung. Der `$jsonSchema`-Validator sperrt nur PII (kein `additionalProperties: false`), daher keine Validator-Änderung nötig. Payload-Typen regeneriert. Ohne gesetzten Wert bleibt das Verhalten identisch (0).
+
+> **Offen (bewusst nicht Teil von 1.2):** Eine tenant-weite Default-Grundzeit und eine je-Leistung-Tabelle (Leistungsstammdaten) sind nicht modelliert — heute wird der Wert je Einsatz/Bedarf getragen. Für „je Leistung" bräuchte es die Leistungsstammdaten aus §5.1.3, die noch fehlen.
 
 ### 1.3 Mitarbeiter-/Tour-Verfügbarkeit — M, **Hoch**
 Urlaub/Krankheit/Teilzeit (§5.1.2) sind im Tour-Modell nicht abgebildet. Der Matcher schlägt sonst Touren vor, die es an dem Tag gar nicht gibt.
