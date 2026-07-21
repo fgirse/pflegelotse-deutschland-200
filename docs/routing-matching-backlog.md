@@ -50,11 +50,15 @@ Heute nur ArbZG-Deckel, keine harte Stopp-Zahl. Verhindert Überbuchung.
 - **Fertig, wenn** ein optionales `maxEinsaetze` (bzw. Rest-Arbeitszeit) am Tour-Modell existiert und `fitScoreFuerTour()` bei Überschreitung `null` zurückgibt.
 - **Test:** `fitScore.test.ts` — volle Tour (`einsaetze.length === maxEinsaetze`) → Kandidat wird abgelehnt, obwohl Zeitfenster/ArbZG passen würden.
 
-### 1.5 Separater Tour-Endpunkt — S, Mittel
+### 1.5 Separater Tour-Endpunkt — S, Mittel — ✅ ERLEDIGT (2026-07-21)
 Modell kennt nur `start` (Depot), keinen Endpunkt (§5.1.2). Der Rückweg der letzten Position wird dadurch unterschätzt. **Zusammen mit 1.2 umsetzen** — gleiche Rechnung.
 
 - **Fertig, wenn** `ende`-Koordinaten am Tour-Modell existieren (Default = `start`) und der Rückweg vom letzten Stopp in Fahrzeit/Mehrweg einfließt.
 - **Test:** `fitScore.test.ts` — Einfügen an letzter Position erhöht den Mehrweg um den geänderten Rückweg zum Endpunkt (Golden-Wert), nicht nur um den Hinweg.
+
+**Umsetzung:** Optionales Feld `ende` (Koordinaten) an `tourSchema` und der `Touren`-Collection; ohne Angabe kehrt die Tour zum Startpunkt zurück (Rundtour zum Depot, Matrix-Index 0). Ein separater Endpunkt wird als zusätzlicher Matrix-Punkt angehängt. `simuliere()` bekommt einen `endeIdx`-Parameter und addiert den Rückweg vom letzten Stopp; `planeTour()` analog. `normTour()` reicht `ende` nur mit echten Koordinaten durch (die optionale Payload-Group liefert sonst null-Felder). Payload-Typen regeneriert.
+
+> **Bewusste Entscheidung:** Der Rückweg ist echte Fahr- **und** Arbeitszeit (der Wagen fährt zum Depot zurück), zählt also auch zur ArbZG-Rechnung — nicht nur zur ausgewiesenen Fahrzeit. Das ist strenger/korrekter und hat drei bestehende Golden-Tests verschoben (ArbZG-Grenzfall 270→260 Min, Grundzeit-Arbeitszeit 110/140→130/160, Pause-Test-Matrix). Zwei neue Tests decken 1.5 ab: Rückweg zum Depot bzw. zu einem separaten Endpunkt fließt in den Mehrweg der letzten Position ein.
 
 ### 1.6 Geschlechts-/Präferenz-Constraint — S, Niedrig
 Modell kennt nur Bezugspflege; Geschlechtspräferenz (§5.1.1) ist eine häufige reale Anforderung.

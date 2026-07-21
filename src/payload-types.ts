@@ -255,6 +255,10 @@ export interface Touren {
     lat: number;
     lng: number;
   };
+  ende?: {
+    lat?: number | null;
+    lng?: number | null;
+  };
   startZeit?: number | null;
   einsaetze?:
     | {
@@ -695,6 +699,12 @@ export interface TourenSelect<T extends boolean = true> {
   pflegekraftId?: T;
   pflegekraftQualifikation?: T;
   start?:
+    | T
+    | {
+        lat?: T;
+        lng?: T;
+      };
+  ende?:
     | T
     | {
         lat?: T;

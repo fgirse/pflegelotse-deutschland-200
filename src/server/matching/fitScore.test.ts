@@ -105,12 +105,13 @@ describe('Fit-Score (ArbZG-Restriktionen)', () => {
     expect(match).toBeNull()
   })
 
-  // Knapp darunter (je 270 Min): 540 Leistung + 30 Kandidat + 20 Fahrt = 590 ≤ 600.
+  // Knapp darunter (je 260 Min): 520 Leistung + 30 Kandidat + 40 Fahrt inkl.
+  // Rückweg zum Depot (Matrix 2→0 = 20) = 590 ≤ 600.
   it('erlaubt eine Einfügung knapp unter 10 h und weist die Arbeitszeit aus', async () => {
     const tour = basisTour({
       einsaetze: [
-        { pseudonymId: '00000000-0000-4000-8000-000000000001', geo: g(1), zeitfenster: weit, dauerMin: 270, qualifikation: [] },
-        { pseudonymId: '00000000-0000-4000-8000-000000000002', geo: g(2), zeitfenster: weit, dauerMin: 270, qualifikation: [] },
+        { pseudonymId: '00000000-0000-4000-8000-000000000001', geo: g(1), zeitfenster: weit, dauerMin: 260, qualifikation: [] },
+        { pseudonymId: '00000000-0000-4000-8000-000000000002', geo: g(2), zeitfenster: weit, dauerMin: 260, qualifikation: [] },
       ],
     })
     const match = await fitScoreFuerTour(tour, kandidat(), stubRouting)
@@ -123,11 +124,12 @@ describe('Fit-Score (ArbZG-Restriktionen)', () => {
   // Ein Einsatz mit 360 Min zwingt den danach bedienten Kandidaten hinter die
   // Pause → seine Ankunft verschiebt sich um 30 Min (860 → 890).
   it('schiebt nach 6 h eine Pflichtpause ein und verschiebt die Ankunft (§4 ArbZG)', async () => {
-    // Asymmetrische Matrix: start→kand teuer (100), erzwingt Kandidat NACH E1.
+    // Asymmetrische Matrix: start→kand teuer (100) erzwingt Kandidat NACH E1;
+    // Rückweg kand→Depot günstig (10), damit die letzte Position gewinnt.
     const matrix = [
       [0, 10, 100],
       [10, 0, 10],
-      [100, 10, 0],
+      [10, 10, 0],
     ]
     const routing: RoutingProvider = { async travelMatrix() { return matrix } }
     const tour = basisTour({
@@ -144,10 +146,10 @@ describe('Fit-Score (ArbZG-Restriktionen)', () => {
 // Pflichtenheft 5.1.3: Hausbesuchsgrundzeit je Besuch, separat von der reinen
 // Leistungszeit. Sie fließt in Zeitplan und ArbZG-Rechnung ein.
 describe('Fit-Score (Hausbesuchsgrundzeit)', () => {
-  // Basis (Position 1): Fahrzeit 20 + Leistung 3×30 = 110 Min Arbeitszeit.
+  // Basis (Position 1): Fahrzeit 40 inkl. Rückweg + Leistung 3×30 = 130.
   it('addiert die Grundzeit je Besuch auf Arbeitszeit und Ankunft', async () => {
     const ohne = await fitScoreFuerTour(basisTour(), kandidat(), stubRouting)
-    expect(ohne!.arbeitszeitMin).toBe(110)
+    expect(ohne!.arbeitszeitMin).toBe(130)
     expect(ohne!.ankunft).toBe(525) // 480 +10 (0→1) +30 (E1) +5 (1→kand)
 
     // Grundzeit je 10 Min auf E1, E2 und Kandidat → +30 Min Arbeitszeit gesamt.
@@ -158,7 +160,7 @@ describe('Fit-Score (Hausbesuchsgrundzeit)', () => {
       ],
     })
     const mit = await fitScoreFuerTour(tour, kandidat({ grundzeitMin: 10 }), stubRouting)
-    expect(mit!.arbeitszeitMin).toBe(140) // 110 + 3×10
+    expect(mit!.arbeitszeitMin).toBe(160) // 130 + 3×10
     // Nur die Grundzeit VOR dem Kandidaten (E1: +10) verschiebt dessen Ankunft.
     expect(mit!.ankunft).toBe(535)
     // Position und Mehrweg bleiben, da die Grundzeit nicht in die Fahrzeit zählt.
@@ -170,8 +172,8 @@ describe('Fit-Score (Hausbesuchsgrundzeit)', () => {
   // Grundzeit über die 10-h-Grenze (§3 ArbZG) → kein Treffer.
   it('lässt die Grundzeit eine sonst machbare Einfügung über 10 h kippen', async () => {
     const einsaetze = [
-      { pseudonymId: '00000000-0000-4000-8000-000000000001', geo: g(1), zeitfenster: weit, dauerMin: 270, qualifikation: [] },
-      { pseudonymId: '00000000-0000-4000-8000-000000000002', geo: g(2), zeitfenster: weit, dauerMin: 270, qualifikation: [] },
+      { pseudonymId: '00000000-0000-4000-8000-000000000001', geo: g(1), zeitfenster: weit, dauerMin: 260, qualifikation: [] },
+      { pseudonymId: '00000000-0000-4000-8000-000000000002', geo: g(2), zeitfenster: weit, dauerMin: 260, qualifikation: [] },
     ]
     // Ohne Grundzeit: machbar (590 Min).
     const ohne = await fitScoreFuerTour(basisTour({ einsaetze }), kandidat(), stubRouting)
@@ -179,6 +181,55 @@ describe('Fit-Score (Hausbesuchsgrundzeit)', () => {
     // Kandidat mit 20 Min Grundzeit → 610 Min > 600 → nicht machbar.
     const mit = await fitScoreFuerTour(basisTour({ einsaetze }), kandidat({ grundzeitMin: 20 }), stubRouting)
     expect(mit).toBeNull()
+  })
+})
+
+// Pflichtenheft 5.1.2: die Tour hat einen Endpunkt; der Rückweg vom letzten
+// Stopp dorthin zählt zur Fahrzeit und damit zum Mehrweg.
+describe('Fit-Score (Tour-Endpunkt / Rückweg)', () => {
+  it('rechnet den Rückweg zum Depot in den Mehrweg der letzten Position ein', async () => {
+    // Punkte [start, E1, kand]; ohne separaten Endpunkt Rückweg zum Start (0).
+    const matrix = [
+      [0, 30, 30],
+      [5, 0, 10],
+      [20, 10, 0],
+    ]
+    const routing: RoutingProvider = { async travelMatrix() { return matrix } }
+    // E1 muss bis 8:40 (520) beginnen → erzwingt E1 zuerst, Kandidat als letzten Stopp.
+    const tour = basisTour({
+      einsaetze: [
+        { pseudonymId: '00000000-0000-4000-8000-000000000001', geo: g(1), zeitfenster: { von: 0, bis: 520 }, dauerMin: 30, qualifikation: [] },
+      ],
+    })
+    const match = await fitScoreFuerTour(tour, kandidat(), routing)
+    expect(match).not.toBeNull()
+    expect(match!.position).toBe(1) // letzte Position
+    // Basis 0→1→0 = 35. Mit Kandidat 0→1→2→0 = 60 → Mehrweg 25. Enthält den
+    // geänderten Rückweg (2→0=20 statt 1→0=5), nicht nur den Hinweg (1→2=10).
+    expect(match!.mehrwegMin).toBe(25)
+  })
+
+  it('nutzt einen separaten Endpunkt (ende ≠ start) für den Rückweg', async () => {
+    // Punkte [start, E1, kand, ende]; Rückweg zum ENDE (Index 3).
+    const matrix = [
+      [0, 10, 10, 99],
+      [10, 0, 10, 5],
+      [10, 10, 0, 40],
+      [99, 5, 40, 0],
+    ]
+    const routing: RoutingProvider = { async travelMatrix() { return matrix } }
+    const tour = basisTour({
+      ende: g(9),
+      einsaetze: [
+        { pseudonymId: '00000000-0000-4000-8000-000000000001', geo: g(1), zeitfenster: { von: 0, bis: 520 }, dauerMin: 30, qualifikation: [] },
+      ],
+    })
+    const match = await fitScoreFuerTour(tour, kandidat(), routing)
+    expect(match).not.toBeNull()
+    expect(match!.position).toBe(1)
+    // Basis 0→1→ende = 10+5 = 15. Mit Kandidat 0→1→2→ende = 10+10+40 = 60 →
+    // Mehrweg 45. Nutzt den teuren Rückweg kand→ende (40); zum Start wäre es 10.
+    expect(match!.mehrwegMin).toBe(45)
   })
 })
 

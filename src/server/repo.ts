@@ -117,6 +117,12 @@ function normTour(d: any): unknown {
     pflegekraftId: d.pflegekraftId,
     pflegekraftQualifikation: arr(d.pflegekraftQualifikation),
     start: d.start,
+    // Endpunkt nur übernehmen, wenn echte Koordinaten vorliegen (die
+    // optionale Payload-Group liefert sonst null-Felder).
+    ende:
+      d.ende && typeof d.ende.lat === 'number' && typeof d.ende.lng === 'number'
+        ? { lat: d.ende.lat, lng: d.ende.lng }
+        : undefined,
     startZeit: d.startZeit ?? 480,
     einsaetze: arr(d.einsaetze).map((e) => ({
       pseudonymId: e.pseudonymId,

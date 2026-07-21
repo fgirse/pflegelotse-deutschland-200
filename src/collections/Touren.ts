@@ -26,6 +26,16 @@ export const Touren: CollectionConfig = {
         { name: 'lng', type: 'number', required: true },
       ],
     },
+    {
+      // Endpunkt der Tour (Pflichtenheft 5.1.2). Optional — ohne Angabe
+      // kehrt die Tour zum Startpunkt/Depot zurück.
+      name: 'ende',
+      type: 'group',
+      fields: [
+        { name: 'lat', type: 'number' },
+        { name: 'lng', type: 'number' },
+      ],
+    },
     { name: 'startZeit', type: 'number', defaultValue: 480 }, // 08:00
     {
       name: 'einsaetze',

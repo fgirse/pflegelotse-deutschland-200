@@ -37,7 +37,10 @@ export function qualifikationErfuellt(tour: Tour, kandidat: Kandidat): boolean {
 
 // Simuliert eine Einsatzfolge ab dem Depot und liefert Machbarkeit,
 // Gesamtfahrzeit, Ankunftszeiten je Knoten und die Arbeitszeit.
-// `order` enthält Matrix-Indizes; order[0] ist immer das Depot.
+// `order` enthält Matrix-Indizes; order[0] ist immer das Depot. `endeIdx` ist
+// der Matrix-Index des Endpunkts (Pflichtenheft 5.1.2): der Rückweg vom letzten
+// Stopp dorthin zählt zu Fahr- und Arbeitszeit. Ohne separaten Endpunkt ist das
+// der Startpunkt (Index 0, Rundtour zum Depot).
 // Harte Restriktionen: Zeitfenster (hard), ArbZG max. 10 h/Tag (hard);
 // nach 6 h Arbeit wird einmalig eine Pflichtpause eingeschoben (§4 ArbZG).
 function simuliere(
@@ -45,6 +48,7 @@ function simuliere(
   startZeit: number,
   matrix: number[][],
   knoten: Knoten[],
+  endeIdx: number,
 ): { machbar: boolean; fahrzeit: number; ankunft: number[]; arbeitszeit: number } {
   let t = startZeit // Abfahrt am Depot
   let fahrzeit = 0
@@ -71,6 +75,11 @@ function simuliere(
     arbeit += n.dauer
     t = beginn + n.dauer
   }
+  // Rückweg vom letzten Stopp zum Endpunkt (Depot oder separater Tour-Endpunkt).
+  const letzter = order[order.length - 1]
+  const rueckweg = matrix[letzter][endeIdx]
+  fahrzeit += rueckweg
+  arbeit += rueckweg
   // ArbZG §3: max. 10 h Arbeitszeit/Tag (hard).
   const machbar = arbeit <= ARBZG.maxArbeitszeitMin
   return { machbar, fahrzeit, ankunft, arbeitszeit: arbeit }
@@ -95,6 +104,14 @@ export async function fitScoreFuerTour(
     ...tour.einsaetze.map((e) => e.geo),
     kandidat.geo,
   ]
+  // Endpunkt (Pflichtenheft 5.1.2): ohne separaten `ende` kehrt die Tour zum
+  // Startpunkt zurück (Index 0). Ein eigener Endpunkt wird als weiterer Punkt
+  // angehängt, damit der Rückweg dorthin in der Matrix steht.
+  let endeIdx = 0
+  if (tour.ende) {
+    punkte.push(tour.ende)
+    endeIdx = punkte.length - 1
+  }
   // Leistungszeit + Hausbesuchsgrundzeit je Besuch (Kap. 5.1.3).
   const knoten: Knoten[] = [
     { von: 0, bis: 1439, dauer: 0 }, // Depot ohne Fenster
@@ -105,12 +122,13 @@ export async function fitScoreFuerTour(
 
   const matrix = await routing.travelMatrix(punkte)
 
-  // Basis-Fahrzeit ohne Kandidaten (Reihenfolge Depot,1..n).
+  // Basis-Fahrzeit ohne Kandidaten (Reihenfolge Depot,1..n, Rückweg zum Ende).
   const basis = simuliere(
     [0, ...range(1, n)],
     tour.startZeit,
     matrix,
     knoten,
+    endeIdx,
   )
 
   // Weiche Restriktion (Bezugspflege): gehört die Tour der bevorzugten Kraft?
@@ -124,7 +142,7 @@ export async function fitScoreFuerTour(
   for (let p = 0; p <= n; p++) {
     const besuche = [...range(1, p), kandidatIdx, ...range(p + 1, n)]
     const order = [0, ...besuche]
-    const sim = simuliere(order, tour.startZeit, matrix, knoten)
+    const sim = simuliere(order, tour.startZeit, matrix, knoten, endeIdx)
     if (!sim.machbar) continue
 
     const mehrweg = sim.fahrzeit - basis.fahrzeit

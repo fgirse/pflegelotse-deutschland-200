@@ -75,6 +75,9 @@ export const tourSchema = z.object({
   pflegekraftId: z.string(),
   pflegekraftQualifikation: z.array(z.string()).default([]),
   start: geoSchema, // Startpunkt (Standort/Depot)
+  // Endpunkt der Tour (Pflichtenheft 5.1.2). Optional; ohne Angabe kehrt die
+  // Tour zum Startpunkt zurück (Rundtour zum Depot).
+  ende: geoSchema.optional(),
   startZeit: z.number().int().min(0).max(1439).default(480), // 08:00
   einsaetze: z.array(einsatzSchema).default([]),
 })

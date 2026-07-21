@@ -67,6 +67,13 @@ export async function planeTour(tour: Tour): Promise<{
   arbzgKonform: boolean
 }> {
   const punkte = [tour.start, ...tour.einsaetze.map((e) => e.geo)]
+  // Endpunkt (Pflichtenheft 5.1.2): Rückweg dorthin zählt zu Fahr-/Arbeitszeit.
+  // Ohne separaten `ende` ist das der Startpunkt (Index 0, Rundtour zum Depot).
+  let endeIdx = 0
+  if (tour.ende) {
+    punkte.push(tour.ende)
+    endeIdx = punkte.length - 1
+  }
   const matrix = await routing.travelMatrix(punkte)
 
   let t = tour.startZeit
@@ -94,6 +101,12 @@ export async function planeTour(tour: Tour): Promise<{
     arbeit += dauer
     return { ...e, ankunft: Math.round(ankunft) }
   })
+
+  // Rückweg vom letzten Stopp zum Endpunkt (Depot oder separater Tour-Endpunkt).
+  const letzterIdx = tour.einsaetze.length // 0=Start, 1..n=Einsätze
+  const rueckweg = matrix[letzterIdx][endeIdx]
+  fahrzeit += rueckweg
+  arbeit += rueckweg
 
   // Auslastung = Zeit am Klienten (Leistung + Grundzeit) / (davon + Fahrzeit),
   // grob als Effizienzmaß. Grundzeit ist echte Zeit beim Patienten, zählt also
