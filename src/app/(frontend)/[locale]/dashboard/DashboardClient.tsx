@@ -7,6 +7,7 @@ import type { KlientOperativ, Tour, FitMatch } from '@/shared/domain'
 import { minToHHMM } from '@/shared/time'
 import { TourMap } from './TourMap'
 import { Timeline } from './Timeline'
+import { TourReorder } from './TourReorder'
 
 export interface TourMitKennzahlen {
   tour: Tour
@@ -50,6 +51,7 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
   const [view, setView] = useState<'map' | 'table'>('map')
   const [angebotGesendet, setAngebotGesendet] = useState(false)
   const [optimierId, setOptimierId] = useState<string | null>(null)
+  const [reorderId, setReorderId] = useState<string | null>(null)
   const [aufloesenBusy, setAufloesenBusy] = useState(false)
   const [vorschau, setVorschau] = useState<null | {
     tourId: string
@@ -270,6 +272,16 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
               <div className="mb-1 flex items-center justify-between gap-2">
                 <span className="text-sm font-medium">{x.tour.pflegekraftId}</span>
                 <span className="flex gap-2">
+                  {x.tour.einsaetze.length > 1 && (
+                    <button
+                      onClick={() => setReorderId(reorderId === x.tour.id ? null : x.tour.id)}
+                      disabled={aufloesenBusy || optimierId !== null}
+                      aria-pressed={reorderId === x.tour.id}
+                      className="btn btn-outline min-h-8 px-3 py-1 text-xs"
+                    >
+                      {t('reihenfolge')}
+                    </button>
+                  )}
                   {x.tour.einsaetze.length > 0 && (
                     <button
                       onClick={() => aufloesenVorschau(x.tour.id)}
@@ -291,6 +303,17 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
                 </span>
               </div>
               <Timeline tour={x.tour} />
+
+              {/* Drag&Drop-Umsortierung mit Live-Vorschau (§5.2.3). */}
+              {reorderId === x.tour.id && (
+                <TourReorder
+                  tour={x.tour}
+                  onClose={(gespeichert) => {
+                    setReorderId(null)
+                    if (gespeichert) startTransition(() => router.refresh())
+                  }}
+                />
+              )}
 
               {/* Vorschau der Umverteilung (Krankmeldung) für diese Tour. */}
               {vorschau?.tourId === x.tour.id && (

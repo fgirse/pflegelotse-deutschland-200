@@ -127,11 +127,15 @@ Geplante vs. erfasste Zeiten (§5.2.2). Setzt mobile Leistungserfassung (§5.3) 
 - **Test:** Integrationstest — erfasste Ist-Zeit weicht ab → Abweichung erscheint in der Tagesübersicht.
 - **Blocker:** §5.3-Mobilmodul muss zuerst existieren.
 
-### 2.5 Kartenansicht + Drag-and-Drop — L, Mittel
+### 2.5 Kartenansicht + Drag-and-Drop — L, Mittel — ✅ ERLEDIGT (2026-07-25)
 Interaktive Karte, sofortige Neuberechnung bei manueller Anpassung (§5.2.3 / §10.2).
 
 - **Fertig, wenn** Touren auf einer Karte dargestellt sind und ein per Drag verschobener Stopp sofort neue Fahrzeit/Zeitfenster-Status zeigt.
 - **Test:** Playwright — Stopp verschieben → Kennzahl-Anzeige aktualisiert sich, Zeitfenster-Verletzung wird rot markiert.
+
+**Umsetzung (Entscheidungen: nur innerhalb einer Tour, Live-Vorschau + Speichern):** Die Karte (MapLibre `TourMap`) existierte bereits. Neu: ziehbare Stopp-Liste je Tour (`TourReorder.tsx`) mit nativem HTML5-Drag&Drop **plus** Hoch/Runter-Buttons als tastaturbedienbare Alternative (WCAG). Reine Ablauf-Rechnung aus `planeTour` in testbare Funktion `matching/tourPlan.ts::planeAblauf(tour, routing)` extrahiert — liefert Kennzahlen **und je Stopp `zeitfensterOk`** (bricht anders als `simuliere` bei Verletzung nicht ab). Service `planeReihenfolge()` (Permutations-Validierung, Vorschau ohne Schreiben / Persistieren), Endpoint `POST /api/v1/tours/{id}/reorder` (`probe=true` = Vorschau). Jeder Drop/Klick holt eine Server-Vorschau → sofort neue Fahrzeit + verletzte Stopps rot; „Speichern" persistiert. Toggle-Button „Reihenfolge" je Tour im Dashboard; i18n de+en. 2 Unit-Tests (`planeAblauf`: Verletzung je Stopp erkannt ohne Abbruch, gültige Reihenfolge alles ok) + Playwright-e2e (`e2e/reorder.spec.ts`: Umsortieren aktualisiert die Kennzahl sofort).
+
+> **Bewusst nicht Teil (Folgeschritte):** Stopps *zwischen* Touren ziehen (deckt fachlich 2.3 „Auflösen/Umverteilen" ab); Marker-Dragging direkt auf der Karte; Undo/Verlauf.
 
 ### 2.6 Performance-Härtung Solver — M, begleitend zu 2.1 — ✅ GEMESSEN (2026-07-25)
 60-s-Grenze (§6.1) ist das eigentliche Performance-Risiko (Risikomatrix, Pflichtenheft).

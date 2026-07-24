@@ -1,12 +1,13 @@
 import type { RoutingProvider } from '@/server/routing/RoutingProvider'
 import { waehleRoutingKern } from '@/server/routing/waehleRouting'
 import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
-import { fitScore, qualifikationErfuellt, ARBZG, besuchsdauer } from './fitScore'
+import { fitScore, qualifikationErfuellt } from './fitScore'
+import { planeAblauf } from './tourPlan'
 import { LocalSearchTourOptimizer } from './tourOptimizer'
 import { umverteile } from '@/server/planning/umverteilung'
 import { ladeTour, ladeTouren, speichereEinsaetze, aktualisiereTour } from '@/server/repo'
 import { env } from '@/lib/env'
-import type { FitScoreRequest, FitMatch, Tour } from '@/shared/domain'
+import type { FitScoreRequest, FitMatch, Tour, Einsatz } from '@/shared/domain'
 
 // Grund, warum kein Treffer zustande kam (für konkrete UI-Meldung).
 export type KeinTrefferGrund = 'keineTouren' | 'qualifikation' | 'zeitfenster'
@@ -59,75 +60,46 @@ export async function berechneFitScore(
   }
 }
 
-// Plant eine Tour: berechnet je Einsatz die Ankunftszeit und liefert
-// zusätzlich die Kennzahlen (Gesamtfahrzeit, Auslastung, Arbeitszeit,
-// ArbZG-Konformität). Berücksichtigt die Pflichtpause nach 6 h (§4 ArbZG)
-// im Zeitplan. Wird nach dem Aufnehmen eines Klienten aufgerufen.
-export async function planeTour(tour: Tour): Promise<{
-  einsaetze: Tour['einsaetze']
-  fahrzeitMin: number
-  pflegezeitMin: number
-  grundzeitMin: number
-  auslastungProzent: number
-  arbeitszeitMin: number
-  arbzgKonform: boolean
-}> {
-  const punkte = [tour.start, ...tour.einsaetze.map((e) => e.geo)]
-  // Endpunkt (Pflichtenheft 5.1.2): Rückweg dorthin zählt zu Fahr-/Arbeitszeit.
-  // Ohne separaten `ende` ist das der Startpunkt (Index 0, Rundtour zum Depot).
-  let endeIdx = 0
-  if (tour.ende) {
-    punkte.push(tour.ende)
-    endeIdx = punkte.length - 1
-  }
-  const matrix = await routing.travelMatrix(punkte)
+// Plant eine Tour: berechnet je Einsatz die Ankunftszeit und liefert die
+// Kennzahlen (Gesamtfahrzeit, Auslastung, Arbeitszeit, ArbZG-Konformität) sowie
+// je Stopp den Zeitfenster-Status. Die reine Rechnung liegt in tourPlan.ts
+// (dort mit injizierbarem Routing testbar); hier nur die Bindung an den
+// aktiven Provider.
+export async function planeTour(tour: Tour) {
+  return planeAblauf(tour, routing)
+}
 
-  let t = tour.startZeit
-  let fahrzeit = 0
-  let pflege = 0 // reine Leistungszeit (Pflichtenheft 5.1.3: getrennt von Grundzeit)
-  let grundzeit = 0 // Hausbesuchsgrundzeit, separat ausgewiesen
-  let arbeit = 0 // Arbeitszeit = Fahrt + Leistung + Grundzeit (ohne Warte-/Pausenzeit)
-  let pauseGesetzt = false
-  const einsaetze = tour.einsaetze.map((e, i) => {
-    const reise = matrix[i][i + 1] // von vorherigem Punkt zu diesem Einsatz
-    fahrzeit += reise
-    arbeit += reise
-    let ankunft = t + reise
-    // ArbZG §4: nach 6 h Arbeit einmalig 30 min Pause einschieben.
-    if (!pauseGesetzt && arbeit >= ARBZG.schwelle6hMin) {
-      ankunft += ARBZG.pauseNach6hMin
-      pauseGesetzt = true
-    }
-    const beginn = Math.max(ankunft, e.zeitfenster.von)
-    const grund = e.grundzeitMin ?? 0
-    const dauer = besuchsdauer(e.dauerMin, e.grundzeitMin) // Leistung + Grundzeit
-    t = beginn + dauer
-    pflege += e.dauerMin
-    grundzeit += grund
-    arbeit += dauer
-    return { ...e, ankunft: Math.round(ankunft) }
-  })
+// Bewertet eine vom Disponenten per Drag&Drop gewählte Reihenfolge (§5.2.3):
+// ordnet die Einsätze der Tour nach den übergebenen pseudonymIds um, plant den
+// Ablauf und liefert Kennzahlen + je Stopp den Zeitfenster-Status. Mit
+// persist=true wird die neue Reihenfolge gespeichert (sonst nur Vorschau).
+// Rückgabe: null = Tour nicht gefunden; { ungueltig: true } = Reihenfolge passt
+// nicht zur Tour (fehlende/fremde Stopps).
+export async function planeReihenfolge(
+  tenantId: string,
+  tourId: string,
+  reihenfolge: string[],
+  persist: boolean,
+) {
+  const tour = await ladeTour(tourId)
+  if (!tour || tour.tenantId !== tenantId) return null
 
-  // Rückweg vom letzten Stopp zum Endpunkt (Depot oder separater Tour-Endpunkt).
-  const letzterIdx = tour.einsaetze.length // 0=Start, 1..n=Einsätze
-  const rueckweg = matrix[letzterIdx][endeIdx]
-  fahrzeit += rueckweg
-  arbeit += rueckweg
+  // Einsätze nach der gewünschten Reihenfolge sortieren; nur echte, vollständige
+  // Permutationen der vorhandenen Stopps zulassen.
+  const nachId = new Map(tour.einsaetze.map((e) => [e.pseudonymId, e]))
+  const neu = reihenfolge.map((id) => nachId.get(id)).filter((e): e is Einsatz => Boolean(e))
+  if (neu.length !== tour.einsaetze.length) return { ungueltig: true as const }
 
-  // Auslastung = Zeit am Klienten (Leistung + Grundzeit) / (davon + Fahrzeit),
-  // grob als Effizienzmaß. Grundzeit ist echte Zeit beim Patienten, zählt also
-  // zur produktiven Seite; sie wird zusätzlich separat ausgewiesen.
-  const amKlienten = pflege + grundzeit
-  const gesamt = amKlienten + fahrzeit
-  const auslastung = gesamt > 0 ? Math.round((amKlienten / gesamt) * 100) : 0
+  const geplant = await planeAblauf({ ...tour, einsaetze: neu }, routing)
+  if (persist) await speichereEinsaetze(tourId, geplant.einsaetze)
+
   return {
-    einsaetze,
-    fahrzeitMin: Math.round(fahrzeit),
-    pflegezeitMin: Math.round(pflege),
-    grundzeitMin: Math.round(grundzeit),
-    auslastungProzent: auslastung,
-    arbeitszeitMin: Math.round(arbeit),
-    arbzgKonform: arbeit <= ARBZG.maxArbeitszeitMin,
+    fahrzeitMin: geplant.fahrzeitMin,
+    arbeitszeitMin: geplant.arbeitszeitMin,
+    auslastungProzent: geplant.auslastungProzent,
+    arbzgKonform: geplant.arbzgKonform,
+    stops: geplant.stops,
+    gespeichert: persist,
   }
 }
 

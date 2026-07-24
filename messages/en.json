@@ -109,7 +109,12 @@
     "umverteilt": "{n, plural, =0 {Nothing to redistribute} one {# visit redistributed} other {# visits redistributed}}",
     "nichtPlatzierbar": "{n, plural, one {# visit unplaceable} other {# visits unplaceable}}",
     "bestaetigen": "Confirm",
-    "abbrechen": "Cancel"
+    "abbrechen": "Cancel",
+    "reihenfolge": "Order",
+    "reihenfolgeTitel": "Adjust order by dragging",
+    "speichern": "Save",
+    "hoch": "Move up",
+    "runter": "Move down"
   },
   "wochenplan": {
     "titel": "Weekly planning",

@@ -108,7 +108,12 @@
     "umverteilt": "{n, plural, =0 {Nichts umzuverteilen} one {# Einsatz umverteilt} other {# Einsätze umverteilt}}",
     "nichtPlatzierbar": "{n, plural, one {# Einsatz nicht platzierbar} other {# Einsätze nicht platzierbar}}",
     "bestaetigen": "Bestätigen",
-    "abbrechen": "Abbrechen"
+    "abbrechen": "Abbrechen",
+    "reihenfolge": "Reihenfolge",
+    "reihenfolgeTitel": "Reihenfolge per Ziehen anpassen",
+    "speichern": "Speichern",
+    "hoch": "Nach oben",
+    "runter": "Nach unten"
   },
   "wochenplan": {
     "titel": "Wochenplanung",
