@@ -229,6 +229,7 @@ export interface KlientenOperativ {
   kostentraegerArt?: ('gesetzlich' | 'privat') | null;
   krankenversicherer?: string | null;
   bezugspflege?: string | null;
+  geschlechtPraeferenz?: ('m' | 'w') | null;
   status?: ('aktiv' | 'pausiert' | 'beendet') | null;
   updatedAt: string;
   createdAt: string;
@@ -251,6 +252,7 @@ export interface Touren {
     | number
     | boolean
     | null;
+  pflegekraftGeschlecht?: ('m' | 'w' | 'd') | null;
   start: {
     lat: number;
     lng: number;
@@ -338,6 +340,7 @@ export interface Bedarfe {
     | number
     | boolean
     | null;
+  geschlechtPraeferenz?: ('m' | 'w') | null;
   kostentraegerArt?: ('gesetzlich' | 'privat') | null;
   krankenversicherer?: string | null;
   bundesland?: string | null;
@@ -688,6 +691,7 @@ export interface KlientenOperativSelect<T extends boolean = true> {
   kostentraegerArt?: T;
   krankenversicherer?: T;
   bezugspflege?: T;
+  geschlechtPraeferenz?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -701,6 +705,7 @@ export interface TourenSelect<T extends boolean = true> {
   datum?: T;
   pflegekraftId?: T;
   pflegekraftQualifikation?: T;
+  pflegekraftGeschlecht?: T;
   start?:
     | T
     | {
@@ -772,6 +777,7 @@ export interface BedarfeSelect<T extends boolean = true> {
   pflegegrad?: T;
   leistungen?: T;
   qualifikation?: T;
+  geschlechtPraeferenz?: T;
   kostentraegerArt?: T;
   krankenversicherer?: T;
   bundesland?: T;

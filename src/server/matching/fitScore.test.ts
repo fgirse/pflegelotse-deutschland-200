@@ -292,3 +292,30 @@ describe('Fit-Score (Bezugspflege, weiche Restriktion)', () => {
     expect(match!.bezugspflegeErfuellt).toBe(false)
   })
 })
+
+// Pflichtenheft 5.1.1: Geschlechtspräferenz als weiche Restriktion.
+describe('Fit-Score (Geschlechtspräferenz, weiche Restriktion)', () => {
+  it('reiht die Tour mit passendem Geschlecht der Pflegekraft nach vorne', async () => {
+    const tourM = basisTour({ id: 'T1', pflegekraftId: 'pk-001', pflegekraftGeschlecht: 'm' })
+    const tourW = basisTour({ id: 'T2', pflegekraftId: 'pk-002', pflegekraftGeschlecht: 'w' })
+    const matches = await fitScore([tourM, tourW], kandidat({ geschlechtPraeferenz: 'w' }), stubRouting)
+    expect(matches).toHaveLength(2)
+    expect(matches[0].pflegekraftId).toBe('pk-002')
+    expect(matches[0].praeferenzErfuellt).toBe(true)
+    expect(matches[1].praeferenzErfuellt).toBe(false)
+  })
+
+  it('lässt Bezugspflege der Geschlechtspräferenz vorgehen', async () => {
+    // Wunschkraft ist pk-001 (männlich); Geschlechtspräferenz zeigt auf pk-002.
+    // Bezugspflege hat Vorrang → pk-001 zuerst.
+    const tourM = basisTour({ id: 'T1', pflegekraftId: 'pk-001', pflegekraftGeschlecht: 'm' })
+    const tourW = basisTour({ id: 'T2', pflegekraftId: 'pk-002', pflegekraftGeschlecht: 'w' })
+    const matches = await fitScore(
+      [tourM, tourW],
+      kandidat({ bezugspflege: 'pk-001', geschlechtPraeferenz: 'w' }),
+      stubRouting,
+    )
+    expect(matches[0].pflegekraftId).toBe('pk-001')
+    expect(matches[0].bezugspflegeErfuellt).toBe(true)
+  })
+})

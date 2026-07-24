@@ -66,17 +66,21 @@ Modell kennt nur `start` (Depot), keinen Endpunkt (§5.1.2). Der Rückweg der le
 
 > **Bewusste Entscheidung:** Der Rückweg ist echte Fahr- **und** Arbeitszeit (der Wagen fährt zum Depot zurück), zählt also auch zur ArbZG-Rechnung — nicht nur zur ausgewiesenen Fahrzeit. Das ist strenger/korrekter und hat drei bestehende Golden-Tests verschoben (ArbZG-Grenzfall 270→260 Min, Grundzeit-Arbeitszeit 110/140→130/160, Pause-Test-Matrix). Zwei neue Tests decken 1.5 ab: Rückweg zum Depot bzw. zu einem separaten Endpunkt fließt in den Mehrweg der letzten Position ein.
 
-### 1.6 Geschlechts-/Präferenz-Constraint — S, Niedrig
+### 1.6 Geschlechts-/Präferenz-Constraint — S, Niedrig — ✅ ERLEDIGT (2026-07-24)
 Modell kennt nur Bezugspflege; Geschlechtspräferenz (§5.1.1) ist eine häufige reale Anforderung.
 
 - **Fertig, wenn** eine Präferenz (z. B. `geschlechtPflegekraft`) am Kandidaten als Soft Constraint in die Sortierung eingeht — analog `bezugspflegeErfuellt`, ohne `machbar` hart zu kippen.
 - **Test:** `fitScore.test.ts` — zwei sonst gleichwertige Touren; die mit passender Präferenz wird vor der anderen sortiert.
 
-### 1.7 Performance-Messung 200/50 — S, Niedrig
+**Umsetzung:** `pflegekraftGeschlecht` (`m`/`w`/`d`) an Tour und `geschlechtPraeferenz` (`m`/`w`) am Kandidaten/Klienten/Bedarf. Neues `praeferenzErfuellt`-Flag im `FitMatch`; `fitScoreFuerTour()` setzt es (Präferenz gesetzt und Geschlecht passt). Die Sortierung in `fitScore()` reiht jetzt: Bezugspflege → Geschlechtspräferenz → Mehrweg — beide weich, `machbar` bleibt unberührt. Felder in Collections `Touren`/`KlientenOperativ`/`Bedarfe`; `normTour`/`normKlient` reichen sie durch; Typen regeneriert. Zwei neue Tests (passende Präferenz zuerst; Bezugspflege hat Vorrang vor der Geschlechtspräferenz).
+
+### 1.7 Performance-Messung 200/50 — S, Niedrig — ✅ ERLEDIGT (2026-07-24)
 Die 60-s-Vorgabe (§6.1) ist für die Insertion-Heuristik heute unbelegt.
 
 - **Fertig, wenn** ein reproduzierbarer Benchmark 200 Bedarfe gegen 50 Touren mit gecachter Matrix misst und die Gesamtzeit unter der 60-s-Vorgabe dokumentiert ist.
 - **Test:** Benchmark-Skript (kein Unit-Test) mit festem Seed → protokollierte `rechenzeitMs` < 60000; als Regressions-Guard mit großzügiger Schwelle in CI.
+
+**Umsetzung:** `fitScore.perf.test.ts` — deterministische Daten (indexbasierte Koordinaten, kein Zufall) für 50 Touren à 4 Einsätze und 200 Kandidaten, gewertet über gecachtes Haversine-Routing (kein Env-Load). Gemessen: **~70 ms** für 200×50 — Faktor ~850 unter der 60-s-Vorgabe. Der Test protokolliert die Zeit ins CI-Log und hält als Regressions-Guard `< 20 s` fest (großzügig). Hinweis: gilt für die aktuelle Nearest-Insertion-Heuristik; ein echter VRPTW-Solver (2.1/2.6) muss erneut gemessen werden.
 
 ---
 

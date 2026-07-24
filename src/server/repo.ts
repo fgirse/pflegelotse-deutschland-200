@@ -116,6 +116,7 @@ function normTour(d: any): unknown {
     datum: d.datum,
     pflegekraftId: d.pflegekraftId,
     pflegekraftQualifikation: arr(d.pflegekraftQualifikation),
+    pflegekraftGeschlecht: d.pflegekraftGeschlecht ?? undefined,
     start: d.start,
     // Endpunkt nur übernehmen, wenn echte Koordinaten vorliegen (die
     // optionale Payload-Group liefert sonst null-Felder).
@@ -152,6 +153,7 @@ function normKlient(d: any): unknown {
     kostentraegerArt: d.kostentraegerArt ?? undefined,
     krankenversicherer: d.krankenversicherer ?? undefined,
     bezugspflege: d.bezugspflege,
+    geschlechtPraeferenz: d.geschlechtPraeferenz ?? undefined,
     status: d.status ?? 'aktiv',
   }
 }

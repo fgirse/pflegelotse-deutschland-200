@@ -44,6 +44,8 @@ export const KlientenOperativ: CollectionConfig = {
     { name: 'kostentraegerArt', type: 'select', options: ['gesetzlich', 'privat'], index: true },
     { name: 'krankenversicherer', type: 'text' },
     { name: 'bezugspflege', type: 'text' },
+    // Präferenz Geschlecht der Pflegekraft (weiche Restriktion, §5.1.1).
+    { name: 'geschlechtPraeferenz', type: 'select', options: ['m', 'w'] },
     {
       name: 'status',
       type: 'select',

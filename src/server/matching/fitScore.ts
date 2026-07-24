@@ -147,6 +147,11 @@ export async function fitScoreFuerTour(
   const bezugspflegeErfuellt = kandidat.bezugspflege
     ? tour.pflegekraftId === kandidat.bezugspflege
     : false
+  // Weiche Restriktion (Geschlechtspräferenz, §5.1.1): passt das Geschlecht der
+  // Pflegekraft zum Wunsch des Klienten?
+  const praeferenzErfuellt = kandidat.geschlechtPraeferenz
+    ? tour.pflegekraftGeschlecht === kandidat.geschlechtPraeferenz
+    : false
 
   let best: FitMatch | null = null
 
@@ -171,6 +176,7 @@ export async function fitScoreFuerTour(
         qualifikationOk: true,
         arbeitszeitMin: Math.round(sim.arbeitszeit),
         bezugspflegeErfuellt,
+        praeferenzErfuellt,
       }
     }
   }
@@ -179,8 +185,9 @@ export async function fitScoreFuerTour(
 }
 
 // Bewertet den Kandidaten gegen mehrere Touren und liefert die Treffer
-// sortiert: Bezugspflege zuerst (weiche Restriktion), dann nach Mehrweg
-// aufsteigend — die beste, präferenzkonforme Lückenfüllung zuerst.
+// sortiert: weiche Restriktionen zuerst — Bezugspflege (Wunschkraft) hat Vorrang
+// vor der Geschlechtspräferenz —, dann nach Mehrweg aufsteigend: die beste,
+// präferenzkonforme Lückenfüllung zuerst.
 export async function fitScore(
   touren: Tour[],
   kandidat: Kandidat,
@@ -194,6 +201,7 @@ export async function fitScore(
     .sort(
       (a, b) =>
         Number(b.bezugspflegeErfuellt) - Number(a.bezugspflegeErfuellt) ||
+        Number(b.praeferenzErfuellt) - Number(a.praeferenzErfuellt) ||
         a.mehrwegMin - b.mehrwegMin,
     )
 }

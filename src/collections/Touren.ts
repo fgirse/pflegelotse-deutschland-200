@@ -18,6 +18,8 @@ export const Touren: CollectionConfig = {
     { name: 'datum', type: 'text', required: true }, // ISO YYYY-MM-DD
     { name: 'pflegekraftId', type: 'text', required: true },
     { name: 'pflegekraftQualifikation', type: 'json', defaultValue: [] },
+    // Geschlecht der Pflegekraft (für Präferenz-Matching, §5.1.1).
+    { name: 'pflegekraftGeschlecht', type: 'select', options: ['m', 'w', 'd'] },
     {
       name: 'start',
       type: 'group',

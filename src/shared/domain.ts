@@ -46,6 +46,9 @@ export const klientOperativSchema = z.object({
   kostentraegerArt: z.enum(KOSTENTRAEGER_ARTEN).optional(),
   krankenversicherer: z.string().optional(),
   bezugspflege: z.string().optional(), // bevorzugte Pflegekraft (Pflegekraft-Id)
+  // Präferenz Geschlecht der Pflegekraft (Pflichtenheft 5.1.1), weiche
+  // Restriktion. Ohne Angabe egal.
+  geschlechtPraeferenz: z.enum(['m', 'w']).optional(),
   status: statusSchema.default('aktiv'),
 })
 export type KlientOperativ = z.infer<typeof klientOperativSchema>
@@ -74,6 +77,8 @@ export const tourSchema = z.object({
   datum: z.string(), // ISO-Datum (YYYY-MM-DD)
   pflegekraftId: z.string(),
   pflegekraftQualifikation: z.array(z.string()).default([]),
+  // Geschlecht der Pflegekraft (für Präferenz-Matching, Pflichtenheft 5.1.1).
+  pflegekraftGeschlecht: z.enum(['m', 'w', 'd']).optional(),
   start: geoSchema, // Startpunkt (Standort/Depot)
   // Endpunkt der Tour (Pflichtenheft 5.1.2). Optional; ohne Angabe kehrt die
   // Tour zum Startpunkt zurück (Rundtour zum Depot).
@@ -109,6 +114,9 @@ export const fitScoreRequestSchema = z.object({
     // Weiche Restriktion (Pflichtenheft 5.2.1): bevorzugte Pflegekraft
     // (Bezugspflege). Touren dieser Kraft werden bevorzugt gereiht.
     bezugspflege: z.string().optional(),
+    // Weiche Restriktion (Pflichtenheft 5.1.1): gewünschtes Geschlecht der
+    // Pflegekraft. Passende Touren werden bevorzugt gereiht.
+    geschlechtPraeferenz: z.enum(['m', 'w']).optional(),
   }),
   // Touren, gegen die geprüft wird (optional — sonst lädt die API alle).
   tourIds: z.array(z.string()).optional(),
@@ -130,6 +138,8 @@ export const fitMatchSchema = z.object({
   arbeitszeitMin: z.number().int().default(0),
   // Weiche Restriktion erfüllt: Tour gehört der bevorzugten Pflegekraft.
   bezugspflegeErfuellt: z.boolean().default(false),
+  // Weiche Restriktion erfüllt: Geschlecht der Pflegekraft passt zur Präferenz.
+  praeferenzErfuellt: z.boolean().default(false),
 })
 export type FitMatch = z.infer<typeof fitMatchSchema>
 

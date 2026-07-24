@@ -28,6 +28,8 @@ export const Bedarfe: CollectionConfig = {
     { name: 'pflegegrad', type: 'number', min: 1, max: 5 },
     { name: 'leistungen', type: 'json', defaultValue: [] },
     { name: 'qualifikation', type: 'json', defaultValue: [] },
+    // Präferenz Geschlecht der Pflegekraft (weiche Restriktion, §5.1.1).
+    { name: 'geschlechtPraeferenz', type: 'select', options: ['m', 'w'] },
     // Kostenträger: Art (gesetzlich/privat) + konkrete Kasse. Operativ relevant
     // für die Abrechnung des Dienstes; kein PII (grobe Kategorie, kein Identifikator).
     {
