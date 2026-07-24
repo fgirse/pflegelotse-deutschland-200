@@ -100,7 +100,9 @@
     "importDropHinweis": "CSV/Excel-Export aus deiner Pflegesoftware (z. B. MediFox) hierher ziehen oder auswählen — die Spalten werden automatisch erkannt.",
     "importDateiWaehlen": "Datei wählen",
     "importAndereDatei": "andere Datei",
-    "tourErstellen": "Neue Tour erstellen"
+    "tourErstellen": "Neue Tour erstellen",
+    "optimieren": "Tour optimieren",
+    "optimiert": "Optimiere …"
   },
   "tourNeu": {
     "title": "Neue Tour erstellen",

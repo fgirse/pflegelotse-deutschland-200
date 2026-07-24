@@ -101,7 +101,9 @@
     "importDropHinweis": "Drag your care-software CSV/Excel export (e.g. MediFox) here or choose a file — columns are detected automatically.",
     "importDateiWaehlen": "Choose file",
     "importAndereDatei": "different file",
-    "tourErstellen": "Create new tour"
+    "tourErstellen": "Create new tour",
+    "optimieren": "Optimise tour",
+    "optimiert": "Optimising …"
   },
   "tourNeu": {
     "title": "Create new tour",

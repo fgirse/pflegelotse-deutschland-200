@@ -49,6 +49,7 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
   const [loading, setLoading] = useState(false)
   const [view, setView] = useState<'map' | 'table'>('map')
   const [angebotGesendet, setAngebotGesendet] = useState(false)
+  const [optimierId, setOptimierId] = useState<string | null>(null)
 
   // Eigene Klienten in die gemeinsame Kandidatenform bringen.
   const eigene: PlanKandidat[] = candidates.map((k) => ({
@@ -118,6 +119,18 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
       startTransition(() => router.refresh())
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Reihenfolge einer Tour optimieren (VRPTW-Sequencing, §5.2.1).
+  async function optimiere(tourId: string) {
+    setOptimierId(tourId)
+    try {
+      const res = await fetch(`/api/v1/tours/${tourId}/optimize`, { method: 'POST' })
+      // Bei Erfolg Server-Daten neu laden (Tour-Reihenfolge hat sich geändert).
+      if (res.ok) startTransition(() => router.refresh())
+    } finally {
+      setOptimierId(null)
     }
   }
 
@@ -215,11 +228,25 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
           <TourTable tours={tours} />
         )}
 
-        {/* Zeitstrahl je Tour */}
+        {/* Zeitstrahl je Tour + „Tour optimieren" (Reihenfolge neu berechnen) */}
         <div className="mt-4">
           <h3 className="mb-2 text-sm font-semibold text-[var(--color-muted)]">{t('timeline')}</h3>
           {tours.map((x) => (
-            <Timeline key={x.tour.id} tour={x.tour} />
+            <div key={x.tour.id} className="mb-3">
+              <div className="mb-1 flex items-center justify-between gap-2">
+                <span className="text-sm font-medium">{x.tour.pflegekraftId}</span>
+                {x.tour.einsaetze.length > 1 && (
+                  <button
+                    onClick={() => optimiere(x.tour.id)}
+                    disabled={optimierId !== null}
+                    className="btn btn-outline min-h-8 px-3 py-1 text-xs"
+                  >
+                    {optimierId === x.tour.id ? t('optimiert') : t('optimieren')}
+                  </button>
+                )}
+              </div>
+              <Timeline tour={x.tour} />
+            </div>
           ))}
         </div>
       </section>
