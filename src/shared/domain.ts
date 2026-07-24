@@ -79,6 +79,13 @@ export const tourSchema = z.object({
   // Tour zum Startpunkt zurück (Rundtour zum Depot).
   ende: geoSchema.optional(),
   startZeit: z.number().int().min(0).max(1439).default(480), // 08:00
+  // Verfügbarkeit der Pflegekraft an diesem Tag (Pflichtenheft 5.1.2).
+  // false = Urlaub/Krankheit → Tour fällt aus dem Matching. Ohne Angabe
+  // gilt die Tour als verfügbar (Rückwärtskompatibilität).
+  verfuegbar: z.boolean().optional(),
+  // Schichtende der Pflegekraft (Teilzeit): spätester Zeitpunkt, bis zu dem ein
+  // Einsatz abgeschlossen sein muss (Minuten seit Mitternacht). Optional.
+  verfuegbarBis: z.number().int().min(0).max(1439).optional(),
   einsaetze: z.array(einsatzSchema).default([]),
 })
 export type Tour = z.infer<typeof tourSchema>

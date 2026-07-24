@@ -36,18 +36,21 @@ export async function berechneFitScore(
   grund: KeinTrefferGrund | null
 }> {
   const start = performance.now()
-  const matches = await fitScore(touren, kandidat, routing)
-  // Bei keinem Treffer den konkreten Grund bestimmen: gar keine Touren, keine
-  // Tour mit passender Qualifikation, oder qualifiziert aber kein Zeitfenster frei.
+  // Nur verfügbare Touren sind buchbar (Urlaub/Krankheit fällt raus, §5.1.2).
+  const aktive = touren.filter((t) => t.verfuegbar !== false)
+  const matches = await fitScore(aktive, kandidat, routing)
+  // Bei keinem Treffer den konkreten Grund bestimmen: gar keine (buchbaren)
+  // Touren, keine mit passender Qualifikation, oder qualifiziert aber kein
+  // Zeitfenster frei.
   let grund: KeinTrefferGrund | null = null
   if (matches.length === 0) {
-    if (touren.length === 0) grund = 'keineTouren'
-    else if (!touren.some((t) => qualifikationErfuellt(t, kandidat))) grund = 'qualifikation'
+    if (aktive.length === 0) grund = 'keineTouren'
+    else if (!aktive.some((t) => qualifikationErfuellt(t, kandidat))) grund = 'qualifikation'
     else grund = 'zeitfenster'
   }
   return {
     matches,
-    geprueft: touren.length,
+    geprueft: aktive.length,
     rechenzeitMs: Math.round((performance.now() - start) * 10) / 10,
     grund,
   }

@@ -38,11 +38,15 @@ Heute ist Haversine (Luftlinie, 30 km/h fix) der Default; der HERE-Provider mit 
 
 > **Offen (bewusst nicht Teil von 1.2):** Eine tenant-weite Default-Grundzeit und eine je-Leistung-Tabelle (Leistungsstammdaten) sind nicht modelliert — heute wird der Wert je Einsatz/Bedarf getragen. Für „je Leistung" bräuchte es die Leistungsstammdaten aus §5.1.3, die noch fehlen.
 
-### 1.3 Mitarbeiter-/Tour-Verfügbarkeit — M, **Hoch**
+### 1.3 Mitarbeiter-/Tour-Verfügbarkeit — M, **Hoch** — ✅ ERLEDIGT (2026-07-24)
 Urlaub/Krankheit/Teilzeit (§5.1.2) sind im Tour-Modell nicht abgebildet. Der Matcher schlägt sonst Touren vor, die es an dem Tag gar nicht gibt.
 
 - **Fertig, wenn** eine an dem `datum` nicht verfügbare Pflegekraft/Tour im Fan-out gar nicht erst als Kandidatentour erscheint (Urlaub/Krankheit) bzw. Teilzeit-Fenster den nutzbaren Zeitraum begrenzen.
 - **Test:** Matching-Service-Test — Tour mit Abwesenheit am Zieldatum → `fitScore()` liefert sie nicht in den Ergebnissen; Tour mit Teilzeit-Endzeit 13:00 → Einsatz um 14:00 wird `machbar=false`.
+
+**Umsetzung:** Da es (noch) keine Mitarbeiter-Collection gibt und Touren ohnehin pro Pflegekraft+Tag existieren, sitzt die Verfügbarkeit auf Tour-Ebene: `verfuegbar` (Flag, false = Urlaub/Krankheit → Tour fällt aus dem Matching) und `verfuegbarBis` (Teilzeit-Schichtende, Min seit Mitternacht) an `tourSchema` und der `Touren`-Collection, beide optional (Rückwärtskompatibilität). `fitScoreFuerTour()` gibt für nicht verfügbare Touren `null` zurück; `simuliere()` weist Einsätze ab, die nicht bis `verfuegbarBis` abgeschlossen sind. `berechneFitScore()` filtert nicht verfügbare Touren vor Zähl-/Grundlogik (`geprueft`, Kein-Treffer-Grund stimmen dadurch). `normTour()` reicht beide Felder durch. Payload-Typen regeneriert. Drei neue Tests (Ausschluss bei `verfuegbar=false`, Ablehnung nach Schichtende, Zulassung davor).
+
+> **Offen (bewusst nicht Teil von 1.3):** Eine echte Mitarbeiter-Stammdatenverwaltung (§5.1.2 — Qualifikationen, Arbeitszeitmodelle, Urlaubskalender) fehlt weiterhin. Die Verfügbarkeit wird heute je Tour gesetzt, nicht aus einem Personalstamm abgeleitet.
 
 ### 1.4 Kapazitätsgrenze je Tour — S, Mittel
 Heute nur ArbZG-Deckel, keine harte Stopp-Zahl. Verhindert Überbuchung.

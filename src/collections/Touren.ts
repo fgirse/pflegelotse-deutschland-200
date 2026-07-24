@@ -37,6 +37,11 @@ export const Touren: CollectionConfig = {
       ],
     },
     { name: 'startZeit', type: 'number', defaultValue: 480 }, // 08:00
+    // Verfügbarkeit der Pflegekraft an diesem Tag (Pflichtenheft 5.1.2):
+    // false = Urlaub/Krankheit → Tour fällt aus dem Matching.
+    { name: 'verfuegbar', type: 'checkbox', defaultValue: true },
+    // Schichtende (Teilzeit): spätestes Ende eines Einsatzes (Min seit Mitternacht).
+    { name: 'verfuegbarBis', type: 'number' },
     {
       name: 'einsaetze',
       type: 'array',

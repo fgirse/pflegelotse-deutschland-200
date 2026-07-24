@@ -49,6 +49,7 @@ function simuliere(
   matrix: number[][],
   knoten: Knoten[],
   endeIdx: number,
+  verfuegbarBis: number, // Schichtende (Teilzeit): Einsatz muss bis dahin fertig sein
 ): { machbar: boolean; fahrzeit: number; ankunft: number[]; arbeitszeit: number } {
   let t = startZeit // Abfahrt am Depot
   let fahrzeit = 0
@@ -72,6 +73,8 @@ function simuliere(
     const beginn = Math.max(ank, n.von)
     // Spätester Beginn überschritten → Zeitfenster verletzt (hard).
     if (beginn > n.bis) return { machbar: false, fahrzeit, ankunft, arbeitszeit: arbeit }
+    // Teilzeit/Schichtende (§5.1.2): Einsatz muss bis verfuegbarBis fertig sein.
+    if (beginn + n.dauer > verfuegbarBis) return { machbar: false, fahrzeit, ankunft, arbeitszeit: arbeit }
     arbeit += n.dauer
     t = beginn + n.dauer
   }
@@ -94,10 +97,15 @@ export async function fitScoreFuerTour(
   kandidat: Kandidat,
   routing: RoutingProvider,
 ): Promise<FitMatch | null> {
+  // Harte Bedingung 0: Verfügbarkeit. Pflegekraft an dem Tag abwesend
+  // (Urlaub/Krankheit) → Tour steht nicht zur Verfügung (§5.1.2).
+  if (tour.verfuegbar === false) return null
   // Harte Bedingung 1: Qualifikation. Fehlt sie, ist keine Position möglich.
   if (!qualifikationErfuellt(tour, kandidat)) return null
 
   const n = tour.einsaetze.length
+  // Schichtende (Teilzeit): Standard = Tagesende (1439), sonst der gesetzte Wert.
+  const verfuegbarBis = tour.verfuegbarBis ?? 1439
   // Punkt- und Knotenliste: 0=Depot, 1..n=Einsätze, n+1=Kandidat.
   const punkte = [
     tour.start,
@@ -129,6 +137,7 @@ export async function fitScoreFuerTour(
     matrix,
     knoten,
     endeIdx,
+    verfuegbarBis,
   )
 
   // Weiche Restriktion (Bezugspflege): gehört die Tour der bevorzugten Kraft?
@@ -142,7 +151,7 @@ export async function fitScoreFuerTour(
   for (let p = 0; p <= n; p++) {
     const besuche = [...range(1, p), kandidatIdx, ...range(p + 1, n)]
     const order = [0, ...besuche]
-    const sim = simuliere(order, tour.startZeit, matrix, knoten, endeIdx)
+    const sim = simuliere(order, tour.startZeit, matrix, knoten, endeIdx, verfuegbarBis)
     if (!sim.machbar) continue
 
     const mehrweg = sim.fahrzeit - basis.fahrzeit

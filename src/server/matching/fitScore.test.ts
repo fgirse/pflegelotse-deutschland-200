@@ -184,6 +184,32 @@ describe('Fit-Score (Hausbesuchsgrundzeit)', () => {
   })
 })
 
+// Pflichtenheft 5.1.2: Verfügbarkeit der Pflegekraft (Urlaub/Krankheit) und
+// Teilzeit-Schichtende begrenzen, welche Touren einplanbar sind.
+describe('Fit-Score (Verfügbarkeit / Teilzeit)', () => {
+  it('schließt eine an dem Tag nicht verfügbare Tour aus (Urlaub/Krankheit)', async () => {
+    const tour = basisTour({ verfuegbar: false })
+    // Direkt: keine Position.
+    expect(await fitScoreFuerTour(tour, kandidat(), stubRouting)).toBeNull()
+    // Über den Fan-out: die Tour taucht nicht in den Treffern auf.
+    const matches = await fitScore([tour], kandidat(), stubRouting)
+    expect(matches).toHaveLength(0)
+  })
+
+  it('lehnt einen Einsatz nach dem Teilzeit-Schichtende ab', async () => {
+    // Schichtende 13:00 (780). Kandidat frühestens 14:00 (840) → nicht machbar.
+    const tour = basisTour({ verfuegbarBis: 780 })
+    const spaet = kandidat({ zeitfenster: { von: 840, bis: 900 } })
+    expect(await fitScoreFuerTour(tour, spaet, stubRouting)).toBeNull()
+  })
+
+  it('erlaubt einen Einsatz, der vor dem Schichtende abgeschlossen ist', async () => {
+    // Schichtende 13:00 (780); Kandidat am Vormittag (weit) → machbar.
+    const tour = basisTour({ verfuegbarBis: 780 })
+    expect(await fitScoreFuerTour(tour, kandidat(), stubRouting)).not.toBeNull()
+  })
+})
+
 // Pflichtenheft 5.1.2: die Tour hat einen Endpunkt; der Rückweg vom letzten
 // Stopp dorthin zählt zur Fahrzeit und damit zum Mehrweg.
 describe('Fit-Score (Tour-Endpunkt / Rückweg)', () => {
