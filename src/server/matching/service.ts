@@ -3,6 +3,8 @@ import { waehleRoutingKern } from '@/server/routing/waehleRouting'
 import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
 import { fitScore, qualifikationErfuellt, ARBZG, besuchsdauer } from './fitScore'
 import { LocalSearchTourOptimizer } from './tourOptimizer'
+import { umverteile } from '@/server/planning/umverteilung'
+import { ladeTour, ladeTouren, speichereEinsaetze, aktualisiereTour } from '@/server/repo'
 import { env } from '@/lib/env'
 import type { FitScoreRequest, FitMatch, Tour } from '@/shared/domain'
 
@@ -141,4 +143,59 @@ export async function optimiereTour(tour: Tour): Promise<
   const opt = await tourOptimizer.optimiere(tour, routing)
   const geplant = await planeTour({ ...tour, einsaetze: opt.einsaetze })
   return { ...geplant, machbar: opt.machbar }
+}
+
+// ── Kurzfristige Umplanung (Pflichtenheft 5.2.2) ──────────────────────────
+
+// Vorschau: berechnet die Umverteilung der Einsätze einer (auszufallenden) Tour
+// auf die anderen verfügbaren Touren des Tages — OHNE zu schreiben. Liefert die
+// Zuordnungen, die nicht Platzierbaren und die Auswirkung (Mehrfahrzeit je Tour).
+export async function planeUmverteilung(tenantId: string, tourId: string) {
+  const quelle = await ladeTour(tourId)
+  if (!quelle || quelle.tenantId !== tenantId) return null
+  const ziele = (await ladeTouren(tenantId, quelle.datum)).filter((t) => t.id !== tourId)
+  const res = await umverteile(quelle.einsaetze, ziele, routing)
+
+  const betroffen = new Set(res.zuordnungen.map((z) => z.zielTourId))
+  const impact: {
+    tourId: string
+    pflegekraftId: string
+    fahrzeitVorherMin: number
+    fahrzeitNachherMin: number
+  }[] = []
+  for (const original of ziele) {
+    if (!betroffen.has(original.id)) continue
+    const neu = res.zielTouren.find((t) => t.id === original.id)!
+    const [vor, nach] = await Promise.all([planeTour(original), planeTour(neu)])
+    impact.push({
+      tourId: original.id,
+      pflegekraftId: original.pflegekraftId,
+      fahrzeitVorherMin: vor.fahrzeitMin,
+      fahrzeitNachherMin: nach.fahrzeitMin,
+    })
+  }
+  return { datum: quelle.datum, zuordnungen: res.zuordnungen, nichtPlatzierbar: res.nichtPlatzierbar, impact }
+}
+
+// Anwenden: verteilt die Einsätze real um (persistiert die Zieltouren), setzt die
+// Quelltour auf verfuegbar=false und behält dort nur die nicht platzierbaren
+// Einsätze (keine stillen Verluste — sie bleiben für die manuelle Klärung sichtbar).
+export async function wendeUmverteilungAn(tenantId: string, tourId: string) {
+  const quelle = await ladeTour(tourId)
+  if (!quelle || quelle.tenantId !== tenantId) return null
+  const ziele = (await ladeTouren(tenantId, quelle.datum)).filter((t) => t.id !== tourId)
+  const res = await umverteile(quelle.einsaetze, ziele, routing)
+
+  const betroffen = new Set(res.zuordnungen.map((z) => z.zielTourId))
+  for (const t of res.zielTouren) {
+    if (!betroffen.has(t.id)) continue
+    const geplant = await planeTour(t)
+    await speichereEinsaetze(t.id, geplant.einsaetze)
+  }
+
+  const offen = new Set(res.nichtPlatzierbar.map((n) => n.pseudonymId))
+  const rest = quelle.einsaetze.filter((e) => offen.has(e.pseudonymId))
+  await aktualisiereTour(tourId, { einsaetze: rest, verfuegbar: false })
+
+  return { zuordnungen: res.zuordnungen, nichtPlatzierbar: res.nichtPlatzierbar }
 }

@@ -166,6 +166,17 @@ export async function erstelleGenerierteTour(entwurf: TourEntwurf): Promise<Tour
   return tourSchema.parse(normTour(d))
 }
 
+// Aktualisiert Felder einer Tour (Einsätze und/oder Verfügbarkeit) — für die
+// kurzfristige Umplanung (§5.2.2): aufgelöste Tour auf verfuegbar=false setzen.
+export async function aktualisiereTour(
+  id: string,
+  data: { einsaetze?: Tour['einsaetze']; verfuegbar?: boolean },
+): Promise<Tour> {
+  const payload = await payloadClient()
+  const d = await payload.update({ collection: 'touren', id, data, overrideAccess: true, depth: 0 })
+  return tourSchema.parse(normTour(d))
+}
+
 // Aktualisiert die Einsatzfolge einer Tour (z. B. nach Ein-Klick-Aufnahme).
 export async function speichereEinsaetze(
   tourId: string,

@@ -110,11 +110,15 @@ Wiederkehrende Leistungen → Rahmenplan (§5.2.2).
 
 > **Bewusst nicht Teil (Folgeschritte):** Tagesanpassung an Verfügbarkeit/Krankmeldung und kurzfristige Umplanung → 2.3. Exotische Wiederholungen (14-tägig, „jeder 2. Dienstag") — erst wöchentliche Wochentag-Sets. Stammtour-Pflege läuft vorerst über die Payload-Admin-UI (`/admin`); ein eigenes Frontend-CRUD ist optional. Vercel-Cron für rollierende Generierung (wie SLA) als einfacher Folgeschritt.
 
-### 2.3 Tagesplanung + kurzfristige Umplanung — L, **Hoch**
+### 2.3 Tagesplanung + kurzfristige Umplanung — L, **Hoch** — ✅ ERLEDIGT (2026-07-25)
 Autom. Anpassung an Tagesverfügbarkeit; Neuberechnung bei Krankmeldung/Notfall (§5.2.2).
 
 - **Fertig, wenn** eine Krankmeldung die betroffenen Einsätze auf andere Touren des Tages neu verteilt und die Auswirkung (Fahrzeit, Zeitfenster-Verletzungen) angezeigt wird.
 - **Test:** Szenario-Test — Pflegekraft fällt aus → alle ihre Einsätze werden gültig neu zugeordnet oder als „nicht platzierbar" markiert, keine stillen Verluste.
+
+**Umsetzung (Entscheidungen: greedy Cheapest-Insertion, Vorschau→Bestätigen):** Reine Multi-Vehicle-Umverteilung `server/planning/umverteilung.ts` — `umverteile(verwaiste, zielTouren, routing)` verteilt die Einsätze schwierigste-zuerst (engstes Fenster, dann längste Dauer) über den bestehenden `fitScore` auf die beste machbare Tour, aktualisiert den Tour-Zustand fortlaufend; machbarkeitserhaltend, was nirgends passt → `nichtPlatzierbar` mit Grund (Qualifikation/Zeitfenster/keineTouren). **Invariante:** jeder verwaiste Einsatz taucht genau einmal auf (keine stillen Verluste). Service `planeUmverteilung` (Vorschau, kein Schreiben, mit Mehrfahrzeit-Impact je Zieltour via planeTour) und `wendeUmverteilungAn` (persistiert Zieltouren, Quelltour → verfuegbar=false, behält nur nicht platzierbare Einsätze). Endpoint `POST /api/v1/tours/{id}/aufloesen` (`?probe=1` = Vorschau). UI: je Tour „Auflösen (Krankmeldung)" → Vorschau-Panel (umverteilt/nicht platzierbar/Mehrfahrzeit) → Bestätigen/Abbrechen; i18n de+en. Nutzt Verfügbarkeit aus 1.3, Kapazität aus 1.4 und den Fit-Score-Kern wieder. 4 Szenario-Tests (günstigste Tour, Qualifikations-Ablehnung, Kapazitäts-Ausweichen, Invariante).
+
+> **Bewusst nicht Teil (Folgeschritte):** Globale Tages-Neuoptimierung from scratch; Echtzeit-Benachrichtigung der Kräfte; die mobile Seite (§5.3). Keine automatische Beschaffung neuer Kräfte/Überstunden — nur die vorhandenen verfügbaren Touren. Bezugspflege/Geschlechtspräferenz fließen bei der Umverteilung nicht ein (liegen am Klienten, nicht am Tour-Einsatz).
 
 ### 2.4 Soll-Ist-Abgleich — L, Mittel — **blockiert durch §5.3 (mobil)**
 Geplante vs. erfasste Zeiten (§5.2.2). Setzt mobile Leistungserfassung (§5.3) voraus, die heute nicht existiert.

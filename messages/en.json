@@ -103,7 +103,13 @@
     "importAndereDatei": "different file",
     "tourErstellen": "Create new tour",
     "optimieren": "Optimise tour",
-    "optimiert": "Optimising …"
+    "optimiert": "Optimising …",
+    "aufloesen": "Disband (sick leave)",
+    "aufloesenTitel": "Redistribution — preview",
+    "umverteilt": "{n, plural, =0 {Nothing to redistribute} one {# visit redistributed} other {# visits redistributed}}",
+    "nichtPlatzierbar": "{n, plural, one {# visit unplaceable} other {# visits unplaceable}}",
+    "bestaetigen": "Confirm",
+    "abbrechen": "Cancel"
   },
   "wochenplan": {
     "titel": "Weekly planning",

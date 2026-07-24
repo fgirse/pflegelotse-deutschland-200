@@ -50,6 +50,13 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
   const [view, setView] = useState<'map' | 'table'>('map')
   const [angebotGesendet, setAngebotGesendet] = useState(false)
   const [optimierId, setOptimierId] = useState<string | null>(null)
+  const [aufloesenBusy, setAufloesenBusy] = useState(false)
+  const [vorschau, setVorschau] = useState<null | {
+    tourId: string
+    zuordnungen: { pseudonymId: string; zielTourId: string; mehrwegMin: number }[]
+    nichtPlatzierbar: { pseudonymId: string; grund: string }[]
+    impact: { tourId: string; pflegekraftId: string; fahrzeitVorherMin: number; fahrzeitNachherMin: number }[]
+  }>(null)
 
   // Eigene Klienten in die gemeinsame Kandidatenform bringen.
   const eigene: PlanKandidat[] = candidates.map((k) => ({
@@ -131,6 +138,33 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
       if (res.ok) startTransition(() => router.refresh())
     } finally {
       setOptimierId(null)
+    }
+  }
+
+  // Krankmeldung / Tour auflösen — erst Vorschau der Umverteilung (kein Schreiben).
+  async function aufloesenVorschau(tourId: string) {
+    setAufloesenBusy(true)
+    setVorschau(null)
+    try {
+      const res = await fetch(`/api/v1/tours/${tourId}/aufloesen?probe=1`, { method: 'POST' })
+      if (res.ok) setVorschau({ tourId, ...(await res.json()) })
+    } finally {
+      setAufloesenBusy(false)
+    }
+  }
+
+  // Bestätigen: Umverteilung real anwenden und Server-Daten neu laden.
+  async function aufloesenBestaetigen() {
+    if (!vorschau) return
+    setAufloesenBusy(true)
+    try {
+      const res = await fetch(`/api/v1/tours/${vorschau.tourId}/aufloesen`, { method: 'POST' })
+      if (res.ok) {
+        setVorschau(null)
+        startTransition(() => router.refresh())
+      }
+    } finally {
+      setAufloesenBusy(false)
     }
   }
 
@@ -235,17 +269,56 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
             <div key={x.tour.id} className="mb-3">
               <div className="mb-1 flex items-center justify-between gap-2">
                 <span className="text-sm font-medium">{x.tour.pflegekraftId}</span>
-                {x.tour.einsaetze.length > 1 && (
-                  <button
-                    onClick={() => optimiere(x.tour.id)}
-                    disabled={optimierId !== null}
-                    className="btn btn-outline min-h-8 px-3 py-1 text-xs"
-                  >
-                    {optimierId === x.tour.id ? t('optimiert') : t('optimieren')}
-                  </button>
-                )}
+                <span className="flex gap-2">
+                  {x.tour.einsaetze.length > 0 && (
+                    <button
+                      onClick={() => aufloesenVorschau(x.tour.id)}
+                      disabled={aufloesenBusy || optimierId !== null}
+                      className="btn btn-outline min-h-8 px-3 py-1 text-xs"
+                    >
+                      {t('aufloesen')}
+                    </button>
+                  )}
+                  {x.tour.einsaetze.length > 1 && (
+                    <button
+                      onClick={() => optimiere(x.tour.id)}
+                      disabled={optimierId !== null || aufloesenBusy}
+                      className="btn btn-outline min-h-8 px-3 py-1 text-xs"
+                    >
+                      {optimierId === x.tour.id ? t('optimiert') : t('optimieren')}
+                    </button>
+                  )}
+                </span>
               </div>
               <Timeline tour={x.tour} />
+
+              {/* Vorschau der Umverteilung (Krankmeldung) für diese Tour. */}
+              {vorschau?.tourId === x.tour.id && (
+                <div className="mt-2 rounded-lg border border-[var(--color-line)] bg-[var(--color-paper)] p-3">
+                  <p className="text-sm font-medium">{t('aufloesenTitel')}</p>
+                  <p className="mt-1 text-sm text-[var(--color-success)]">
+                    {t('umverteilt', { n: vorschau.zuordnungen.length })}
+                  </p>
+                  {vorschau.impact.map((im) => (
+                    <p key={im.tourId} className="text-xs text-[var(--color-muted)]">
+                      {im.pflegekraftId}: {t('tourDuration')} {im.fahrzeitVorherMin} → {im.fahrzeitNachherMin} {t('minutes')}
+                    </p>
+                  ))}
+                  {vorschau.nichtPlatzierbar.length > 0 && (
+                    <p className="mt-1 text-sm font-medium text-[var(--color-danger)]">
+                      ⚠ {t('nichtPlatzierbar', { n: vorschau.nichtPlatzierbar.length })}
+                    </p>
+                  )}
+                  <div className="mt-2 flex gap-2">
+                    <button onClick={aufloesenBestaetigen} disabled={aufloesenBusy} className="btn btn-primary min-h-9 px-3 py-1 text-sm">
+                      {t('bestaetigen')}
+                    </button>
+                    <button onClick={() => setVorschau(null)} disabled={aufloesenBusy} className="btn btn-outline min-h-9 px-3 py-1 text-sm">
+                      {t('abbrechen')}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
