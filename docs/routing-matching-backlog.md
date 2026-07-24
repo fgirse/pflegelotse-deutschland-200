@@ -96,7 +96,9 @@ Ganze Tour, Reihenfolge-Reoptimierung; OR-Tools o. ä. hinter dem bestehenden Pr
 
 **Umsetzung (Entscheidung: Pure-TS lokale Suche, nur Single-Tour-Sequencing):** Neuer Port `TourOptimizer` mit Adapter `LocalSearchTourOptimizer` (`tourOptimizer.ts`): Cheapest-Insertion-Konstruktion + 2-opt + Or-opt, deterministisch, in-process, keine Infra. Bewertet Reihenfolgen über das **exportierte `simuliere()`** aus dem Matcher — dieselben harten Restriktionen (Zeitfenster, ArbZG §3/§4, Schichtende, Kapazität, Endpunkt, Grundzeit), keine Doppel-Logik. Anbindung: `optimiereTour()` im Service (verplant das Ergebnis über `planeTour` für konsistente Ankunftszeiten/Kennzahlen) und Endpoint `POST /api/v1/tours/{id}/optimize` (Rollen disponent/admin, Mandantengrenze). Vier Tests: schlechte Reihenfolge → bekanntes Optimum (80→60); enges Zeitfenster erzwingt machbare Reihenfolge; leere Tour / Einzeltour trivial. Nearest-Insertion (`fitScoreFuerTour`) bleibt unverändert der Marktplatz-Spezialfall.
 
-> **Bewusst nicht Teil (Folgeschritte):** Multi-Vehicle-Zuordnung (Einsatz→Pflegekraft über mehrere Touren) gehört zu 2.2/2.3. OR-Tools bleibt hinter demselben Port eine Option, falls je echtes Multi-Vehicle über Hunderte Stopps nötig wird. Performance des Sequencers separat gegen §6.1 messen (2.6) — die Nearest-Insertion-Messung aus 1.7 gilt nicht für den Solver. Frontend-Auslöser (Button „Tour optimieren") noch offen — heute nur per Endpoint erreichbar.
+> **Bewusst nicht Teil (Folgeschritte):** Multi-Vehicle-Zuordnung (Einsatz→Pflegekraft über mehrere Touren) gehört zu 2.2/2.3. OR-Tools bleibt hinter demselben Port eine Option, falls je echtes Multi-Vehicle über Hunderte Stopps nötig wird.
+>
+> **Nachgezogen (2026-07-25):** Frontend-Auslöser umgesetzt — Button „Tour optimieren" je Tour im Dashboard-Zeitstrahl (`DashboardClient.tsx`), ruft `POST /api/v1/tours/{id}/optimize` und lädt die Seite neu; i18n `dashboard.optimieren`/`optimiert` in de+en. Solver-Performance gegen §6.1 gemessen (siehe 2.6).
 
 ### 2.2 Stammtouren + Wochenplanung — L, **Hoch**
 Wiederkehrende Leistungen → Rahmenplan (§5.2.2).
@@ -123,11 +125,15 @@ Interaktive Karte, sofortige Neuberechnung bei manueller Anpassung (§5.2.3 / §
 - **Fertig, wenn** Touren auf einer Karte dargestellt sind und ein per Drag verschobener Stopp sofort neue Fahrzeit/Zeitfenster-Status zeigt.
 - **Test:** Playwright — Stopp verschieben → Kennzahl-Anzeige aktualisiert sich, Zeitfenster-Verletzung wird rot markiert.
 
-### 2.6 Performance-Härtung Solver — M, begleitend zu 2.1
+### 2.6 Performance-Härtung Solver — M, begleitend zu 2.1 — ✅ GEMESSEN (2026-07-25)
 60-s-Grenze (§6.1) ist das eigentliche Performance-Risiko (Risikomatrix, Pflichtenheft).
 
 - **Fertig, wenn** der Solver die 200/50-Instanz innerhalb 60 s löst — mit Zeitbudget/Abbruch, das die beste bis dahin gefundene Lösung zurückgibt.
 - **Test:** Benchmark wie 1.7, aber gegen den Solver; harte Assertion `< 60 s`.
+
+**Messung:** `tourOptimizer.perf.test.ts` — deterministische Daten über gecachtes Haversine-Routing. Gemessen: **50 Touren × 4 Stopps (= 200 Stopps, §6.1-Szenario) in ~4 ms**; eine große Einzeltour mit **15 Stopps in ~3 ms**. Regressions-Guards `< 20 s` bzw. `< 10 s`, Zeiten ins CI-Log.
+
+> **Zeitbudget/Abbruch bewusst nicht umgesetzt:** Bei den realen Tourgrößen (Millisekunden, ~4 Größenordnungen unter 60 s) unnötig. Ein explizites Zeitbudget mit „beste-bis-dahin"-Rückgabe wird erst relevant, wenn Multi-Vehicle (2.3) über viele hundert Stopps optimiert — dann hinter demselben `TourOptimizer`-Port nachrüstbar.
 
 ---
 
