@@ -1,6 +1,14 @@
 import type { Where } from 'payload'
 import { payloadClient } from './payloadClient'
-import { tourSchema, klientOperativSchema, type Tour, type KlientOperativ } from '@/shared/domain'
+import {
+  tourSchema,
+  stammtourSchema,
+  klientOperativSchema,
+  type Tour,
+  type KlientOperativ,
+  type Stammtour,
+} from '@/shared/domain'
+import { tourSchluessel, type TourEntwurf } from './planning/wochenplan'
 
 // Liest Touren eines Mandanten (Säule 2) und bildet sie auf die Domäne ab.
 // overrideAccess: true — die v1-API läuft serverseitig vertrauenswürdig;
@@ -90,6 +98,74 @@ export async function ladeKlientenOperativ(
   return res.docs.map((d) => klientOperativSchema.parse(normKlient(d)))
 }
 
+// ── Stammtouren / Wochenplanung (§5.2.2) ──────────────────────────────────
+
+// Liest die Stammtouren eines Mandanten.
+export async function ladeStammtouren(tenantId: string): Promise<Stammtour[]> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'stammtouren',
+    where: { tenantId: { equals: tenantId } },
+    limit: 200,
+    overrideAccess: true,
+    depth: 0,
+  })
+  return res.docs.map((d) => stammtourSchema.parse(normStammtour(d)))
+}
+
+// Sammelt die Idempotenz-Schlüssel (stammtourId|datum) bereits generierter
+// Touren eines Mandanten für die gegebenen Tage — damit die Wochengenerierung
+// bestehende Tag-Touren nicht überschreibt.
+export async function ladeGenerierteTourKeys(
+  tenantId: string,
+  tage: string[],
+): Promise<Set<string>> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'touren',
+    where: {
+      tenantId: { equals: tenantId },
+      datum: { in: tage },
+      stammtourId: { exists: true },
+    },
+    limit: 500,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const keys = new Set<string>()
+  for (const d of res.docs) {
+    const s = (d as { stammtourId?: string }).stammtourId
+    const datum = (d as { datum?: string }).datum
+    if (s && datum) keys.add(tourSchluessel({ stammtourId: s, datum }))
+  }
+  return keys
+}
+
+// Legt eine generierte Tour aus einem Entwurf an (mit Rückverweis stammtourId).
+export async function erstelleGenerierteTour(entwurf: TourEntwurf): Promise<Tour> {
+  const payload = await payloadClient()
+  const d = await payload.create({
+    collection: 'touren',
+    data: {
+      tenantId: entwurf.tenantId,
+      datum: entwurf.datum,
+      pflegekraftId: entwurf.pflegekraftId,
+      pflegekraftQualifikation: entwurf.pflegekraftQualifikation,
+      pflegekraftGeschlecht: entwurf.pflegekraftGeschlecht,
+      start: entwurf.start,
+      ende: entwurf.ende,
+      startZeit: entwurf.startZeit,
+      verfuegbarBis: entwurf.verfuegbarBis,
+      maxEinsaetze: entwurf.maxEinsaetze,
+      stammtourId: entwurf.stammtourId,
+      einsaetze: entwurf.einsaetze,
+    },
+    overrideAccess: true,
+    depth: 0,
+  })
+  return tourSchema.parse(normTour(d))
+}
+
 // Aktualisiert die Einsatzfolge einer Tour (z. B. nach Ein-Klick-Aufnahme).
 export async function speichereEinsaetze(
   tourId: string,
@@ -128,6 +204,7 @@ function normTour(d: any): unknown {
     verfuegbar: d.verfuegbar ?? true,
     verfuegbarBis: typeof d.verfuegbarBis === 'number' ? d.verfuegbarBis : undefined,
     maxEinsaetze: typeof d.maxEinsaetze === 'number' ? d.maxEinsaetze : undefined,
+    stammtourId: d.stammtourId ?? undefined,
     einsaetze: arr(d.einsaetze).map((e) => ({
       pseudonymId: e.pseudonymId,
       geo: e.geo,
@@ -155,6 +232,36 @@ function normKlient(d: any): unknown {
     bezugspflege: d.bezugspflege,
     geschlechtPraeferenz: d.geschlechtPraeferenz ?? undefined,
     status: d.status ?? 'aktiv',
+  }
+}
+
+function normStammtour(d: any): unknown {
+  return {
+    id: String(d.id),
+    tenantId: d.tenantId,
+    pflegekraftId: d.pflegekraftId,
+    pflegekraftQualifikation: arr(d.pflegekraftQualifikation),
+    pflegekraftGeschlecht: d.pflegekraftGeschlecht ?? undefined,
+    start: d.start,
+    ende:
+      d.ende && typeof d.ende.lat === 'number' && typeof d.ende.lng === 'number'
+        ? { lat: d.ende.lat, lng: d.ende.lng }
+        : undefined,
+    startZeit: d.startZeit ?? 480,
+    verfuegbarBis: typeof d.verfuegbarBis === 'number' ? d.verfuegbarBis : undefined,
+    maxEinsaetze: typeof d.maxEinsaetze === 'number' ? d.maxEinsaetze : undefined,
+    wochentage: arr(d.wochentage),
+    aktivAb: d.aktivAb ?? undefined,
+    aktivBis: d.aktivBis ?? undefined,
+    einsaetze: arr(d.einsaetze).map((e) => ({
+      pseudonymId: e.pseudonymId,
+      geo: e.geo,
+      zeitfenster: e.zeitfenster,
+      dauerMin: e.dauerMin ?? 30,
+      grundzeitMin: typeof e.grundzeitMin === 'number' ? e.grundzeitMin : undefined,
+      qualifikation: arr(e.qualifikation),
+      wochentage: Array.isArray(e.wochentage) ? e.wochentage : undefined,
+    })),
   }
 }
 

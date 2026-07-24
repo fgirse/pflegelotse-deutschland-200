@@ -6,6 +6,7 @@ import { listeBedarfeFuerDienst } from '@/server/marketplace/service'
 import { requireDienstSeite } from '@/server/auth/page'
 import { DashboardClient } from './DashboardClient'
 import { DashboardImport } from './DashboardImport'
+import { WochenplanButton } from './WochenplanButton'
 
 // Das Dashboard liest zur Laufzeit aus der Datenbank (Säule 2) — es darf
 // nicht statisch vorgerendert werden.
@@ -133,6 +134,9 @@ export default async function DashboardPage({
 
       {/* Prominenter CSV/Excel-Upload (Drag & Drop) — Klienten aus der Pflegesoftware. */}
       <DashboardImport />
+
+      {/* Wochenplanung: Rahmenplan aus den Stammtouren erzeugen (§5.2.2). */}
+      <WochenplanButton />
 
       {/* Kostenträger-Mix: offene Bedarfe (Gelegenheiten) + Klientenstamm (Portfolio). */}
       <div className="mb-6 grid gap-4 lg:grid-cols-2">

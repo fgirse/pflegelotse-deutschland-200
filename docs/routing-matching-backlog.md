@@ -100,11 +100,15 @@ Ganze Tour, Reihenfolge-Reoptimierung; OR-Tools o. ä. hinter dem bestehenden Pr
 >
 > **Nachgezogen (2026-07-25):** Frontend-Auslöser umgesetzt — Button „Tour optimieren" je Tour im Dashboard-Zeitstrahl (`DashboardClient.tsx`), ruft `POST /api/v1/tours/{id}/optimize` und lädt die Seite neu; i18n `dashboard.optimieren`/`optimiert` in de+en. Solver-Performance gegen §6.1 gemessen (siehe 2.6).
 
-### 2.2 Stammtouren + Wochenplanung — L, **Hoch**
+### 2.2 Stammtouren + Wochenplanung — L, **Hoch** — ✅ ERLEDIGT (2026-07-25)
 Wiederkehrende Leistungen → Rahmenplan (§5.2.2).
 
 - **Fertig, wenn** wiederkehrende Leistungen als Stammtour hinterlegbar sind und daraus ein Wochenrahmenplan generiert wird.
 - **Test:** E2E — Stammtour „Mo/Mi/Fr 08:00" erzeugt für eine Kalenderwoche genau drei Tour-Instanzen mit korrekten Einsätzen.
+
+**Umsetzung (Entscheidungen: per-Stammeinsatz-Frequenz, idempotente Generierung):** Neue Säule-2-Collection `stammtouren` (pseudonym, wie `touren`) + Schema `stammtourSchema`/`stammEinsatzSchema` — jeder Stammeinsatz hat optional eigene `wochentage` (Default = die der Tour), plus Gültigkeitsraum `aktivAb`/`aktivBis`. `touren` bekommt `stammtourId` (Rückverweis). Reiner, deterministischer Planer `server/planning/wochenplan.ts`: `generiereWoche(stammtouren, montag)` erzeugt pro passendem Wochentag eine Tour mit den fälligen Einsätzen (leere Tage werden übersprungen); Datumsarithmetik in UTC (keine Zeitzonen-Effekte); `montagDerWoche()` normalisiert beliebige Eingabetage. Idempotenz: `filtereNeue()` + `ladeGenerierteTourKeys()` lassen bestehende Tag-Touren (inkl. manueller Änderungen) unangetastet, nur fehlende Tage werden ergänzt. Service `generiereWochenplan()`, Endpoint `POST /api/v1/stammtouren/generate` (Rollen disponent/admin), UI-Auslöser „Woche planen" im Dashboard (`WochenplanButton.tsx`), i18n `wochenplan` in de+en. Generierte Touren sind normale `Tour`-Docs → laufen sofort durch die gesamte Maschinerie (planeTour, Fit-Score, Optimizer/„Tour optimieren"). 8 Planer-Tests: Datumslogik, Abnahme-Fall (Mo/Mi/Fr → 3 Touren), per-Einsatz-Frequenz, keine leeren Touren, Gültigkeitsraum, Idempotenz-Filter.
+
+> **Bewusst nicht Teil (Folgeschritte):** Tagesanpassung an Verfügbarkeit/Krankmeldung und kurzfristige Umplanung → 2.3. Exotische Wiederholungen (14-tägig, „jeder 2. Dienstag") — erst wöchentliche Wochentag-Sets. Stammtour-Pflege läuft vorerst über die Payload-Admin-UI (`/admin`); ein eigenes Frontend-CRUD ist optional. Vercel-Cron für rollierende Generierung (wie SLA) als einfacher Folgeschritt.
 
 ### 2.3 Tagesplanung + kurzfristige Umplanung — L, **Hoch**
 Autom. Anpassung an Tagesverfügbarkeit; Neuberechnung bei Krankmeldung/Notfall (§5.2.2).

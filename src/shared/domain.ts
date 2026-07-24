@@ -94,9 +94,45 @@ export const tourSchema = z.object({
   // Kapazitätsgrenze: max. Anzahl Einsätze in dieser Tour (§5.2.1). Optional;
   // ohne Angabe unbegrenzt (nur ArbZG/Zeitfenster begrenzen dann).
   maxEinsaetze: z.number().int().positive().optional(),
+  // Rückverweis auf die Stammtour, aus der diese Tour generiert wurde (§5.2.2).
+  // Zusammen mit datum eindeutig — Basis der idempotenten Wochengenerierung.
+  stammtourId: z.string().optional(),
   einsaetze: z.array(einsatzSchema).default([]),
 })
 export type Tour = z.infer<typeof tourSchema>
+
+// ── Stammtouren / Wochenplanung (Pflichtenheft 5.2.2) ─────────────────────
+// ISO-Wochentag: Mo=1 … So=7.
+export const wochentagSchema = z.number().int().min(1).max(7)
+
+// Ein wiederkehrender Einsatz. wochentage optional — ohne Angabe gelten die
+// Wochentage der Stammtour (per-Einsatz-Frequenz, z. B. Grundpflege täglich,
+// Behandlungspflege nur Mo/Do).
+export const stammEinsatzSchema = einsatzSchema.extend({
+  wochentage: z.array(wochentagSchema).optional(),
+})
+export type StammEinsatz = z.infer<typeof stammEinsatzSchema>
+
+// Eine Stammtour (Vorlage): erzeugt je passendem Wochentag eine konkrete Tour.
+export const stammtourSchema = z.object({
+  id: z.string(),
+  tenantId: z.string().min(1),
+  pflegekraftId: z.string(),
+  pflegekraftQualifikation: z.array(z.string()).default([]),
+  pflegekraftGeschlecht: z.enum(['m', 'w', 'd']).optional(),
+  start: geoSchema,
+  ende: geoSchema.optional(),
+  startZeit: z.number().int().min(0).max(1439).default(480),
+  verfuegbarBis: z.number().int().min(0).max(1439).optional(),
+  maxEinsaetze: z.number().int().positive().optional(),
+  // An welchen Wochentagen die Tour läuft (mind. einer).
+  wochentage: z.array(wochentagSchema).min(1),
+  // Optionaler Gültigkeitszeitraum (YYYY-MM-DD); außerhalb wird nichts erzeugt.
+  aktivAb: z.string().optional(),
+  aktivBis: z.string().optional(),
+  einsaetze: z.array(stammEinsatzSchema).default([]),
+})
+export type Stammtour = z.infer<typeof stammtourSchema>
 
 // ── Fit-Score (Matching) ─────────────────────────────────────────────────
 

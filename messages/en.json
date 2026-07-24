@@ -105,6 +105,15 @@
     "optimieren": "Optimise tour",
     "optimiert": "Optimising …"
   },
+  "wochenplan": {
+    "titel": "Weekly planning",
+    "hinweis": "Generate the week's framework plan from your master tours.",
+    "woche": "Week (any day)",
+    "planen": "Plan week",
+    "plant": "Planning …",
+    "ergebnis": "{erzeugt} tours created, {uebersprungen} already existed.",
+    "fehler": "Planning failed. Please try again."
+  },
   "tourNeu": {
     "title": "Create new tour",
     "subtitle": "Set the carer, day and start point — you plan the visits afterwards.",

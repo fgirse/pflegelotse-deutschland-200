@@ -71,6 +71,7 @@ export interface Config {
     klienten_identitaet: KlientenIdentitaet;
     klienten_operativ: KlientenOperativ;
     touren: Touren;
+    stammtouren: Stammtouren;
     gdpr_audit_log: GdprAuditLog;
     bedarfe: Bedarfe;
     angehoerige_identitaet: AngehoerigeIdentitaet;
@@ -89,6 +90,7 @@ export interface Config {
     klienten_identitaet: KlientenIdentitaetSelect<false> | KlientenIdentitaetSelect<true>;
     klienten_operativ: KlientenOperativSelect<false> | KlientenOperativSelect<true>;
     touren: TourenSelect<false> | TourenSelect<true>;
+    stammtouren: StammtourenSelect<false> | StammtourenSelect<true>;
     gdpr_audit_log: GdprAuditLogSelect<false> | GdprAuditLogSelect<true>;
     bedarfe: BedarfeSelect<false> | BedarfeSelect<true>;
     angehoerige_identitaet: AngehoerigeIdentitaetSelect<false> | AngehoerigeIdentitaetSelect<true>;
@@ -265,6 +267,7 @@ export interface Touren {
   verfuegbar?: boolean | null;
   verfuegbarBis?: number | null;
   maxEinsaetze?: number | null;
+  stammtourId?: string | null;
   einsaetze?:
     | {
         pseudonymId: string;
@@ -289,6 +292,83 @@ export interface Touren {
           | null;
         ankunft?: number | null;
         probe?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stammtouren".
+ */
+export interface Stammtouren {
+  id: string;
+  tenantId: string;
+  pflegekraftId: string;
+  pflegekraftQualifikation?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  pflegekraftGeschlecht?: ('m' | 'w' | 'd') | null;
+  start: {
+    lat: number;
+    lng: number;
+  };
+  ende?: {
+    lat?: number | null;
+    lng?: number | null;
+  };
+  startZeit?: number | null;
+  verfuegbarBis?: number | null;
+  maxEinsaetze?: number | null;
+  wochentage:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  aktivAb?: string | null;
+  aktivBis?: string | null;
+  einsaetze?:
+    | {
+        pseudonymId: string;
+        geo: {
+          lat: number;
+          lng: number;
+        };
+        zeitfenster: {
+          von: number;
+          bis: number;
+        };
+        dauerMin?: number | null;
+        grundzeitMin?: number | null;
+        qualifikation?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        wochentage?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -543,6 +623,10 @@ export interface PayloadLockedDocument {
         value: string | Touren;
       } | null)
     | ({
+        relationTo: 'stammtouren';
+        value: string | Stammtouren;
+      } | null)
+    | ({
         relationTo: 'gdpr_audit_log';
         value: string | GdprAuditLog;
       } | null)
@@ -722,6 +806,7 @@ export interface TourenSelect<T extends boolean = true> {
   verfuegbar?: T;
   verfuegbarBis?: T;
   maxEinsaetze?: T;
+  stammtourId?: T;
   einsaetze?:
     | T
     | {
@@ -743,6 +828,58 @@ export interface TourenSelect<T extends boolean = true> {
         qualifikation?: T;
         ankunft?: T;
         probe?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stammtouren_select".
+ */
+export interface StammtourenSelect<T extends boolean = true> {
+  tenantId?: T;
+  pflegekraftId?: T;
+  pflegekraftQualifikation?: T;
+  pflegekraftGeschlecht?: T;
+  start?:
+    | T
+    | {
+        lat?: T;
+        lng?: T;
+      };
+  ende?:
+    | T
+    | {
+        lat?: T;
+        lng?: T;
+      };
+  startZeit?: T;
+  verfuegbarBis?: T;
+  maxEinsaetze?: T;
+  wochentage?: T;
+  aktivAb?: T;
+  aktivBis?: T;
+  einsaetze?:
+    | T
+    | {
+        pseudonymId?: T;
+        geo?:
+          | T
+          | {
+              lat?: T;
+              lng?: T;
+            };
+        zeitfenster?:
+          | T
+          | {
+              von?: T;
+              bis?: T;
+            };
+        dauerMin?: T;
+        grundzeitMin?: T;
+        qualifikation?: T;
+        wochentage?: T;
         id?: T;
       };
   updatedAt?: T;

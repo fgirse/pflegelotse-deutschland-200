@@ -1,12 +1,13 @@
 import type { CollectionConfig } from 'payload'
 import { tenantScoped, istDienstMitarbeiter, klientenSchreibAccess } from './access'
 
-// SÄULE 2 — Touren: eine Pflegekraft, ein Tag, eine Einsatzfolge.
-// Enthält ausschließlich pseudonymisierte Referenzen (pseudonym_id), keine PII.
-export const Touren: CollectionConfig = {
-  slug: 'touren',
-  dbName: 'touren', // keine Pluralisierung
-  admin: { useAsTitle: 'id', group: 'Säule 2 (operativ)' },
+// SÄULE 2 — Stammtouren: Vorlagen wiederkehrender Touren (Pflichtenheft 5.2.2).
+// Aus ihnen wird je Woche der Rahmenplan (konkrete Touren) generiert. Wie die
+// Touren-Collection enthält sie nur pseudonyme Referenzen (pseudonymId), keine PII.
+export const Stammtouren: CollectionConfig = {
+  slug: 'stammtouren',
+  dbName: 'stammtouren', // keine Pluralisierung
+  admin: { useAsTitle: 'pflegekraftId', group: 'Säule 2 (operativ)' },
   access: {
     read: tenantScoped,
     create: klientenSchreibAccess,
@@ -15,10 +16,8 @@ export const Touren: CollectionConfig = {
   },
   fields: [
     { name: 'tenantId', type: 'text', required: true, index: true },
-    { name: 'datum', type: 'text', required: true }, // ISO YYYY-MM-DD
     { name: 'pflegekraftId', type: 'text', required: true },
     { name: 'pflegekraftQualifikation', type: 'json', defaultValue: [] },
-    // Geschlecht der Pflegekraft (für Präferenz-Matching, §5.1.1).
     { name: 'pflegekraftGeschlecht', type: 'select', options: ['m', 'w', 'd'] },
     {
       name: 'start',
@@ -29,8 +28,6 @@ export const Touren: CollectionConfig = {
       ],
     },
     {
-      // Endpunkt der Tour (Pflichtenheft 5.1.2). Optional — ohne Angabe
-      // kehrt die Tour zum Startpunkt/Depot zurück.
       name: 'ende',
       type: 'group',
       fields: [
@@ -38,17 +35,13 @@ export const Touren: CollectionConfig = {
         { name: 'lng', type: 'number' },
       ],
     },
-    { name: 'startZeit', type: 'number', defaultValue: 480 }, // 08:00
-    // Verfügbarkeit der Pflegekraft an diesem Tag (Pflichtenheft 5.1.2):
-    // false = Urlaub/Krankheit → Tour fällt aus dem Matching.
-    { name: 'verfuegbar', type: 'checkbox', defaultValue: true },
-    // Schichtende (Teilzeit): spätestes Ende eines Einsatzes (Min seit Mitternacht).
+    { name: 'startZeit', type: 'number', defaultValue: 480 },
     { name: 'verfuegbarBis', type: 'number' },
-    // Kapazitätsgrenze: max. Anzahl Einsätze in dieser Tour (§5.2.1).
     { name: 'maxEinsaetze', type: 'number' },
-    // Rückverweis auf die erzeugende Stammtour (§5.2.2), für idempotente
-    // Wochengenerierung. Zusammen mit datum eindeutig.
-    { name: 'stammtourId', type: 'text', index: true },
+    // Wochentage, an denen die Tour läuft (ISO 1..7, Mo=1). Pflicht: mind. einer.
+    { name: 'wochentage', type: 'json', required: true },
+    { name: 'aktivAb', type: 'text' }, // YYYY-MM-DD, optional
+    { name: 'aktivBis', type: 'text' },
     {
       name: 'einsaetze',
       type: 'array',
@@ -70,16 +63,15 @@ export const Touren: CollectionConfig = {
             { name: 'bis', type: 'number', required: true },
           ],
         },
-        { name: 'dauerMin', type: 'number', defaultValue: 30 }, // reine Leistungszeit
-        // Hausbesuchsgrundzeit je Besuch (Pflichtenheft 5.1.3), separat von dauerMin.
+        { name: 'dauerMin', type: 'number', defaultValue: 30 },
         { name: 'grundzeitMin', type: 'number', defaultValue: 0 },
         { name: 'qualifikation', type: 'json', defaultValue: [] },
-        { name: 'ankunft', type: 'number' }, // geplante Ankunft (Min seit Mitternacht)
-        { name: 'probe', type: 'checkbox', defaultValue: false }, // unverbindliche Probe-Einplanung
+        // Eigene Wochentage des Einsatzes; leer = die der Stammtour.
+        { name: 'wochentage', type: 'json' },
       ],
     },
   ],
 }
 
-// Lesehilfe-Export für API-Schicht.
-export const tourenLeseAccess = { read: tenantScoped, list: istDienstMitarbeiter }
+// Lesehilfe-Export für die API-Schicht.
+export const stammtourenLeseAccess = { read: tenantScoped, list: istDienstMitarbeiter }

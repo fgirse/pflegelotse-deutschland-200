@@ -104,6 +104,15 @@
     "optimieren": "Tour optimieren",
     "optimiert": "Optimiere …"
   },
+  "wochenplan": {
+    "titel": "Wochenplanung",
+    "hinweis": "Aus deinen Stammtouren den Rahmenplan für eine Woche erzeugen.",
+    "woche": "Woche (beliebiger Tag)",
+    "planen": "Woche planen",
+    "plant": "Plane …",
+    "ergebnis": "{erzeugt} Touren erzeugt, {uebersprungen} bereits vorhanden.",
+    "fehler": "Planung fehlgeschlagen. Bitte erneut versuchen."
+  },
   "tourNeu": {
     "title": "Neue Tour erstellen",
     "subtitle": "Pflegekraft, Tag und Startpunkt festlegen — Einsätze planst du danach.",
