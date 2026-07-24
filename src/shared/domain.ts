@@ -86,6 +86,9 @@ export const tourSchema = z.object({
   // Schichtende der Pflegekraft (Teilzeit): spätester Zeitpunkt, bis zu dem ein
   // Einsatz abgeschlossen sein muss (Minuten seit Mitternacht). Optional.
   verfuegbarBis: z.number().int().min(0).max(1439).optional(),
+  // Kapazitätsgrenze: max. Anzahl Einsätze in dieser Tour (§5.2.1). Optional;
+  // ohne Angabe unbegrenzt (nur ArbZG/Zeitfenster begrenzen dann).
+  maxEinsaetze: z.number().int().positive().optional(),
   einsaetze: z.array(einsatzSchema).default([]),
 })
 export type Tour = z.infer<typeof tourSchema>

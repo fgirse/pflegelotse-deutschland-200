@@ -126,6 +126,7 @@ function normTour(d: any): unknown {
     startZeit: d.startZeit ?? 480,
     verfuegbar: d.verfuegbar ?? true,
     verfuegbarBis: typeof d.verfuegbarBis === 'number' ? d.verfuegbarBis : undefined,
+    maxEinsaetze: typeof d.maxEinsaetze === 'number' ? d.maxEinsaetze : undefined,
     einsaetze: arr(d.einsaetze).map((e) => ({
       pseudonymId: e.pseudonymId,
       geo: e.geo,

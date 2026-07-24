@@ -184,6 +184,22 @@ describe('Fit-Score (Hausbesuchsgrundzeit)', () => {
   })
 })
 
+// Pflichtenheft 5.2.1: Kapazitätsgrenze je Tour (max. Anzahl Einsätze).
+describe('Fit-Score (Kapazität)', () => {
+  it('lehnt eine volle Tour ab, obwohl Zeitfenster und ArbZG passen würden', async () => {
+    // Zwei Einsätze, Grenze 2 → voll. Ohne die Grenze wäre der Kandidat machbar.
+    const voll = basisTour({ maxEinsaetze: 2 }) // basisTour hat 2 Einsätze
+    expect(await fitScoreFuerTour(voll, kandidat(), stubRouting)).toBeNull()
+    // Gegenprobe: gleiche Tour ohne Grenze nimmt den Kandidaten auf.
+    expect(await fitScoreFuerTour(basisTour(), kandidat(), stubRouting)).not.toBeNull()
+  })
+
+  it('erlaubt eine Einfügung, solange die Grenze nicht erreicht ist', async () => {
+    const platz = basisTour({ maxEinsaetze: 3 }) // 2 Einsätze, Platz für einen dritten
+    expect(await fitScoreFuerTour(platz, kandidat(), stubRouting)).not.toBeNull()
+  })
+})
+
 // Pflichtenheft 5.1.2: Verfügbarkeit der Pflegekraft (Urlaub/Krankheit) und
 // Teilzeit-Schichtende begrenzen, welche Touren einplanbar sind.
 describe('Fit-Score (Verfügbarkeit / Teilzeit)', () => {

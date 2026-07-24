@@ -262,6 +262,7 @@ export interface Touren {
   startZeit?: number | null;
   verfuegbar?: boolean | null;
   verfuegbarBis?: number | null;
+  maxEinsaetze?: number | null;
   einsaetze?:
     | {
         pseudonymId: string;
@@ -715,6 +716,7 @@ export interface TourenSelect<T extends boolean = true> {
   startZeit?: T;
   verfuegbar?: T;
   verfuegbarBis?: T;
+  maxEinsaetze?: T;
   einsaetze?:
     | T
     | {

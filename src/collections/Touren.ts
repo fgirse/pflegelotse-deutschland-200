@@ -42,6 +42,8 @@ export const Touren: CollectionConfig = {
     { name: 'verfuegbar', type: 'checkbox', defaultValue: true },
     // Schichtende (Teilzeit): spätestes Ende eines Einsatzes (Min seit Mitternacht).
     { name: 'verfuegbarBis', type: 'number' },
+    // Kapazitätsgrenze: max. Anzahl Einsätze in dieser Tour (§5.2.1).
+    { name: 'maxEinsaetze', type: 'number' },
     {
       name: 'einsaetze',
       type: 'array',

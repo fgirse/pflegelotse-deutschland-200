@@ -102,6 +102,9 @@ export async function fitScoreFuerTour(
   if (tour.verfuegbar === false) return null
   // Harte Bedingung 1: Qualifikation. Fehlt sie, ist keine Position möglich.
   if (!qualifikationErfuellt(tour, kandidat)) return null
+  // Harte Bedingung 2: Kapazität. Ist die Tour bereits voll, passt kein
+  // weiterer Einsatz mehr hinein (§5.2.1), unabhängig von Zeit/ArbZG.
+  if (tour.maxEinsaetze !== undefined && tour.einsaetze.length >= tour.maxEinsaetze) return null
 
   const n = tour.einsaetze.length
   // Schichtende (Teilzeit): Standard = Tagesende (1439), sonst der gesetzte Wert.

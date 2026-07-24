@@ -48,11 +48,13 @@ Urlaub/Krankheit/Teilzeit (§5.1.2) sind im Tour-Modell nicht abgebildet. Der Ma
 
 > **Offen (bewusst nicht Teil von 1.3):** Eine echte Mitarbeiter-Stammdatenverwaltung (§5.1.2 — Qualifikationen, Arbeitszeitmodelle, Urlaubskalender) fehlt weiterhin. Die Verfügbarkeit wird heute je Tour gesetzt, nicht aus einem Personalstamm abgeleitet.
 
-### 1.4 Kapazitätsgrenze je Tour — S, Mittel
+### 1.4 Kapazitätsgrenze je Tour — S, Mittel — ✅ ERLEDIGT (2026-07-24)
 Heute nur ArbZG-Deckel, keine harte Stopp-Zahl. Verhindert Überbuchung.
 
 - **Fertig, wenn** ein optionales `maxEinsaetze` (bzw. Rest-Arbeitszeit) am Tour-Modell existiert und `fitScoreFuerTour()` bei Überschreitung `null` zurückgibt.
 - **Test:** `fitScore.test.ts` — volle Tour (`einsaetze.length === maxEinsaetze`) → Kandidat wird abgelehnt, obwohl Zeitfenster/ArbZG passen würden.
+
+**Umsetzung:** Optionales Feld `maxEinsaetze` an `tourSchema` und der `Touren`-Collection; ohne Angabe unbegrenzt (nur ArbZG/Zeitfenster greifen). `fitScoreFuerTour()` gibt als harte Bedingung `null` zurück, wenn `einsaetze.length >= maxEinsaetze` — noch vor der Routing-/Positionsrechnung. `normTour()` reicht das Feld durch, Payload-Typen regeneriert. Zwei neue Tests (volle Tour abgelehnt trotz passendem Zeitfenster/ArbZG; freie Tour nimmt auf).
 
 ### 1.5 Separater Tour-Endpunkt — S, Mittel — ✅ ERLEDIGT (2026-07-21)
 Modell kennt nur `start` (Depot), keinen Endpunkt (§5.1.2). Der Rückweg der letzten Position wird dadurch unterschätzt. **Zusammen mit 1.2 umsetzen** — gleiche Rechnung.
