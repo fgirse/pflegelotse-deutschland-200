@@ -88,11 +88,15 @@ Die 60-s-Vorgabe (§6.1) ist für die Insertion-Heuristik heute unbelegt.
 
 **Harte Grenze:** Solange **2.1** fehlt, bleibt alles „Einzelklient in fixe Tour einfügen". Sobald der Solver steht, wird die heutige Insertion-Heuristik zum Spezialfall — dann lohnen 2.2–2.5.
 
-### 2.1 Echter VRPTW-Solver — L, **Hoch** (Fundament)
+### 2.1 Echter VRPTW-Solver — L, **Hoch** (Fundament) — ✅ ERLEDIGT (2026-07-25, Single-Tour)
 Ganze Tour, Reihenfolge-Reoptimierung; OR-Tools o. ä. hinter dem bestehenden Provider-Interface (§5.2.1).
 
 - **Fertig, wenn** ein Solver hinter einem `TourOptimizer`-Interface eine komplette Tour-Reihenfolge unter allen Hard Constraints (Zeitfenster, ArbZG, Qualifikation, Kapazität) berechnet und die heutige Insertion-Heuristik als degenerierter Fall (1 Kandidat, fixe Tour) erhalten bleibt.
 - **Test:** Solver-Testsuite mit kleinen Instanzen bekannter Optimallösung → berechnete Gesamtfahrzeit == Optimum; Constraint-Verletzung in keiner Lösung.
+
+**Umsetzung (Entscheidung: Pure-TS lokale Suche, nur Single-Tour-Sequencing):** Neuer Port `TourOptimizer` mit Adapter `LocalSearchTourOptimizer` (`tourOptimizer.ts`): Cheapest-Insertion-Konstruktion + 2-opt + Or-opt, deterministisch, in-process, keine Infra. Bewertet Reihenfolgen über das **exportierte `simuliere()`** aus dem Matcher — dieselben harten Restriktionen (Zeitfenster, ArbZG §3/§4, Schichtende, Kapazität, Endpunkt, Grundzeit), keine Doppel-Logik. Anbindung: `optimiereTour()` im Service (verplant das Ergebnis über `planeTour` für konsistente Ankunftszeiten/Kennzahlen) und Endpoint `POST /api/v1/tours/{id}/optimize` (Rollen disponent/admin, Mandantengrenze). Vier Tests: schlechte Reihenfolge → bekanntes Optimum (80→60); enges Zeitfenster erzwingt machbare Reihenfolge; leere Tour / Einzeltour trivial. Nearest-Insertion (`fitScoreFuerTour`) bleibt unverändert der Marktplatz-Spezialfall.
+
+> **Bewusst nicht Teil (Folgeschritte):** Multi-Vehicle-Zuordnung (Einsatz→Pflegekraft über mehrere Touren) gehört zu 2.2/2.3. OR-Tools bleibt hinter demselben Port eine Option, falls je echtes Multi-Vehicle über Hunderte Stopps nötig wird. Performance des Sequencers separat gegen §6.1 messen (2.6) — die Nearest-Insertion-Messung aus 1.7 gilt nicht für den Solver. Frontend-Auslöser (Button „Tour optimieren") noch offen — heute nur per Endpoint erreichbar.
 
 ### 2.2 Stammtouren + Wochenplanung — L, **Hoch**
 Wiederkehrende Leistungen → Rahmenplan (§5.2.2).

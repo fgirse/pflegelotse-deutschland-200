@@ -21,7 +21,7 @@ export function besuchsdauer(dauerMin: number, grundzeitMin?: number): number {
 }
 
 // Ein Knoten in der Tour-Simulation: Depot (ohne Fenster) oder Einsatz.
-interface Knoten {
+export interface Knoten {
   von: number
   bis: number
   dauer: number
@@ -43,7 +43,7 @@ export function qualifikationErfuellt(tour: Tour, kandidat: Kandidat): boolean {
 // der Startpunkt (Index 0, Rundtour zum Depot).
 // Harte Restriktionen: Zeitfenster (hard), ArbZG max. 10 h/Tag (hard);
 // nach 6 h Arbeit wird einmalig eine Pflichtpause eingeschoben (§4 ArbZG).
-function simuliere(
+export function simuliere(
   order: number[],
   startZeit: number,
   matrix: number[][],
@@ -207,7 +207,7 @@ export async function fitScore(
 }
 
 // ── Hilfen ────────────────────────────────────────────────────────────────
-function fensterKnoten(zf: Zeitfenster, dauer: number): Knoten {
+export function fensterKnoten(zf: Zeitfenster, dauer: number): Knoten {
   return { von: zf.von, bis: zf.bis, dauer }
 }
 

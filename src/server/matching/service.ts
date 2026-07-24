@@ -2,6 +2,7 @@ import type { RoutingProvider } from '@/server/routing/RoutingProvider'
 import { waehleRoutingKern } from '@/server/routing/waehleRouting'
 import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
 import { fitScore, qualifikationErfuellt, ARBZG, besuchsdauer } from './fitScore'
+import { LocalSearchTourOptimizer } from './tourOptimizer'
 import { env } from '@/lib/env'
 import type { FitScoreRequest, FitMatch, Tour } from '@/shared/domain'
 
@@ -126,4 +127,18 @@ export async function planeTour(tour: Tour): Promise<{
     arbeitszeitMin: Math.round(arbeit),
     arbzgKonform: arbeit <= ARBZG.maxArbeitszeitMin,
   }
+}
+
+const tourOptimizer = new LocalSearchTourOptimizer()
+
+// Optimiert die Reihenfolge der Stopps einer Tour (VRPTW-Sequencing, §5.2.1) und
+// liefert die neu sortierten Einsätze samt Kennzahlen (Ankunftszeiten,
+// Fahrzeit, Auslastung, ArbZG). Verplant die optimierte Reihenfolge über
+// planeTour, damit Kennzahlen und Ankunftszeiten konsistent sind.
+export async function optimiereTour(tour: Tour): Promise<
+  Awaited<ReturnType<typeof planeTour>> & { machbar: boolean }
+> {
+  const opt = await tourOptimizer.optimiere(tour, routing)
+  const geplant = await planeTour({ ...tour, einsaetze: opt.einsaetze })
+  return { ...geplant, machbar: opt.machbar }
 }
