@@ -72,6 +72,7 @@ export interface Config {
     klienten_operativ: KlientenOperativ;
     touren: Touren;
     stammtouren: Stammtouren;
+    leistungsnachweise: Leistungsnachweise;
     gdpr_audit_log: GdprAuditLog;
     bedarfe: Bedarfe;
     angehoerige_identitaet: AngehoerigeIdentitaet;
@@ -91,6 +92,7 @@ export interface Config {
     klienten_operativ: KlientenOperativSelect<false> | KlientenOperativSelect<true>;
     touren: TourenSelect<false> | TourenSelect<true>;
     stammtouren: StammtourenSelect<false> | StammtourenSelect<true>;
+    leistungsnachweise: LeistungsnachweiseSelect<false> | LeistungsnachweiseSelect<true>;
     gdpr_audit_log: GdprAuditLogSelect<false> | GdprAuditLogSelect<true>;
     bedarfe: BedarfeSelect<false> | BedarfeSelect<true>;
     angehoerige_identitaet: AngehoerigeIdentitaetSelect<false> | AngehoerigeIdentitaetSelect<true>;
@@ -381,6 +383,35 @@ export interface Stammtouren {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leistungsnachweise".
+ */
+export interface Leistungsnachweise {
+  id: string;
+  tenantId: string;
+  pseudonymId: string;
+  datum: string;
+  tourId: string;
+  erbrachteLeistungen?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  istAnkunft?: number | null;
+  istAbfahrt?: number | null;
+  bestaetigtAm: string;
+  bestaetigtVon: string;
+  prevHash: string;
+  hash: string;
+  pepperVersion: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "gdpr_audit_log".
  */
 export interface GdprAuditLog {
@@ -629,6 +660,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'stammtouren';
         value: string | Stammtouren;
+      } | null)
+    | ({
+        relationTo: 'leistungsnachweise';
+        value: string | Leistungsnachweise;
       } | null)
     | ({
         relationTo: 'gdpr_audit_log';
@@ -890,6 +925,26 @@ export interface StammtourenSelect<T extends boolean = true> {
         wochentage?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leistungsnachweise_select".
+ */
+export interface LeistungsnachweiseSelect<T extends boolean = true> {
+  tenantId?: T;
+  pseudonymId?: T;
+  datum?: T;
+  tourId?: T;
+  erbrachteLeistungen?: T;
+  istAnkunft?: T;
+  istAbfahrt?: T;
+  bestaetigtAm?: T;
+  bestaetigtVon?: T;
+  prevHash?: T;
+  hash?: T;
+  pepperVersion?: T;
   updatedAt?: T;
   createdAt?: T;
 }

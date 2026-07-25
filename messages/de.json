@@ -117,7 +117,22 @@
     "soll": "Soll",
     "ist": "Ist",
     "abweichung": "Abw.",
-    "puenktlichkeit": "Pünktlichkeit"
+    "puenktlichkeit": "Pünktlichkeit",
+    "nachweisLink": "Nachweis"
+  },
+  "nachweis": {
+    "title": "Leistungsnachweis",
+    "zurueck": "Zurück zum Dashboard",
+    "keine": "Keine bestätigten Leistungen für diesen Klienten.",
+    "integer": "Integrität bestätigt — unverändert seit der Erfassung (Hash-Kette geprüft).",
+    "gebrochen": "Integrität nicht bestätigt — die Aufzeichnung wurde verändert.",
+    "datum": "Datum",
+    "zeit": "Zeit",
+    "leistungen": "Erbrachte Leistungen",
+    "bestaetigtVon": "Bestätigt von",
+    "drucken": "Drucken",
+    "markdown": "Als Markdown",
+    "fuss": "{n} bestätigte Einsätze."
   },
   "erfassung": {
     "title": "Leistungserfassung",

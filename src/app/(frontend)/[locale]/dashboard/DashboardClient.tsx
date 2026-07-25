@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
+import { Link } from '@/i18n/navigation'
 import type { KlientOperativ, Tour, FitMatch } from '@/shared/domain'
 import type { SollIstBericht } from '@/server/planning/sollist'
 import { minToHHMM } from '@/shared/time'
@@ -500,6 +501,14 @@ function TourTable({ tours }: { tours: TourMitKennzahlen[] }) {
                     <td className="py-1 pr-3">
                       {e.qualifikation.join(', ') || '—'}
                       {e.probe && <span className="chip ml-1">{t('probe')}</span>}
+                      {si?.erledigt && (
+                        <Link
+                          href={`/nachweis/${e.pseudonymId}`}
+                          className="ml-2 text-[var(--color-accent)] hover:underline"
+                        >
+                          {t('nachweisLink')}
+                        </Link>
+                      )}
                     </td>
                   </tr>
                 )

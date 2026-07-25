@@ -163,6 +163,19 @@ Aus §5.2.1 sind folgende Restriktionen im Fit-Score vollständig implementiert 
 - Bezugspflege als Soft Constraint (Sortierkriterium `bezugspflegeErfuellt`)
 - Routing-Abstraktion mit HERE-Live-Verkehr, OSRM, Haversine-Fallback und Matrix-Cache
 
+---
+
+## Über das Routing/Matching hinaus (Berichtswesen §5.4)
+
+### §5.4 Rechtssicherer Leistungsnachweis — ✅ ERLEDIGT (2026-07-25)
+Erbrachte Leistungen je Patient, rechtssicher (§5.4 Berichtswesen).
+
+**Umsetzung (Entscheidungen: hash-verkettetes Journal, Bestätigung = Leistungen + Kraft/Zeit):** Reine Hash-Ketten-Logik `server/nachweis/kette.ts` — jeder Eintrag trägt `prevHash` + `hash = HMAC(prevHash + kanonischer Kern)` mit `AUDIT_PEPPER`; `verifiziereKette()` erkennt geänderte, gelöschte oder umgeordnete Einträge. WORM-Collection `leistungsnachweise` (Säule 2, pseudonym, `create` ja / `update`+`delete` nein — wie `gdpr_audit_log`). Bestätigungs-Flow: auf `/erfassung` schreibt „Erledigt" über `POST /api/v1/tours/{id}/bestaetigung` einen revisionssicheren Eintrag (erbrachte Leistungen = angegeben oder die geplanten des Klienten) und markiert den Einsatz operativ als erledigt. Nachweis-Dokument `erzeugeNachweisDokument()` verbindet die pseudonymen Einträge mit der Identität aus **Säule 1** (CSFLE) — **nur zur Darstellung**, nie zurück nach Säule 2 (Invariante gewahrt) —, weist den Integritätsstatus der Kette aus und ist als druckbare Seite `/nachweis/{pseudonymId}` (mit Markdown-Export) sowie via `GET /api/v1/klienten/{pseudonymId}/leistungsnachweis` (Rollen disponent/admin) abrufbar. „Nachweis"-Link je erledigtem Stopp in der Tagesübersicht; i18n de+en. 5 Ketten-Tests (gültige Kette, Genesis, manipulierter/gelöschter Eintrag, falscher Pepper).
+
+> **Bewusst nicht Teil (Folgeschritte, §8.3):** DTA-Datenträgeraustausch und DATEV-Export in die echten Kassen-/FiBu-Formate — eigener großer Schnittstellen-Strang. Ebenfalls offen: Patienten-Unterschrift, Versichertennummer im Nachweis, per-Leistung-Abwahl in der Bestätigungs-UI.
+
+---
+
 ## Referenzen
 
 - Pflichtenheft: `docs/PflichtenheftRoutenoptimierung_Pflegedienst.md`

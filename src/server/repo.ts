@@ -9,6 +9,7 @@ import {
   type Stammtour,
 } from '@/shared/domain'
 import { tourSchluessel, type TourEntwurf } from './planning/wochenplan'
+import type { NachweisEintrag } from './nachweis/kette'
 
 // Liest Touren eines Mandanten (Säule 2) und bildet sie auf die Domäne ab.
 // overrideAccess: true — die v1-API läuft serverseitig vertrauenswürdig;
@@ -166,6 +167,78 @@ export async function erstelleGenerierteTour(entwurf: TourEntwurf): Promise<Tour
   return tourSchema.parse(normTour(d))
 }
 
+// ── Leistungsnachweis (§5.4, WORM/hash-verkettet) ─────────────────────────
+
+// Hash des jüngsten Nachweis-Eintrags eines Mandanten (Ketten-Kopf) — leer,
+// wenn noch keiner existiert.
+export async function ladeKettenKopf(tenantId: string): Promise<string> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'leistungsnachweise',
+    where: { tenantId: { equals: tenantId } },
+    sort: '-createdAt',
+    limit: 1,
+    overrideAccess: true,
+    depth: 0,
+  })
+  return res.docs[0] ? String((res.docs[0] as { hash?: string }).hash ?? '') : ''
+}
+
+// Hängt einen Nachweis-Eintrag an (append-only).
+export async function erstelleNachweis(
+  tenantId: string,
+  e: NachweisEintrag,
+  pepperVersion: string,
+): Promise<void> {
+  const payload = await payloadClient()
+  await payload.create({
+    collection: 'leistungsnachweise',
+    data: { tenantId, ...e, pepperVersion },
+    overrideAccess: true,
+    depth: 0,
+  })
+}
+
+// Lädt die Nachweis-Einträge eines Mandanten (optional je Klient), chronologisch.
+export async function ladeNachweise(tenantId: string, pseudonymId?: string): Promise<NachweisEintrag[]> {
+  const payload = await payloadClient()
+  const where: Where = { tenantId: { equals: tenantId } }
+  if (pseudonymId) where.pseudonymId = { equals: pseudonymId }
+  const res = await payload.find({
+    collection: 'leistungsnachweise',
+    where,
+    sort: 'createdAt',
+    limit: 2000,
+    overrideAccess: true,
+    depth: 0,
+  })
+  return res.docs.map(normNachweis)
+}
+
+export interface KlientIdentitaet {
+  vorname?: string
+  nachname?: string
+  adresse?: string
+}
+
+// Liest die Klarnamen-Identität aus Säule 1 (CSFLE) — NUR für die Nachweis-
+// Erzeugung, server-seitig und geschützt. Wird nie zurück in Säule 2 geschrieben.
+export async function ladeKlientIdentitaet(
+  tenantId: string,
+  pseudonymId: string,
+): Promise<KlientIdentitaet | null> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'klienten_identitaet',
+    where: { tenantId: { equals: tenantId }, pseudonymId: { equals: pseudonymId } },
+    limit: 1,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const d = res.docs[0] as { vorname?: string; nachname?: string; adresse?: string } | undefined
+  return d ? { vorname: d.vorname, nachname: d.nachname, adresse: d.adresse } : null
+}
+
 // Aktualisiert Felder einer Tour (Einsätze und/oder Verfügbarkeit) — für die
 // kurzfristige Umplanung (§5.2.2): aufgelöste Tour auf verfuegbar=false setzen.
 export async function aktualisiereTour(
@@ -277,6 +350,21 @@ function normStammtour(d: any): unknown {
       qualifikation: arr(e.qualifikation),
       wochentage: Array.isArray(e.wochentage) ? e.wochentage : undefined,
     })),
+  }
+}
+
+function normNachweis(d: any): NachweisEintrag {
+  return {
+    pseudonymId: d.pseudonymId,
+    datum: d.datum,
+    tourId: d.tourId,
+    erbrachteLeistungen: arr(d.erbrachteLeistungen),
+    istAnkunft: typeof d.istAnkunft === 'number' ? d.istAnkunft : undefined,
+    istAbfahrt: typeof d.istAbfahrt === 'number' ? d.istAbfahrt : undefined,
+    bestaetigtAm: d.bestaetigtAm,
+    bestaetigtVon: d.bestaetigtVon,
+    prevHash: d.prevHash,
+    hash: d.hash,
   }
 }
 

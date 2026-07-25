@@ -35,10 +35,17 @@ export function ErfassungClient({ touren }: { touren: TourView[] }) {
     const zeit = jetztMin()
     setBusy(pseudonymId + event)
     try {
-      const res = await fetch(`/api/v1/tours/${tourId}/erfassung`, {
+      // „Erledigt" schreibt den revisionssicheren Leistungsnachweis (§5.4);
+      // „Angekommen" nur den Ist-Zeitstempel (§5.3).
+      const url =
+        event === 'erledigt'
+          ? `/api/v1/tours/${tourId}/bestaetigung`
+          : `/api/v1/tours/${tourId}/erfassung`
+      const body = event === 'erledigt' ? { pseudonymId, zeit } : { pseudonymId, event, zeit }
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ pseudonymId, event, zeit }),
+        body: JSON.stringify(body),
       })
       if (!res.ok) return
       // Lokalen Zustand aktualisieren (optimistisch bestätigt).

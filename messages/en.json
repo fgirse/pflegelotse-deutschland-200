@@ -118,7 +118,22 @@
     "soll": "Planned",
     "ist": "Actual",
     "abweichung": "Diff.",
-    "puenktlichkeit": "Punctuality"
+    "puenktlichkeit": "Punctuality",
+    "nachweisLink": "Proof"
+  },
+  "nachweis": {
+    "title": "Service record",
+    "zurueck": "Back to dashboard",
+    "keine": "No confirmed services for this client.",
+    "integer": "Integrity confirmed — unchanged since capture (hash chain verified).",
+    "gebrochen": "Integrity NOT confirmed — the record was altered.",
+    "datum": "Date",
+    "zeit": "Time",
+    "leistungen": "Services rendered",
+    "bestaetigtVon": "Confirmed by",
+    "drucken": "Print",
+    "markdown": "As Markdown",
+    "fuss": "{n} confirmed visits."
   },
   "erfassung": {
     "title": "Service capture",
