@@ -67,6 +67,12 @@ export const einsatzSchema = z.object({
   // Probe-Einplanung: ein offener Marktplatz-Bedarf, der noch nicht gewonnen
   // ist — unverbindliche Kapazitätsplanung, klar gekennzeichnet.
   probe: z.boolean().optional(),
+  // Ist-Erfassung (Pflichtenheft §5.3 mobile Leistungserfassung → §5.2.2
+  // Soll-Ist). Minuten seit Mitternacht; von der Pflegekraft gestempelt.
+  istAnkunft: z.number().int().min(0).max(1439).optional(),
+  istAbfahrt: z.number().int().min(0).max(1439).optional(),
+  erledigt: z.boolean().optional(),
+  abweichungGrund: z.string().optional(), // z. B. „Patient nicht angetroffen"
 })
 export type Einsatz = z.infer<typeof einsatzSchema>
 

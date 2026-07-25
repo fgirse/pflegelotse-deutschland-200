@@ -113,7 +113,20 @@
     "reihenfolgeTitel": "Reihenfolge per Ziehen anpassen",
     "speichern": "Speichern",
     "hoch": "Nach oben",
-    "runter": "Nach unten"
+    "runter": "Nach unten",
+    "soll": "Soll",
+    "ist": "Ist",
+    "abweichung": "Abw.",
+    "puenktlichkeit": "Pünktlichkeit"
+  },
+  "erfassung": {
+    "title": "Leistungserfassung",
+    "subtitle": "Ankunft und Erledigung je Einsatz stempeln.",
+    "keineTouren": "Keine Touren für die Erfassung.",
+    "angekommen": "Angekommen",
+    "fertig": "Erledigt",
+    "erledigt": "Erledigt",
+    "angekommenUm": "angekommen {zeit}"
   },
   "wochenplan": {
     "titel": "Wochenplanung",

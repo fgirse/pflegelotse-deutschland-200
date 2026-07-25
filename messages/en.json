@@ -114,7 +114,20 @@
     "reihenfolgeTitel": "Adjust order by dragging",
     "speichern": "Save",
     "hoch": "Move up",
-    "runter": "Move down"
+    "runter": "Move down",
+    "soll": "Planned",
+    "ist": "Actual",
+    "abweichung": "Diff.",
+    "puenktlichkeit": "Punctuality"
+  },
+  "erfassung": {
+    "title": "Service capture",
+    "subtitle": "Stamp arrival and completion per visit.",
+    "keineTouren": "No tours to capture.",
+    "angekommen": "Arrived",
+    "fertig": "Done",
+    "erledigt": "Done",
+    "angekommenUm": "arrived {zeit}"
   },
   "wochenplan": {
     "titel": "Weekly planning",

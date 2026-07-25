@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import type { KlientOperativ, Tour, FitMatch } from '@/shared/domain'
+import type { SollIstBericht } from '@/server/planning/sollist'
 import { minToHHMM } from '@/shared/time'
 import { TourMap } from './TourMap'
 import { Timeline } from './Timeline'
@@ -15,6 +16,7 @@ export interface TourMitKennzahlen {
   auslastungProzent: number
   arbeitszeitMin: number
   arbzgKonform: boolean
+  sollIst?: SollIstBericht
 }
 
 // Gemeinsame Form für einplanbare Kandidaten — eigene Klienten UND offene
@@ -463,6 +465,9 @@ function TourTable({ tours }: { tours: TourMitKennzahlen[] }) {
             {x.tour.pflegekraftId} — {x.tour.datum} · {t('tourDuration')} {x.fahrzeitMin}{' '}
             {t('minutes')} · {t('utilization')} {x.auslastungProzent}% · {t('arbeitszeit')}{' '}
             {minToHHMM(x.arbeitszeitMin)} h
+            {x.sollIst && x.sollIst.erfasst > 0 && (
+              <span className="ml-2">· {t('puenktlichkeit')} {x.sollIst.puenktlichkeitProzent}%</span>
+            )}
             {!x.arbzgKonform && (
               <span className="ml-2 font-medium text-[var(--color-danger)]">⚠ {t('arbzgWarnung')}</span>
             )}
@@ -471,25 +476,34 @@ function TourTable({ tours }: { tours: TourMitKennzahlen[] }) {
             <thead>
               <tr className="border-b border-[var(--color-line)] text-left text-[var(--color-muted)]">
                 <th className="py-1 pr-3">#</th>
-                <th className="py-1 pr-3">{t('minutes')}</th>
-                <th className="py-1 pr-3">PG</th>
+                <th className="py-1 pr-3">{t('soll')}</th>
+                <th className="py-1 pr-3">{t('ist')}</th>
+                <th className="py-1 pr-3">{t('abweichung')}</th>
                 <th className="py-1 pr-3">Qual.</th>
               </tr>
             </thead>
             <tbody>
-              {x.tour.einsaetze.map((e, i) => (
-                <tr key={e.pseudonymId} className="border-b border-[var(--color-line)]">
-                  <td className="py-1 pr-3">{i + 1}</td>
-                  <td className="py-1 pr-3">
-                    {e.ankunft != null ? minToHHMM(e.ankunft) : '—'}
-                  </td>
-                  <td className="py-1 pr-3">{e.dauerMin}</td>
-                  <td className="py-1 pr-3">
-                    {e.qualifikation.join(', ') || '—'}
-                    {e.probe && <span className="chip ml-1">{t('probe')}</span>}
-                  </td>
-                </tr>
-              ))}
+              {x.tour.einsaetze.map((e, i) => {
+                const si = x.sollIst?.stopps.find((s) => s.pseudonymId === e.pseudonymId)
+                return (
+                  <tr key={e.pseudonymId} className="border-b border-[var(--color-line)]">
+                    <td className="py-1 pr-3">{i + 1}</td>
+                    <td className="py-1 pr-3">{e.ankunft != null ? minToHHMM(e.ankunft) : '—'}</td>
+                    <td className="py-1 pr-3">
+                      {si && si.istAnkunft != null ? minToHHMM(si.istAnkunft) : '—'}
+                    </td>
+                    <td className={`py-1 pr-3 ${si?.ausreisser ? 'font-medium text-[var(--color-danger)]' : 'text-[var(--color-muted)]'}`}>
+                      {si && si.abweichungMin != null
+                        ? `${si.abweichungMin > 0 ? '+' : ''}${si.abweichungMin} ${t('minutes')}`
+                        : '—'}
+                    </td>
+                    <td className="py-1 pr-3">
+                      {e.qualifikation.join(', ') || '—'}
+                      {e.probe && <span className="chip ml-1">{t('probe')}</span>}
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>

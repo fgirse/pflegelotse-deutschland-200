@@ -120,12 +120,16 @@ Autom. Anpassung an Tagesverfügbarkeit; Neuberechnung bei Krankmeldung/Notfall 
 
 > **Bewusst nicht Teil (Folgeschritte):** Globale Tages-Neuoptimierung from scratch; Echtzeit-Benachrichtigung der Kräfte; die mobile Seite (§5.3). Keine automatische Beschaffung neuer Kräfte/Überstunden — nur die vorhandenen verfügbaren Touren. Bezugspflege/Geschlechtspräferenz fließen bei der Umverteilung nicht ein (liegen am Klienten, nicht am Tour-Einsatz).
 
-### 2.4 Soll-Ist-Abgleich — L, Mittel — **blockiert durch §5.3 (mobil)**
+### 2.4 Soll-Ist-Abgleich — L, Mittel — ✅ ERLEDIGT (2026-07-25, inkl. schlankem §5.3)
 Geplante vs. erfasste Zeiten (§5.2.2). Setzt mobile Leistungserfassung (§5.3) voraus, die heute nicht existiert.
 
 - **Fertig, wenn** erfasste Ist-Zeiten je Einsatz gegen die geplante Ankunft/Dauer gestellt und Abweichungen ausgewiesen werden.
 - **Test:** Integrationstest — erfasste Ist-Zeit weicht ab → Abweichung erscheint in der Tagesübersicht.
-- **Blocker:** §5.3-Mobilmodul muss zuerst existieren.
+- **Blocker (aufgelöst):** §5.3-Mobilmodul musste zuerst existieren.
+
+**Umsetzung (Entscheidungen: eigene Mobil-Seite, Auto-Stempel):** Blocker entschärft durch einen **schlanken §5.3-Erfassungspfad** (nicht das ganze Mobilmodul). Datenmodell: Ist-Felder am Einsatz (`istAnkunft`/`istAbfahrt` Min seit Mitternacht, `erledigt`, `abweichungGrund`) in Schema + `Touren`-Collection. Mobile Seite `/erfassung` (`ErfassungClient.tsx`): handschuhtaugliche „Angekommen"/„Erledigt"-Buttons je Stopp, die die **Gerätezeit** stempeln (Client rechnet lokale Uhrzeit → vermeidet Server-Zeitzonen-Footgun). Endpoint `POST /api/v1/tours/{id}/erfassung` (Rollen pflegekraft/disponent/admin). Reiner Soll-Ist-Abgleich `server/planning/sollist.ts::sollIst(tour, routing)` — Soll aus `planeAblauf`, gegen `istAnkunft`; liefert Abweichung je Stopp (+ zu spät/− zu früh), Ausreißer-Flag (Schwelle 15 Min), Pünktlichkeitsquote. Service `berechneSollIst` bindet den Provider. Angezeigt in der Tagesübersicht (`TourTable`): Spalten Soll/Ist/Abw. (Ausreißer rot) + Pünktlichkeit je Tour. 3 Unit-Tests (Abweichung/Ausreißer/Quote, nicht Erfasste ausgeklammert, leerer Fall). Gesamte Suite 142 grün.
+
+> **Bewusst nicht Teil (klar als §5.3-Folgeschritte markiert):** Offline/PWA/Sync, NFC-Zeiterfassung, pflegekraft-scoped Auth-Härtung, rechtssicherer Leistungsnachweis mit echten Zeitstempeln (§5.4), Remote-Wipe (§9.5). `/erfassung` ist ein funktionaler Keim von §5.3, nicht das vollständige Mobilmodul.
 
 ### 2.5 Kartenansicht + Drag-and-Drop — L, Mittel — ✅ ERLEDIGT (2026-07-25)
 Interaktive Karte, sofortige Neuberechnung bei manueller Anpassung (§5.2.3 / §10.2).

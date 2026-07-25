@@ -5,6 +5,7 @@ import { fitScore, qualifikationErfuellt } from './fitScore'
 import { planeAblauf } from './tourPlan'
 import { LocalSearchTourOptimizer } from './tourOptimizer'
 import { umverteile } from '@/server/planning/umverteilung'
+import { sollIst, type SollIstBericht } from '@/server/planning/sollist'
 import { ladeTour, ladeTouren, speichereEinsaetze, aktualisiereTour } from '@/server/repo'
 import { env } from '@/lib/env'
 import type { FitScoreRequest, FitMatch, Tour, Einsatz } from '@/shared/domain'
@@ -115,6 +116,40 @@ export async function optimiereTour(tour: Tour): Promise<
   const opt = await tourOptimizer.optimiere(tour, routing)
   const geplant = await planeTour({ ...tour, einsaetze: opt.einsaetze })
   return { ...geplant, machbar: opt.machbar }
+}
+
+// ── Soll-Ist & Ist-Erfassung (Pflichtenheft 5.2.2 / 5.3) ──────────────────
+
+// Bindet den Soll-Ist-Abgleich an den aktiven Routing-Provider.
+export async function berechneSollIst(tour: Tour): Promise<SollIstBericht> {
+  return sollIst(tour, routing)
+}
+
+export type ErfassungEvent = 'ankunft' | 'erledigt' | 'abweichung'
+
+// Stempelt eine Ist-Erfassung an einen Einsatz (mobile Leistungserfassung §5.3):
+// Ankunft/Abfahrt (Min seit Mitternacht, von der Pflegekraft) oder ein
+// Abweichungsgrund. Rückgabe: null = Tour nicht gefunden; { ungueltig } = der
+// Einsatz gehört nicht zur Tour.
+export async function erfasseIst(
+  tenantId: string,
+  tourId: string,
+  daten: { pseudonymId: string; event: ErfassungEvent; zeit?: number; grund?: string },
+) {
+  const tour = await ladeTour(tourId)
+  if (!tour || tour.tenantId !== tenantId) return null
+  if (!tour.einsaetze.some((e) => e.pseudonymId === daten.pseudonymId)) {
+    return { ungueltig: true as const }
+  }
+
+  const einsaetze = tour.einsaetze.map((e) => {
+    if (e.pseudonymId !== daten.pseudonymId) return e
+    if (daten.event === 'ankunft') return { ...e, istAnkunft: daten.zeit }
+    if (daten.event === 'erledigt') return { ...e, erledigt: true, istAbfahrt: daten.zeit }
+    return { ...e, abweichungGrund: daten.grund }
+  })
+  await speichereEinsaetze(tourId, einsaetze)
+  return { ok: true as const }
 }
 
 // ── Kurzfristige Umplanung (Pflichtenheft 5.2.2) ──────────────────────────

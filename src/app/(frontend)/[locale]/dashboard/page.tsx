@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { Link } from '@/i18n/navigation'
 import { ladeTouren, ladeKlientenOperativ } from '@/server/repo'
-import { planeTour, berechneFitScore } from '@/server/matching/service'
+import { planeTour, berechneFitScore, berechneSollIst } from '@/server/matching/service'
 import { listeBedarfeFuerDienst } from '@/server/marketplace/service'
 import { requireDienstSeite } from '@/server/auth/page'
 import { DashboardClient } from './DashboardClient'
@@ -34,13 +34,14 @@ export default async function DashboardPage({
   // Kennzahlen je Tour vorab berechnen (Fahrzeit, Auslastung).
   const tourenMitKennzahlen = await Promise.all(
     touren.map(async (tour) => {
-      const plan = await planeTour(tour)
+      const [plan, si] = await Promise.all([planeTour(tour), berechneSollIst(tour)])
       return {
         tour: { ...tour, einsaetze: plan.einsaetze },
         fahrzeitMin: plan.fahrzeitMin,
         auslastungProzent: plan.auslastungProzent,
         arbeitszeitMin: plan.arbeitszeitMin,
         arbzgKonform: plan.arbzgKonform,
+        sollIst: si,
       }
     }),
   )

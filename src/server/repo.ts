@@ -224,6 +224,10 @@ function normTour(d: any): unknown {
       qualifikation: arr(e.qualifikation),
       ankunft: e.ankunft,
       probe: Boolean(e.probe),
+      istAnkunft: typeof e.istAnkunft === 'number' ? e.istAnkunft : undefined,
+      istAbfahrt: typeof e.istAbfahrt === 'number' ? e.istAbfahrt : undefined,
+      erledigt: Boolean(e.erledigt),
+      abweichungGrund: e.abweichungGrund ?? undefined,
     })),
   }
 }

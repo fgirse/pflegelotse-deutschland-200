@@ -292,6 +292,10 @@ export interface Touren {
           | null;
         ankunft?: number | null;
         probe?: boolean | null;
+        istAnkunft?: number | null;
+        istAbfahrt?: number | null;
+        erledigt?: boolean | null;
+        abweichungGrund?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -828,6 +832,10 @@ export interface TourenSelect<T extends boolean = true> {
         qualifikation?: T;
         ankunft?: T;
         probe?: T;
+        istAnkunft?: T;
+        istAbfahrt?: T;
+        erledigt?: T;
+        abweichungGrund?: T;
         id?: T;
       };
   updatedAt?: T;

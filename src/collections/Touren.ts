@@ -76,6 +76,11 @@ export const Touren: CollectionConfig = {
         { name: 'qualifikation', type: 'json', defaultValue: [] },
         { name: 'ankunft', type: 'number' }, // geplante Ankunft (Min seit Mitternacht)
         { name: 'probe', type: 'checkbox', defaultValue: false }, // unverbindliche Probe-Einplanung
+        // Ist-Erfassung (§5.3 → Soll-Ist §5.2.2), Min seit Mitternacht.
+        { name: 'istAnkunft', type: 'number' },
+        { name: 'istAbfahrt', type: 'number' },
+        { name: 'erledigt', type: 'checkbox', defaultValue: false },
+        { name: 'abweichungGrund', type: 'text' },
       ],
     },
   ],
