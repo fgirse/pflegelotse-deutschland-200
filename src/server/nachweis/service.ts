@@ -5,6 +5,7 @@ import {
   ladeKlientenOperativ,
   ladeKettenKopf,
   erstelleNachweis,
+  existiertNachweisAktion,
   ladeNachweise,
   ladeKlientIdentitaet,
   speichereEinsaetze,
@@ -18,12 +19,17 @@ import { naechsterEintrag, verifiziereKette, type NachweisKern, type NachweisEin
 export async function bestaetigeLeistung(
   tenantId: string,
   tourId: string,
-  daten: { pseudonymId: string; erbrachteLeistungen?: string[]; bestaetigtVon: string; zeit?: number },
+  daten: { pseudonymId: string; erbrachteLeistungen?: string[]; bestaetigtVon: string; zeit?: number; aktionId?: string },
 ) {
   const tour = await ladeTour(tourId)
   if (!tour || tour.tenantId !== tenantId) return null
   const einsatz = tour.einsaetze.find((e) => e.pseudonymId === daten.pseudonymId)
   if (!einsatz) return { ungueltig: true as const }
+
+  // Idempotenz (§5.3 Offline-Replay): schon zu dieser Aktion verbucht → überspringen.
+  if (daten.aktionId && (await existiertNachweisAktion(tenantId, daten.aktionId))) {
+    return { ok: true as const, dedupliziert: true }
+  }
 
   // Erbrachte Leistungen: explizit angegeben, sonst die geplanten des Klienten.
   let erbracht = daten.erbrachteLeistungen
@@ -44,7 +50,7 @@ export async function bestaetigeLeistung(
   }
   const kopf = await ladeKettenKopf(tenantId)
   const eintrag = naechsterEintrag(kern, kopf, env.AUDIT_PEPPER)
-  await erstelleNachweis(tenantId, eintrag, env.AUDIT_PEPPER_VERSION)
+  await erstelleNachweis(tenantId, eintrag, env.AUDIT_PEPPER_VERSION, daten.aktionId)
 
   // Operativ den Einsatz als erledigt markieren (Abfahrtszeit stempeln).
   const einsaetze = tour.einsaetze.map((e) =>

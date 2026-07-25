@@ -12,6 +12,8 @@ const bodySchema = z
     // Ist-Zeit in Minuten seit Mitternacht (Gerätezeit der Pflegekraft).
     zeit: z.number().int().min(0).max(1439).optional(),
     grund: z.string().optional(),
+    // Client-Aktions-ID für Offline-Replay (§5.3); serverseitig hier unkritisch.
+    aktionId: z.string().optional(),
   })
   .refine(
     (d) => (d.event === 'abweichung' ? typeof d.grund === 'string' : typeof d.zeit === 'number'),

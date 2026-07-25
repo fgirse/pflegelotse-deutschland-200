@@ -183,6 +183,15 @@ Leistungsdaten in Abrechnungsformate exportieren (§8.3).
 
 ---
 
+### §5.3 Mobiles Modul als PWA — ✅ ERLEDIGT (2026-07-26)
+Echte mobile Leistungserfassung: installierbar, offline-fähig (§5.3 / §9.5 / §10.3).
+
+**Umsetzung (Entscheidungen: echtes Offline mit Queue+Sync, pflegekraftId am Nutzer):** `/erfassung` von der schlanken Seite zur **PWA** ausgebaut. Installierbar: `public/manifest.webmanifest` (standalone, Theme, Icons via sharp erzeugt `public/icons/icon-192|512.png`) + handgeschriebener Service Worker `public/sw.js` (App-Shell/Static cache-first, Navigation network-first mit Offline-Fallback; kein Precache der Auth-Seite) + `PwaRegister`. **Offline-Kern:** Tagestour in IndexedDB gespiegelt (`idb.ts`); Erfassungen laufen in eine lokale Warteschlange (`queue.ts`, rein & getestet) und werden bei Verbindung automatisch nachgespielt; Online/Offline-Anzeige + „n ausstehend". **Idempotenz:** jede Aktion trägt eine `aktionId` (UUID); `leistungsnachweise.aktionId` + `existiertNachweisAktion()` → `bestaetigeLeistung` überspringt bereits verbuchte Aktionen (kein Doppel-Eintrag bei Replay). **Kraft-Scoping (§9.5):** Feld `pflegekraftId` am Nutzer + Endpoint `GET /api/v1/erfassung/heute?datum=` liefert nur die heutige Tour DIESER Kraft (Client sendet Gerätedatum). Dazu: **Navigation-Handoff** je Stopp (Google/Apple Maps) und **Abweichung melden** (`event:'abweichung'`). Handschuhtaugliche Buttons (§10.3). 3 Queue-Unit-Tests (Enqueue-Idempotenz, Flush behält Fehlgeschlagene, kein Verlust bei Fehler).
+
+> **Bewusst NICHT Teil (klar markiert):** NFC-Zeiterfassung, Remote-Wipe bei Geräteverlust (§9.5 — braucht Push/Geräte-Registrierung), Ende-zu-Ende-Verschlüsselung über TLS hinaus, Push-Benachrichtigungen, Background-Sync-API (stattdessen robuster `online`-Listener-Flush). PWA-Icons sind generische Platzhalter.
+
+---
+
 ## Referenzen
 
 - Pflichtenheft: `docs/PflichtenheftRoutenoptimierung_Pflegedienst.md`

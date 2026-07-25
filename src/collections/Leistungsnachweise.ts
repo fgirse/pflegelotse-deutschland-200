@@ -25,6 +25,8 @@ export const Leistungsnachweise: CollectionConfig = {
     { name: 'istAbfahrt', type: 'number' },
     { name: 'bestaetigtAm', type: 'text', required: true }, // ISO-Zeitstempel
     { name: 'bestaetigtVon', type: 'text', required: true }, // Pflegekraft-Kennung
+    // Client-Aktions-ID (§5.3 Offline): dedupliziert nachgespielte Erfassungen.
+    { name: 'aktionId', type: 'text', index: true },
     // Hash-Kette (revisionssicher): prevHash zeigt auf den Vorgänger.
     { name: 'prevHash', type: 'text', required: true, index: true },
     { name: 'hash', type: 'text', required: true, unique: true },

@@ -64,6 +64,9 @@ export const Users: CollectionConfig = {
       hooks: { beforeChange: [sealHook], afterRead: [openHook] },
     },
     { name: 'totpEnabled', type: 'checkbox', defaultValue: false },
+    // Zuordnung Pflegekraft-Konto → Tour-Kennung (§5.3 mobile Erfassung):
+    // die mobile Ansicht zeigt nur die heutige Tour DIESER Kraft (§9.5).
+    { name: 'pflegekraftId', type: 'text', index: true },
     // Selbstregistrierung: Anzeigename des Pflegedienstes (Dienst-Konten).
     { name: 'dienstName', type: 'text', label: 'Name des Pflegedienstes', required: false },
     // Einzugsgebiet eines Dienstes: Standort + Radius (km). Bedarfe innerhalb

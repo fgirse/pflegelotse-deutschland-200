@@ -11,6 +11,8 @@ const bodySchema = z.object({
   erbrachteLeistungen: z.array(z.string()).optional(),
   // Gerätezeit (Min seit Mitternacht) der Erledigung.
   zeit: z.number().int().min(0).max(1439).optional(),
+  // Client-Aktions-ID für idempotentes Offline-Nachspielen (§5.3).
+  aktionId: z.string().optional(),
 })
 
 // POST /api/v1/tours/{id}/bestaetigung — bestätigt die erbrachten Leistungen

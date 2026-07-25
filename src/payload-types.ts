@@ -151,6 +151,7 @@ export interface User {
   tenantId?: string | null;
   totpSecret?: string | null;
   totpEnabled?: boolean | null;
+  pflegekraftId?: string | null;
   dienstName?: string | null;
   einzugsGeo?: {
     lat?: number | null;
@@ -406,6 +407,7 @@ export interface Leistungsnachweise {
   istAbfahrt?: number | null;
   bestaetigtAm: string;
   bestaetigtVon: string;
+  aktionId?: string | null;
   prevHash: string;
   hash: string;
   pepperVersion: string;
@@ -775,6 +777,7 @@ export interface UsersSelect<T extends boolean = true> {
   tenantId?: T;
   totpSecret?: T;
   totpEnabled?: T;
+  pflegekraftId?: T;
   dienstName?: T;
   einzugsGeo?:
     | T
@@ -973,6 +976,7 @@ export interface LeistungsnachweiseSelect<T extends boolean = true> {
   istAbfahrt?: T;
   bestaetigtAm?: T;
   bestaetigtVon?: T;
+  aktionId?: T;
   prevHash?: T;
   hash?: T;
   pepperVersion?: T;

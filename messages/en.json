@@ -150,9 +150,16 @@
     "title": "Service capture",
     "subtitle": "Stamp arrival and completion per visit.",
     "keineTouren": "No tours to capture.",
+    "lade": "Loading today's tour …",
+    "online": "● Online",
+    "offline": "● Offline — captures will be resent",
+    "ausstehend": "{n} pending",
+    "navigieren": "Navigate",
     "angekommen": "Arrived",
     "fertig": "Done",
     "erledigt": "Done",
+    "abweichung": "Deviation",
+    "abweichungFrage": "What is the deviation? (e.g. patient not present)",
     "angekommenUm": "arrived {zeit}"
   },
   "wochenplan": {

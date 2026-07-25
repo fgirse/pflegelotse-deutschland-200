@@ -184,19 +184,34 @@ export async function ladeKettenKopf(tenantId: string): Promise<string> {
   return res.docs[0] ? String((res.docs[0] as { hash?: string }).hash ?? '') : ''
 }
 
-// Hängt einen Nachweis-Eintrag an (append-only).
+// Hängt einen Nachweis-Eintrag an (append-only). aktionId dedupliziert
+// nachgespielte Offline-Erfassungen (§5.3).
 export async function erstelleNachweis(
   tenantId: string,
   e: NachweisEintrag,
   pepperVersion: string,
+  aktionId?: string,
 ): Promise<void> {
   const payload = await payloadClient()
   await payload.create({
     collection: 'leistungsnachweise',
-    data: { tenantId, ...e, pepperVersion },
+    data: { tenantId, ...e, pepperVersion, aktionId },
     overrideAccess: true,
     depth: 0,
   })
+}
+
+// Prüft, ob zu einer Client-Aktions-ID bereits ein Nachweis existiert (Idempotenz).
+export async function existiertNachweisAktion(tenantId: string, aktionId: string): Promise<boolean> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'leistungsnachweise',
+    where: { tenantId: { equals: tenantId }, aktionId: { equals: aktionId } },
+    limit: 1,
+    overrideAccess: true,
+    depth: 0,
+  })
+  return res.docs.length > 0
 }
 
 // Lädt die Nachweis-Einträge eines Mandanten (optional je Klient), chronologisch.

@@ -149,9 +149,16 @@
     "title": "Leistungserfassung",
     "subtitle": "Ankunft und Erledigung je Einsatz stempeln.",
     "keineTouren": "Keine Touren für die Erfassung.",
+    "lade": "Lade Tagestour …",
+    "online": "● Online",
+    "offline": "● Offline — Erfassungen werden nachgesendet",
+    "ausstehend": "{n} ausstehend",
+    "navigieren": "Navigieren",
     "angekommen": "Angekommen",
     "fertig": "Erledigt",
     "erledigt": "Erledigt",
+    "abweichung": "Abweichung",
+    "abweichungFrage": "Was ist abweichend? (z. B. Patient nicht angetroffen)",
     "angekommenUm": "angekommen {zeit}"
   },
   "wochenplan": {
