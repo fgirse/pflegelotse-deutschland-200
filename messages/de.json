@@ -101,6 +101,7 @@
     "importDateiWaehlen": "Datei wählen",
     "importAndereDatei": "andere Datei",
     "tourErstellen": "Neue Tour erstellen",
+    "abrechnungLink": "Abrechnung",
     "optimieren": "Tour optimieren",
     "optimiert": "Optimiere …",
     "aufloesen": "Auflösen (Krankmeldung)",
@@ -119,6 +120,16 @@
     "abweichung": "Abw.",
     "puenktlichkeit": "Pünktlichkeit",
     "nachweisLink": "Nachweis"
+  },
+  "abrechnung": {
+    "title": "Abrechnung",
+    "subtitle": "Exporte für den Zeitraum aus den revisionssicheren Leistungsnachweisen.",
+    "zurueck": "Zurück zum Dashboard",
+    "von": "Von",
+    "bis": "Bis",
+    "datev": "DATEV-Export (Buchungsstapel)",
+    "kassen": "Kassen-CSV (abrechnungsvorbereitend)",
+    "hinweis": "Preise und DATEV-Stammdaten werden je Dienst in der Verwaltung (/admin) gepflegt. Das Kassen-CSV ist nicht das zertifizierte §302-Format."
   },
   "nachweis": {
     "title": "Leistungsnachweis",

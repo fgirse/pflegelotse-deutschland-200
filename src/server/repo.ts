@@ -215,6 +215,63 @@ export async function ladeNachweise(tenantId: string, pseudonymId?: string): Pro
   return res.docs.map(normNachweis)
 }
 
+// ── Abrechnung (§8.3) ─────────────────────────────────────────────────────
+
+export interface Abrechnungskonfig {
+  preise: Record<string, number>
+  beraterNr?: string
+  mandantenNr?: string
+  wjBeginn?: string
+  sachkontenlaenge?: number
+  erloesKonto?: string
+  debitorKonto?: string
+}
+
+export async function ladeAbrechnungskonfig(tenantId: string): Promise<Abrechnungskonfig | null> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'abrechnungskonfiguration',
+    where: { tenantId: { equals: tenantId } },
+    limit: 1,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const d = res.docs[0] as any
+  if (!d) return null
+  return {
+    preise: d.preise && typeof d.preise === 'object' ? d.preise : {},
+    beraterNr: d.beraterNr ?? undefined,
+    mandantenNr: d.mandantenNr ?? undefined,
+    wjBeginn: d.wjBeginn ?? undefined,
+    sachkontenlaenge: typeof d.sachkontenlaenge === 'number' ? d.sachkontenlaenge : undefined,
+    erloesKonto: d.erloesKonto ?? undefined,
+    debitorKonto: d.debitorKonto ?? undefined,
+  }
+}
+
+// Klarnamen (Säule 1, CSFLE) für mehrere Klienten auf einmal — für die
+// Abrechnungs-Exporte (server-seitig, geschützt). Nie zurück nach Säule 2.
+export async function ladeIdentitaeten(
+  tenantId: string,
+  pseudonymIds: string[],
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>()
+  if (pseudonymIds.length === 0) return map
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'klienten_identitaet',
+    where: { tenantId: { equals: tenantId }, pseudonymId: { in: pseudonymIds } },
+    limit: 1000,
+    overrideAccess: true,
+    depth: 0,
+  })
+  for (const d of res.docs as any[]) {
+    const name = [d.vorname, d.nachname].filter(Boolean).join(' ')
+    if (d.pseudonymId && name) map.set(d.pseudonymId, name)
+  }
+  return map
+}
+
 export interface KlientIdentitaet {
   vorname?: string
   nachname?: string

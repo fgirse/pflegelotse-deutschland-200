@@ -73,6 +73,7 @@ export interface Config {
     touren: Touren;
     stammtouren: Stammtouren;
     leistungsnachweise: Leistungsnachweise;
+    abrechnungskonfiguration: Abrechnungskonfiguration;
     gdpr_audit_log: GdprAuditLog;
     bedarfe: Bedarfe;
     angehoerige_identitaet: AngehoerigeIdentitaet;
@@ -93,6 +94,7 @@ export interface Config {
     touren: TourenSelect<false> | TourenSelect<true>;
     stammtouren: StammtourenSelect<false> | StammtourenSelect<true>;
     leistungsnachweise: LeistungsnachweiseSelect<false> | LeistungsnachweiseSelect<true>;
+    abrechnungskonfiguration: AbrechnungskonfigurationSelect<false> | AbrechnungskonfigurationSelect<true>;
     gdpr_audit_log: GdprAuditLogSelect<false> | GdprAuditLogSelect<true>;
     bedarfe: BedarfeSelect<false> | BedarfeSelect<true>;
     angehoerige_identitaet: AngehoerigeIdentitaetSelect<false> | AngehoerigeIdentitaetSelect<true>;
@@ -412,6 +414,31 @@ export interface Leistungsnachweise {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "abrechnungskonfiguration".
+ */
+export interface Abrechnungskonfiguration {
+  id: string;
+  tenantId: string;
+  preise?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  beraterNr?: string | null;
+  mandantenNr?: string | null;
+  wjBeginn?: string | null;
+  sachkontenlaenge?: number | null;
+  erloesKonto?: string | null;
+  debitorKonto?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "gdpr_audit_log".
  */
 export interface GdprAuditLog {
@@ -664,6 +691,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'leistungsnachweise';
         value: string | Leistungsnachweise;
+      } | null)
+    | ({
+        relationTo: 'abrechnungskonfiguration';
+        value: string | Abrechnungskonfiguration;
       } | null)
     | ({
         relationTo: 'gdpr_audit_log';
@@ -945,6 +976,22 @@ export interface LeistungsnachweiseSelect<T extends boolean = true> {
   prevHash?: T;
   hash?: T;
   pepperVersion?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "abrechnungskonfiguration_select".
+ */
+export interface AbrechnungskonfigurationSelect<T extends boolean = true> {
+  tenantId?: T;
+  preise?: T;
+  beraterNr?: T;
+  mandantenNr?: T;
+  wjBeginn?: T;
+  sachkontenlaenge?: T;
+  erloesKonto?: T;
+  debitorKonto?: T;
   updatedAt?: T;
   createdAt?: T;
 }

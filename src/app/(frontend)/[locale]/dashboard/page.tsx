@@ -102,10 +102,15 @@ export default async function DashboardPage({
           <h1 className="mt-3 text-3xl font-bold">{t('title')}</h1>
           <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
         </div>
-        {/* Primäraktion: neue Tour anlegen. */}
-        <Link href="/dashboard/tour-neu" className="btn btn-primary shrink-0">
-          + {t('tourErstellen')}
-        </Link>
+        {/* Primäraktion: neue Tour anlegen; daneben der Abrechnungs-Export. */}
+        <div className="flex shrink-0 gap-2">
+          <Link href="/abrechnung" className="btn btn-outline">
+            {t('abrechnungLink')}
+          </Link>
+          <Link href="/dashboard/tour-neu" className="btn btn-primary">
+            + {t('tourErstellen')}
+          </Link>
+        </div>
       </header>
 
       {/* Marktplatz-Eingänge + Einzugsgebiet. */}
