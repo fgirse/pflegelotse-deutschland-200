@@ -230,6 +230,64 @@ export async function ladeNachweise(tenantId: string, pseudonymId?: string): Pro
   return res.docs.map(normNachweis)
 }
 
+// ── eVerordnung / TI (§8.2) ───────────────────────────────────────────────
+
+export async function existiertVerordnung(tenantId: string, verordnungId: string): Promise<boolean> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'verordnungen',
+    where: { tenantId: { equals: tenantId }, verordnungId: { equals: verordnungId } },
+    limit: 1,
+    overrideAccess: true,
+    depth: 0,
+  })
+  return res.docs.length > 0
+}
+
+export async function erstelleVerordnung(v: {
+  verordnungId: string
+  tenantId: string
+  pseudonymId: string
+  leistungen: string[]
+  zeitraumVon: string
+  zeitraumBis: string
+  pflegegrad?: number
+  verordnetVon?: string
+  eingegangenAm: string
+}): Promise<void> {
+  const payload = await payloadClient()
+  await payload.create({ collection: 'verordnungen', data: v, overrideAccess: true, depth: 0 })
+}
+
+// Legt eine Patienten-Identität an (Säule 1, CSFLE-Hooks verschlüsseln).
+export async function erstelleIdentitaet(i: {
+  pseudonymId: string
+  tenantId: string
+  externalId?: string
+  vorname: string
+  nachname: string
+  adresse: string
+}): Promise<void> {
+  const payload = await payloadClient()
+  await payload.create({ collection: 'klienten_identitaet', data: i, overrideAccess: true, depth: 0 })
+}
+
+// Legt einen operativen Klienten an (Säule 2, pseudonym).
+export async function erstelleKlientOperativ(o: {
+  pseudonymId: string
+  tenantId: string
+  geo: { lat: number; lng: number }
+  pflegegrad?: number
+  leistungen: string[]
+  qualifikation: string[]
+  zeitfenster: { von: number; bis: number }
+  dauerMin: number
+  status: 'aktiv' | 'pausiert' | 'beendet'
+}): Promise<void> {
+  const payload = await payloadClient()
+  await payload.create({ collection: 'klienten_operativ', data: o, overrideAccess: true, depth: 0 })
+}
+
 // ── Abrechnung (§8.3) ─────────────────────────────────────────────────────
 
 export interface Abrechnungskonfig {

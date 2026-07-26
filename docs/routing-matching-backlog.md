@@ -190,6 +190,13 @@ Echte mobile Leistungserfassung: installierbar, offline-fähig (§5.3 / §9.5 / 
 
 > **Bewusst NICHT Teil (klar markiert):** NFC-Zeiterfassung, Remote-Wipe bei Geräteverlust (§9.5 — braucht Push/Geräte-Registrierung), Ende-zu-Ende-Verschlüsselung über TLS hinaus, Push-Benachrichtigungen, Background-Sync-API (stattdessen robuster `online`-Listener-Flush). PWA-Icons sind generische Platzhalter.
 
+### §8.2 TI-Anbindung (eVerordnung) — ✅ ERLEDIGT (2026-07-26, Software-Seite)
+Schnittstellen zur Telematikinfrastruktur (§8.2). Siehe `docs/ti-anbindung.md` für die Grenze real ↔ zertifiziertes Umfeld.
+
+**Umsetzung (Entscheidungen: eVO substanziell, KIM/ePA nur Port+Stub, vereinfachtes JSON):** Vollständige TI ist ohne Konnektor/SMC-B/zugelassene Fachdienste/gematik-Zulassung nicht baubar — umgesetzt ist die **Software-Seite**. Port-Schicht `server/ti/ports.ts` (`EvoEingang`, `KimVersand`, `EpaLesen`) + Stubs. **eVerordnung eingehend (real):** vereinfachtes, fachlich korrektes Schema `evo.ts` + reiner Mapper `mappeEvo()` mit **Zwei-Säulen-Trennung** (Patient-PII → Säule 1, verordnete Leistungen/Zeitraum → Säule 2). Service `verarbeiteEvo()`: idempotent über `verordnungId`, Adress-Geocoding, Anlage Identität + operativer Klient + Verordnung, KIM-Rückmeldung (Stub). Collection `verordnungen` (Säule 2, append-only, kein PII). Endpoint `POST /api/v1/ti/evo` (Stub-Transport; im Betrieb liefert der KIM-Fachdienst/Konnektor die Nutzlast). Env-Platzhalter `TI_KONNEKTOR_URL`/`TI_SMCB_ID`/`TI_KIM_ADRESSE`. 5 Unit-Tests (Schema, Zwei-Säulen-Mapping, Leistungen/Zeitraum-Übertragung).
+
+> **Bewusst NICHT Teil (klar markiert):** echter Konnektor/SMC-B/TLS, gematik-Zulassung, KBV-FHIR-Vollprofil, KIM vollständig (S/MIME über TI), echter ePA-Zugriff (VSDM/Einwilligung), Patienten-Dedup über Versichertennummer (KVNR wird als externalId schon mitgeführt).
+
 ---
 
 ## Referenzen

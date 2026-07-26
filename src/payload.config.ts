@@ -13,6 +13,7 @@ import { KlientenOperativ } from '@/collections/KlientenOperativ'
 import { Touren } from '@/collections/Touren'
 import { Stammtouren } from '@/collections/Stammtouren'
 import { Leistungsnachweise } from '@/collections/Leistungsnachweise'
+import { Verordnungen } from '@/collections/Verordnungen'
 import { Abrechnungskonfiguration } from '@/collections/Abrechnungskonfiguration'
 import { GdprAuditLog } from '@/collections/GdprAuditLog'
 import { Bedarfe } from '@/collections/Bedarfe'
@@ -34,6 +35,7 @@ export default buildConfig({
     Touren,
     Stammtouren,
     Leistungsnachweise,
+    Verordnungen,
     Abrechnungskonfiguration,
     GdprAuditLog,
     Bedarfe,

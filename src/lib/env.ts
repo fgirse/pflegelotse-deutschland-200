@@ -36,6 +36,11 @@ const schema = z.object({
   CRON_SECRET: z.string().optional(),
   // Payment (Mollie).
   MOLLIE_API_KEY: z.string().optional(),
+  // Telematikinfrastruktur (§8.2). Platzhalter — der echte Transport
+  // (Konnektor/SMC-B, KIM-Fachdienst) wird vom Auftraggeber bereitgestellt.
+  TI_KONNEKTOR_URL: z.string().optional(),
+  TI_SMCB_ID: z.string().optional(),
+  TI_KIM_ADRESSE: z.string().optional(),
   // KI-Pflegelotse (Anthropic Claude, serverseitig).
   ANTHROPIC_API_KEY: z.string().optional(),
   ANTHROPIC_MODEL: z.string().default('claude-opus-4-8'),

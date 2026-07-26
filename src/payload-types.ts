@@ -73,6 +73,7 @@ export interface Config {
     touren: Touren;
     stammtouren: Stammtouren;
     leistungsnachweise: Leistungsnachweise;
+    verordnungen: Verordnungen;
     abrechnungskonfiguration: Abrechnungskonfiguration;
     gdpr_audit_log: GdprAuditLog;
     bedarfe: Bedarfe;
@@ -94,6 +95,7 @@ export interface Config {
     touren: TourenSelect<false> | TourenSelect<true>;
     stammtouren: StammtourenSelect<false> | StammtourenSelect<true>;
     leistungsnachweise: LeistungsnachweiseSelect<false> | LeistungsnachweiseSelect<true>;
+    verordnungen: VerordnungenSelect<false> | VerordnungenSelect<true>;
     abrechnungskonfiguration: AbrechnungskonfigurationSelect<false> | AbrechnungskonfigurationSelect<true>;
     gdpr_audit_log: GdprAuditLogSelect<false> | GdprAuditLogSelect<true>;
     bedarfe: BedarfeSelect<false> | BedarfeSelect<true>;
@@ -416,6 +418,32 @@ export interface Leistungsnachweise {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "verordnungen".
+ */
+export interface Verordnungen {
+  id: string;
+  verordnungId: string;
+  tenantId: string;
+  pseudonymId: string;
+  leistungen?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  zeitraumVon?: string | null;
+  zeitraumBis?: string | null;
+  pflegegrad?: number | null;
+  verordnetVon?: string | null;
+  eingegangenAm?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "abrechnungskonfiguration".
  */
 export interface Abrechnungskonfiguration {
@@ -693,6 +721,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'leistungsnachweise';
         value: string | Leistungsnachweise;
+      } | null)
+    | ({
+        relationTo: 'verordnungen';
+        value: string | Verordnungen;
       } | null)
     | ({
         relationTo: 'abrechnungskonfiguration';
@@ -980,6 +1012,23 @@ export interface LeistungsnachweiseSelect<T extends boolean = true> {
   prevHash?: T;
   hash?: T;
   pepperVersion?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "verordnungen_select".
+ */
+export interface VerordnungenSelect<T extends boolean = true> {
+  verordnungId?: T;
+  tenantId?: T;
+  pseudonymId?: T;
+  leistungen?: T;
+  zeitraumVon?: T;
+  zeitraumBis?: T;
+  pflegegrad?: T;
+  verordnetVon?: T;
+  eingegangenAm?: T;
   updatedAt?: T;
   createdAt?: T;
 }
