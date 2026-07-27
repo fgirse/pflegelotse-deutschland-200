@@ -174,6 +174,13 @@ Erbrachte Leistungen je Patient, rechtssicher (§5.4 Berichtswesen).
 
 > **Folgeschritte:** Patienten-Unterschrift, Versichertennummer im Nachweis, per-Leistung-Abwahl in der Bestätigungs-UI. (DTA/DATEV → §8.3, siehe unten.)
 
+### §5.4 Weitere Berichte (Mitarbeiterauslastung, Kilometernachweis) — ✅ ERLEDIGT (2026-07-27)
+Berichtswesen (§5.4): Auslastungsgrad je Mitarbeiter, gefahrene Kilometer je Tour/Mitarbeiter.
+
+**Umsetzung (Entscheidung: geometrische km-Schätzung):** Reine Aggregation `server/berichte/` — `tourKilometer()` schätzt km geometrisch (exportiertes `haversineKm` × Umwegfaktor 1,3 inkl. Rückweg zum Depot); `aggregiereBerichte()` gruppiert je Tour berechnete Kennzahlen nach `pflegekraftId` → **Mitarbeiterauslastung** (Touren, Einsätze, Arbeits-/Fahr-/Klientenzeit, Auslastung % = amKlienten/(amKlienten+Fahrzeit), km) und **Kilometernachweis** (je Tour). Service `berechneBerichte()` lädt die Touren des Zeitraums und rechnet je Tour über `planeTour` (an den Provider gebunden). Endpoints `GET /api/v1/berichte` (JSON) + `/berichte/csv?typ=auslastung|kilometer` (CSV/BOM), Rollen disponent/admin. UI-Seite `/berichte` (Zeitraum, zwei Tabellen, CSV-Downloads) + Dashboard-Link; i18n de+en. 5 Unit-Tests (km-Geometrie, Aggregation/Auslastung, CSV-Format).
+
+> **Bewusst NICHT Teil:** Echte Straßen-km (bräuchte eine Distanzmatrix vom Provider — km sind hier geometrische Schätzung); Auslastung gegen Vertragsarbeitszeit (nicht erfasst). Qualitätsindikatoren (Pünktlichkeit) deckt der Soll-Ist-Abgleich (2.4) bereits ab.
+
 ### §8.3 Abrechnungs-Export (DATEV + Kassen) — ✅ ERLEDIGT (2026-07-26)
 Leistungsdaten in Abrechnungsformate exportieren (§8.3).
 

@@ -2,7 +2,7 @@ import type { Geo } from '@/shared/domain'
 import type { RoutingProvider } from './RoutingProvider'
 
 // Haversine-Distanz in Kilometern zwischen zwei Koordinaten.
-function haversineKm(a: Geo, b: Geo): number {
+export function haversineKm(a: Geo, b: Geo): number {
   const R = 6371 // Erdradius in km
   const toRad = (d: number) => (d * Math.PI) / 180
   const dLat = toRad(b.lat - a.lat)

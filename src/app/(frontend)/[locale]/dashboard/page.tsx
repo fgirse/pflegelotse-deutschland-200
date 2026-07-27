@@ -104,6 +104,9 @@ export default async function DashboardPage({
         </div>
         {/* Primäraktion: neue Tour anlegen; daneben der Abrechnungs-Export. */}
         <div className="flex shrink-0 gap-2">
+          <Link href="/berichte" className="btn btn-outline">
+            {t('berichteLink')}
+          </Link>
           <Link href="/abrechnung" className="btn btn-outline">
             {t('abrechnungLink')}
           </Link>
