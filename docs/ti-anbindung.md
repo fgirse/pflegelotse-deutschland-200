@@ -22,11 +22,20 @@ markierte Naht offen — dort klinkt sich später der zertifizierte Client ein.
   `verarbeiteEvo()`: idempotent über `verordnungId`, Geocoding der Adresse,
   Anlage von Identität + operativem Klienten + Verordnungs-Aufzeichnung, plus
   KIM-Rückmeldung (Stub). Endpoint `POST /api/v1/ti/evo`.
+- **KBV-FHIR-Eingang (toleranter Subset-Parser)**: `fhir.ts::mappeFhirBundle()`
+  liest aus einem FHIR-Bundle Patient (Name/Adresse/KVNR), ServiceRequest
+  (Leistungscodes + `occurrencePeriod`) und Practitioner/Organization (LANR)
+  und bildet sie auf `EvoNutzlast` ab; Leistungscode-Crosswalk in
+  `leistungsCodes.ts`. Der Endpoint erkennt `resourceType=Bundle` automatisch;
+  beide Pfade laufen durch dieselbe `evoSchema`-Validierung.
 - Collection `verordnungen` (Säule 2, append-only, kein PII).
 
 ## Bewusst NICHT enthalten (Folgeschritte)
 - Echter Konnektor-/SMC-B-/TLS-Aufbau, gematik-Zulassung.
-- **KBV-FHIR-Vollprofil** der eVO (hier vereinfachtes JSON; FHIR-Mapping offen).
+- **KBV-FHIR-Vollprofil-Konformität** (StructureDefinition-/Terminologie-
+  Validierung, FHIR-Validator, offizielle Profile). Der Subset-Parser liest die
+  benötigten Felder; ein offizieller Leistungscode-Crosswalk (regionaler
+  Katalog) fehlt noch — heute Beispiel-Mapping + Pass-through.
 - **KIM** vollständig (S/MIME über TI, Adressierung) — nur Port + Stub.
 - **ePA**-Lesezugriff (VSDM, Einwilligung, Aktensystem) — nur Port + Stub.
 - Patienten-Deduplizierung über die Versichertennummer (heute wird je eVO ein
