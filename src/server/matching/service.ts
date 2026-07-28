@@ -3,6 +3,7 @@ import { waehleRoutingKern } from '@/server/routing/waehleRouting'
 import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
 import { fitScore, qualifikationErfuellt } from './fitScore'
 import { planeAblauf } from './tourPlan'
+import { tourKilometer, summeKm } from '@/server/berichte/kilometer'
 import { LocalSearchTourOptimizer } from './tourOptimizer'
 import { umverteile } from '@/server/planning/umverteilung'
 import { sollIst, type SollIstBericht } from '@/server/planning/sollist'
@@ -102,6 +103,21 @@ export async function planeReihenfolge(
     stops: geplant.stops,
     gespeichert: persist,
   }
+}
+
+// Kilometer einer Tour (§5.4 Kilometernachweis) über die Distanzmatrix des
+// aktiven Providers — bei OSRM/HERE echte Straßen-km, sonst geometrische
+// Schätzung (Haversine). Eigener Routing-Call, nur für den Bericht.
+export async function berechneTourKm(tour: Tour): Promise<number> {
+  if (!routing.distanzMatrix) return tourKilometer(tour)
+  const punkte = [tour.start, ...tour.einsaetze.map((e) => e.geo)]
+  let endeIdx = 0
+  if (tour.ende) {
+    punkte.push(tour.ende)
+    endeIdx = punkte.length - 1
+  }
+  const distanz = await routing.distanzMatrix(punkte)
+  return summeKm(distanz, tour.einsaetze.length, endeIdx)
 }
 
 const tourOptimizer = new LocalSearchTourOptimizer()

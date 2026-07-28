@@ -142,7 +142,7 @@
     "auslastung": "Auslastung",
     "km": "km",
     "datum": "Datum",
-    "hinweis": "Kilometer sind eine geometrische Schätzung (Luftlinie × 1,3). Auslastung = Zeit am Klienten / (Zeit am Klienten + Fahrzeit)."
+    "hinweis": "Kilometer stammen aus der Distanzmatrix des Routing-Anbieters (bei OSRM/HERE echte Straßen-km, mit Haversine eine geometrische Schätzung). Auslastung = Zeit am Klienten / (Zeit am Klienten + Fahrzeit)."
   },
   "abrechnung": {
     "title": "Abrechnung",

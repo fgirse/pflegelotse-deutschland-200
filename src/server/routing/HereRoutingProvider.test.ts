@@ -56,6 +56,19 @@ describe('HereRoutingProvider', () => {
     expect(m[1][2]).toBe(5)
   })
 
+  it('distanzMatrix fragt distances ab und rechnet Meter in Kilometer um', async () => {
+    const fetchMock = mockFetch({
+      matrix: { numOrigins: 3, numDestinations: 3, distances: [0, 3000, 5000, 3000, 0, 2000, 5000, 2000, 0] },
+    })
+    vi.stubGlobal('fetch', fetchMock)
+    const here = new HereRoutingProvider('geheim-key', 'car', 4000, festeZeit)
+    const m = await here.distanzMatrix(punkte)
+    const body = JSON.parse(fetchMock.mock.calls[0][1].body as string)
+    expect(body.matrixAttributes).toEqual(['distances'])
+    expect(m[0][1]).toBe(3) // 3000 m → 3 km
+    expect(m[1][2]).toBe(2)
+  })
+
   it('behandelt nicht erreichbare Paare (errorCodes != 0) als unendlich weit', async () => {
     vi.stubGlobal(
       'fetch',

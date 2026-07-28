@@ -24,4 +24,20 @@ export class FallbackRoutingProvider implements RoutingProvider {
       return this.ersatz.travelMatrix(points)
     }
   }
+
+  // Distanzmatrix mit derselben Resilienz: primär, bei Fehler Ersatz (Haversine).
+  async distanzMatrix(points: Geo[]): Promise<number[][]> {
+    if (this.primaer.distanzMatrix) {
+      try {
+        return await this.primaer.distanzMatrix(points)
+      } catch (err) {
+        console.warn(
+          '[routing] Primäre Distanzmatrix fehlgeschlagen, nutze Fallback:',
+          err instanceof Error ? err.message : err,
+        )
+      }
+    }
+    if (this.ersatz.distanzMatrix) return this.ersatz.distanzMatrix(points)
+    throw new Error('[routing] kein Distanzmatrix-Adapter verfügbar')
+  }
 }

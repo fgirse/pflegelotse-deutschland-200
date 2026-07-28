@@ -58,4 +58,34 @@ export class OsrmRoutingProvider implements RoutingProvider {
       zeile.map((sek) => (sek == null ? Infinity : sek / 60)),
     )
   }
+
+  // Echte Straßen-Distanzmatrix in km (§5.4 Kilometernachweis). OSRM liefert
+  // mit annotations=distance die Fahrstrecke in METERN.
+  async distanzMatrix(points: Geo[]): Promise<number[][]> {
+    const n = points.length
+    if (n === 0) return []
+    if (n === 1) return [[0]]
+
+    const coords = points.map((p) => `${p.lng},${p.lat}`).join(';')
+    const base = this.baseUrl.replace(/\/+$/, '')
+    const url = `${base}/table/v1/${this.profile}/${coords}?annotations=distance`
+
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => ctrl.abort(), this.timeoutMs)
+    const headers = this.apiKey ? { 'X-Api-Key': this.apiKey } : undefined
+    let res: Response
+    try {
+      res = await fetch(url, { signal: ctrl.signal, headers })
+    } finally {
+      clearTimeout(timer)
+    }
+
+    if (!res.ok) throw new Error(`OSRM-Antwort ${res.status} ${res.statusText}`)
+    const data = (await res.json()) as { code?: string; distances?: (number | null)[][] }
+    if (data.code !== 'Ok' || !Array.isArray(data.distances)) {
+      throw new Error(`OSRM-Fehler: ${data.code ?? 'unbekannt'}`)
+    }
+    // Meter → Kilometer; nicht erreichbar → Infinity.
+    return data.distances.map((zeile) => zeile.map((m) => (m == null ? Infinity : m / 1000)))
+  }
 }

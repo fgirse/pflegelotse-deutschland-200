@@ -8,4 +8,8 @@ import type { Geo } from '@/shared/domain'
 // matching/service.ts, nicht den Fit-Score. matrix[i][j] = Fahrzeit i → j.
 export interface RoutingProvider {
   travelMatrix(points: Geo[]): Promise<number[][]>
+  // Optionale Distanz-Matrix in KILOMETERN (für den Kilometernachweis §5.4).
+  // Bei OSRM/HERE echte Straßen-km; Haversine liefert die geometrische Schätzung.
+  // Optional, damit schlanke Test-Stubs nur travelMatrix implementieren müssen.
+  distanzMatrix?(points: Geo[]): Promise<number[][]>
 }

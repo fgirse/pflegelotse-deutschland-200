@@ -39,4 +39,19 @@ export class HaversineRoutingProvider implements RoutingProvider {
     }
     return m
   }
+
+  // Distanz-Matrix in km: Luftlinie × Umwegfaktor (geometrische Schätzung —
+  // ohne Straßendaten die bestmögliche Näherung).
+  async distanzMatrix(points: Geo[]): Promise<number[][]> {
+    const n = points.length
+    const m: number[][] = Array.from({ length: n }, () => new Array(n).fill(0))
+    for (let i = 0; i < n; i++) {
+      for (let j = i + 1; j < n; j++) {
+        const km = haversineKm(points[i], points[j]) * this.umwegFaktor
+        m[i][j] = km
+        m[j][i] = km
+      }
+    }
+    return m
+  }
 }

@@ -85,4 +85,58 @@ export class HereRoutingProvider implements RoutingProvider {
     }
     return out
   }
+
+  // Echte Straßen-Distanzmatrix in km (§5.4). HERE liefert mit dem Attribut
+  // `distances` die Fahrstrecke in METERN.
+  async distanzMatrix(points: Geo[]): Promise<number[][]> {
+    const n = points.length
+    if (n === 0) return []
+    if (n === 1) return [[0]]
+    if (n > 15) throw new Error(`HERE: ${n} Punkte über Sync-Limit (15)`)
+
+    const url = `https://matrix.router.hereapi.com/v8/matrix?async=false&apiKey=${encodeURIComponent(this.apiKey)}`
+    const body = {
+      origins: points.map((p) => ({ lat: p.lat, lng: p.lng })),
+      regionDefinition: { type: 'autoCircle' },
+      matrixAttributes: ['distances'],
+      transportMode: this.transportMode,
+      departureTime: this.jetzt().toISOString(),
+    }
+
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => ctrl.abort(), this.timeoutMs)
+    let res: Response
+    try {
+      res = await fetch(url, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: ctrl.signal,
+      })
+    } finally {
+      clearTimeout(timer)
+    }
+
+    if (!res.ok) throw new Error(`HERE-Antwort ${res.status} ${res.statusText}`)
+    const data = (await res.json()) as {
+      matrix?: { numOrigins: number; numDestinations: number; distances?: number[]; errorCodes?: number[] }
+    }
+    const m = data.matrix
+    if (!m || !Array.isArray(m.distances)) {
+      throw new Error('HERE-Fehler: keine distances in der Antwort')
+    }
+    const nd = m.numDestinations
+    const out: number[][] = []
+    for (let i = 0; i < m.numOrigins; i++) {
+      const zeile: number[] = []
+      for (let j = 0; j < nd; j++) {
+        const idx = i * nd + j
+        const fehler = m.errorCodes ? m.errorCodes[idx] : 0
+        const meter = m.distances[idx]
+        zeile.push(fehler || meter == null ? Infinity : meter / 1000)
+      }
+      out.push(zeile)
+    }
+    return out
+  }
 }

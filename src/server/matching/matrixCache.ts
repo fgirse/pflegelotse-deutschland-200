@@ -29,11 +29,27 @@ export class CachedRoutingProvider implements RoutingProvider {
   ) {}
 
   async travelMatrix(points: Geo[]): Promise<number[][]> {
-    const key = points.map((p) => `${p.lat.toFixed(4)},${p.lng.toFixed(4)}`).join('|')
+    const key = this.schluessel(points)
     const hit = this.cache.get(key)
     if (hit) return hit
     const matrix = await this.inner.travelMatrix(points)
     this.cache.set(key, matrix)
     return matrix
+  }
+
+  // Distanzmatrix analog gecacht (eigener Schlüssel-Namensraum "d:").
+  async distanzMatrix(points: Geo[]): Promise<number[][]> {
+    const key = 'd:' + this.schluessel(points)
+    const hit = this.cache.get(key)
+    if (hit) return hit
+    const matrix = this.inner.distanzMatrix
+      ? await this.inner.distanzMatrix(points)
+      : []
+    this.cache.set(key, matrix)
+    return matrix
+  }
+
+  private schluessel(points: Geo[]): string {
+    return points.map((p) => `${p.lat.toFixed(4)},${p.lng.toFixed(4)}`).join('|')
   }
 }

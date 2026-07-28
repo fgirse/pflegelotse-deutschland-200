@@ -25,6 +25,28 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+describe('OsrmRoutingProvider distanzMatrix', () => {
+  it('fragt annotations=distance ab und rechnet Meter in Kilometer um', async () => {
+    const fetchMock = mockFetch({
+      code: 'Ok',
+      distances: [
+        [0, 3000, 5000],
+        [3000, 0, 2000],
+        [5000, 2000, 0],
+      ],
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const osrm = new OsrmRoutingProvider('https://osrm.example.org/', 'driving')
+    const m = await osrm.distanzMatrix(punkte)
+
+    expect(fetchMock.mock.calls[0][0]).toContain('annotations=distance')
+    expect(m[0][1]).toBe(3) // 3000 m → 3 km
+    expect(m[1][2]).toBe(2)
+    expect(m[0][2]).toBe(5)
+  })
+})
+
 describe('OsrmRoutingProvider', () => {
   it('baut die table-URL mit lng,lat-Reihenfolge und rechnet Sekunden in Minuten um', async () => {
     const fetchMock = mockFetch({

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { tourKilometer } from './kilometer'
+import { tourKilometer, summeKm } from './kilometer'
 import { aggregiereBerichte, type TourKennzahl } from './aggregat'
 import { baueMitarbeiterCsv, stunden } from './csv'
 import type { Tour } from '@/shared/domain'
@@ -29,6 +29,17 @@ describe('Kilometer-Schätzung', () => {
   })
   it('liefert 0 km für eine Tour ohne Einsätze', () => {
     expect(tourKilometer(tour())).toBe(0)
+  })
+
+  it('summiert echte Distanzen aus der Provider-Matrix inkl. Rückweg zum Depot', () => {
+    // Punkte [start, E1, E2]; 2 Einsätze; Rückweg zum Start (Index 0).
+    const distanz = [
+      [0, 3, 5],
+      [3, 0, 2],
+      [5, 2, 0],
+    ]
+    // start→E1 (3) + E1→E2 (2) + E2→start (5) = 10 km.
+    expect(summeKm(distanz, 2, 0)).toBe(10)
   })
 })
 
