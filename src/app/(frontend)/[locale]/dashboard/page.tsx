@@ -102,8 +102,13 @@ export default async function DashboardPage({
           <h1 className="mt-3 text-3xl font-bold">{t('title')}</h1>
           <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
         </div>
-        {/* Primäraktion: neue Tour anlegen; daneben der Abrechnungs-Export. */}
+        {/* Primäraktion: neue Tour anlegen; daneben der Abrechnungs-Export.
+            Vorangestellt der direkte Einstieg in die mobile Leistungserfassung
+            (§5.3) — der Alltagsweg der Pflegekraft nach erfolgter Leistung. */}
         <div className="flex shrink-0 gap-2">
+          <Link href="/erfassung" className="btn btn-primary">
+            {t('erfassungLink')}
+          </Link>
           <Link href="/berichte" className="btn btn-outline">
             {t('berichteLink')}
           </Link>
