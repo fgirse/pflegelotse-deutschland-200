@@ -20,6 +20,8 @@ export function LoginForm({ locale }: { locale: string }) {
   const [email, setEmail] = useState(params.get('email') ?? '')
   const [password, setPassword] = useState('')
   const [code, setCode] = useState('')
+  // Rolle aus der Login-Antwort merken — bestimmt später das Ziel nach der 2FA.
+  const [role, setRole] = useState<string | null>(null)
   const [secret, setSecret] = useState<string | null>(null)
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
@@ -27,8 +29,15 @@ export function LoginForm({ locale }: { locale: string }) {
   const registriert = params.get('registriert') === '1'
 
   const inputCls = 'input'
-  // Ziel nach abgeschlossener 2FA (Dienst-Rollen).
-  const ziel = `/${locale}/dashboard`
+  // Ziel nach erfolgreicher Anmeldung, rollenabhängig: die Pflegekraft geht in
+  // ihre mobile Erfassung, Suchende in ihr Bedarfe-Portal, Disponent/Admin ins
+  // Dashboard. So landet niemand auf einer für die Rolle unpassenden Startseite.
+  const zielFuer = (r: string | null) =>
+    r === 'pflegekraft'
+      ? `/${locale}/erfassung`
+      : r === 'angehoeriger'
+        ? `/${locale}/meine-bedarfe`
+        : `/${locale}/dashboard`
 
   async function login() {
     setBusy(true)
@@ -44,6 +53,7 @@ export function LoginForm({ locale }: { locale: string }) {
         return
       }
       const data = await res.json()
+      setRole(data.role ?? null)
       if (data.needsEnrollment) {
         // 2FA erstmalig einrichten (Dienst-Rollen).
         const e = await fetch('/api/v1/auth/2fa/enroll', { method: 'POST' })
@@ -55,9 +65,8 @@ export function LoginForm({ locale }: { locale: string }) {
         // 2FA-Code bestätigen.
         setSchritt('verify')
       } else {
-        // Keine 2FA-Pflicht (Suchende): weiter ins eigene Bedarfe-Portal.
-        window.location.href =
-          data.role === 'angehoeriger' ? `/${locale}/meine-bedarfe` : ziel
+        // Keine 2FA-Pflicht (Suchende): direkt ans rollenpassende Ziel.
+        window.location.href = zielFuer(data.role)
       }
     } finally {
       setBusy(false)
@@ -80,7 +89,7 @@ export function LoginForm({ locale }: { locale: string }) {
         setCode('') // Kästchen für neue Eingabe leeren
         return
       }
-      window.location.href = ziel
+      window.location.href = zielFuer(role)
     } finally {
       setBusy(false)
     }
