@@ -64,6 +64,10 @@ export const Users: CollectionConfig = {
       hooks: { beforeChange: [sealHook], afterRead: [openHook] },
     },
     { name: 'totpEnabled', type: 'checkbox', defaultValue: false },
+    // Offboarding: deaktivierte Konten verlieren zentral (getAuthUser) sofort
+    // jeden Zugang — auch mit noch gültigem Cookie. Das Konto bleibt erhalten
+    // (reversibel; History/Leistungsnachweise über pflegekraftId bleiben verknüpft).
+    { name: 'deaktiviert', type: 'checkbox', defaultValue: false, index: true },
     // Zuordnung Pflegekraft-Konto → Tour-Kennung (§5.3 mobile Erfassung):
     // die mobile Ansicht zeigt nur die heutige Tour DIESER Kraft (§9.5).
     { name: 'pflegekraftId', type: 'text', index: true },

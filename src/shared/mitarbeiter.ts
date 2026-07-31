@@ -22,5 +22,10 @@ export interface MitarbeiterZeile {
   email: string
   pflegekraftId?: string
   totpEnabled: boolean
+  deaktiviert: boolean
   erstelltAm?: string
 }
+
+// Statuswechsel (Offboarding): deaktivieren oder wieder aktivieren.
+export const mitarbeiterStatusSchema = z.object({ deaktiviert: z.boolean() })
+export type MitarbeiterStatus = z.infer<typeof mitarbeiterStatusSchema>

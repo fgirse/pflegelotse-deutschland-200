@@ -20,6 +20,13 @@ export async function POST(req: NextRequest) {
       collection: 'users',
       data: { email: parsed.data.email, password: parsed.data.password },
     })
+    // Deaktivierte Konten (Offboarding) können sich nicht anmelden.
+    if ((user as { deaktiviert?: boolean }).deaktiviert) {
+      return NextResponse.json(
+        { error: 'Konto deaktiviert', code: 'ACCOUNT_DISABLED' },
+        { status: 403 },
+      )
+    }
     const role = (user as { role?: string }).role ?? 'angehoeriger'
     const totpEnabled = Boolean((user as { totpEnabled?: boolean }).totpEnabled)
     // 2FA ist nur für Klientendaten-Rollen Pflicht; Suchende/Betreiber nicht.

@@ -16,6 +16,8 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
   const [erfolg, setErfolg] = useState<string | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  // Läuft gerade eine Zeilen-Aktion (Deaktivieren/Löschen)? Merkt sich die ID.
+  const [aktionBusy, setAktionBusy] = useState<string | null>(null)
 
   const gueltig = /\S+@\S+\.\S+/.test(email) && password.length >= 8
 
@@ -52,6 +54,52 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
       setFehler(t('fehlerAllgemein'))
     } finally {
       setBusy(false)
+    }
+  }
+
+  // Deaktivieren/Aktivieren (Offboarding, reversibel).
+  async function statusWechseln(m: MitarbeiterZeile) {
+    if (aktionBusy) return
+    setAktionBusy(m.id)
+    setErfolg(null)
+    setFehler(null)
+    try {
+      const res = await fetch(`/api/v1/team/mitarbeiter/${m.id}`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ deaktiviert: !m.deaktiviert }),
+      })
+      if (!res.ok) {
+        setFehler(t('fehlerAllgemein'))
+        return
+      }
+      const data = (await res.json()) as { mitarbeiter: MitarbeiterZeile }
+      setListe((l) => l.map((x) => (x.id === m.id ? data.mitarbeiter : x)))
+    } catch {
+      setFehler(t('fehlerAllgemein'))
+    } finally {
+      setAktionBusy(null)
+    }
+  }
+
+  // Endgültig löschen (mit Rückfrage).
+  async function loeschen(m: MitarbeiterZeile) {
+    if (aktionBusy) return
+    if (!window.confirm(t('loeschenBestaetigen', { email: m.email }))) return
+    setAktionBusy(m.id)
+    setErfolg(null)
+    setFehler(null)
+    try {
+      const res = await fetch(`/api/v1/team/mitarbeiter/${m.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        setFehler(t('fehlerAllgemein'))
+        return
+      }
+      setListe((l) => l.filter((x) => x.id !== m.id))
+    } catch {
+      setFehler(t('fehlerAllgemein'))
+    } finally {
+      setAktionBusy(null)
     }
   }
 
@@ -108,22 +156,56 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
                 <tr className="border-b border-[var(--color-line)] text-[var(--color-muted)]">
                   <th className="py-2 pr-4 font-medium">{t('spalteEmail')}</th>
                   <th className="py-2 pr-4 font-medium">{t('spalteKuerzel')}</th>
-                  <th className="py-2 font-medium">{t('spalte2fa')}</th>
+                  <th className="py-2 pr-4 font-medium">{t('spalte2fa')}</th>
+                  <th className="py-2 pr-4 font-medium">{t('spalteStatus')}</th>
+                  <th className="py-2 font-medium">{t('spalteAktionen')}</th>
                 </tr>
               </thead>
               <tbody>
                 {liste.map((m) => (
-                  <tr key={m.id} className="border-b border-[var(--color-line)] last:border-0">
+                  <tr
+                    key={m.id}
+                    className={`border-b border-[var(--color-line)] last:border-0 ${
+                      m.deaktiviert ? 'text-[var(--color-faint)]' : ''
+                    }`}
+                  >
                     <td className="py-2 pr-4">{m.email}</td>
                     <td className="py-2 pr-4">
                       {m.pflegekraftId ?? <span className="text-[var(--color-faint)]">—</span>}
                     </td>
-                    <td className="py-2">
+                    <td className="py-2 pr-4">
                       {m.totpEnabled ? (
                         <span className="text-[var(--color-success)]">● {t('aktiv')}</span>
                       ) : (
                         <span className="text-[var(--color-muted)]">○ {t('offen')}</span>
                       )}
+                    </td>
+                    <td className="py-2 pr-4">
+                      {m.deaktiviert ? (
+                        <span className="text-[var(--color-danger)]">{t('statusDeaktiviert')}</span>
+                      ) : (
+                        <span className="text-[var(--color-success)]">{t('statusAktiv')}</span>
+                      )}
+                    </td>
+                    <td className="py-2">
+                      <div className="flex gap-3 whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => statusWechseln(m)}
+                          disabled={aktionBusy === m.id}
+                          className="font-medium text-[var(--color-accent)] hover:underline disabled:opacity-50"
+                        >
+                          {m.deaktiviert ? t('aktivieren') : t('deaktivieren')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => loeschen(m)}
+                          disabled={aktionBusy === m.id}
+                          className="font-medium text-[var(--color-danger)] hover:underline disabled:opacity-50"
+                        >
+                          {t('loeschen')}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

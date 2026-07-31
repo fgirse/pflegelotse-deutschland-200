@@ -7,6 +7,7 @@ function zuZeile(d: {
   email?: string
   pflegekraftId?: string | null
   totpEnabled?: boolean | null
+  deaktiviert?: boolean | null
   createdAt?: string
 }): MitarbeiterZeile {
   return {
@@ -14,6 +15,7 @@ function zuZeile(d: {
     email: d.email ?? '',
     pflegekraftId: d.pflegekraftId ?? undefined,
     totpEnabled: Boolean(d.totpEnabled),
+    deaktiviert: Boolean(d.deaktiviert),
     erstelltAm: d.createdAt,
   }
 }
@@ -65,4 +67,44 @@ export async function erstelleMitarbeiter(
     overrideAccess: true,
   })
   return { status: 'ok', mitarbeiter: zuZeile(doc as Parameters<typeof zuZeile>[0]) }
+}
+
+// Lädt eine Pflegekraft NUR, wenn sie zum Mandanten des Admins gehört und
+// tatsächlich Rolle 'pflegekraft' hat. Verhindert Zugriff auf fremde Mandanten
+// oder andere Rollen (z. B. einen anderen Admin deaktivieren/löschen).
+async function ladeEigeneKraft(tenantId: string, id: string) {
+  const payload = await payloadClient()
+  const doc = (await payload
+    .findByID({ collection: 'users', id, overrideAccess: true })
+    .catch(() => null)) as
+    | { id: string | number; role?: string; tenantId?: string }
+    | null
+  if (!doc || doc.role !== 'pflegekraft' || doc.tenantId !== tenantId) return null
+  return doc
+}
+
+// Deaktiviert/aktiviert eine Pflegekraft (Offboarding, reversibel).
+export async function setzeMitarbeiterStatus(
+  tenantId: string,
+  id: string,
+  deaktiviert: boolean,
+): Promise<MitarbeiterZeile | null> {
+  if (!(await ladeEigeneKraft(tenantId, id))) return null
+  const payload = await payloadClient()
+  const doc = await payload.update({
+    collection: 'users',
+    id,
+    data: { deaktiviert },
+    overrideAccess: true,
+  })
+  return zuZeile(doc as Parameters<typeof zuZeile>[0])
+}
+
+// Löscht eine Pflegekraft endgültig. Die pseudonyme Historie (Säule 2, per
+// pflegekraftId als String referenziert) bleibt davon unberührt.
+export async function loescheMitarbeiter(tenantId: string, id: string): Promise<boolean> {
+  if (!(await ladeEigeneKraft(tenantId, id))) return false
+  const payload = await payloadClient()
+  await payload.delete({ collection: 'users', id, overrideAccess: true })
+  return true
 }

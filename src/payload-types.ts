@@ -153,6 +153,7 @@ export interface User {
   tenantId?: string | null;
   totpSecret?: string | null;
   totpEnabled?: boolean | null;
+  deaktiviert?: boolean | null;
   pflegekraftId?: string | null;
   dienstName?: string | null;
   einzugsGeo?: {
@@ -809,6 +810,7 @@ export interface UsersSelect<T extends boolean = true> {
   tenantId?: T;
   totpSecret?: T;
   totpEnabled?: T;
+  deaktiviert?: T;
   pflegekraftId?: T;
   dienstName?: T;
   einzugsGeo?:

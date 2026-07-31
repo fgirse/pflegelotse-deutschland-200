@@ -21,6 +21,9 @@ export async function getAuthUser(headers: Headers): Promise<AuthUser | null> {
   const payload = await payloadClient()
   const { user } = await payload.auth({ headers })
   if (!user) return null
+  // Deaktiviertes Konto = kein Zugang (Offboarding). Zentral hier, damit die
+  // Sperre für API (requireAuth) UND Seiten (requireDienstSeite) sofort greift.
+  if ((user as { deaktiviert?: boolean }).deaktiviert) return null
   return {
     id: String(user.id),
     email: (user as { email?: string }).email ?? '',
