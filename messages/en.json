@@ -3,6 +3,21 @@
     "name": "Pflegelotse Deutschland",
     "tagline": "Route optimisation for home-care services"
   },
+  "konto": {
+    "title": "Account",
+    "subtitle": "Change your password here.",
+    "pflichtHinweis": "Please set your own password before continuing.",
+    "aktuell": "Current password",
+    "neu": "New password",
+    "neuWdh": "Repeat new password",
+    "ungleich": "The passwords do not match.",
+    "speichern": "Change password",
+    "erfolg": "Password changed.",
+    "passwortAnzeigen": "Show password",
+    "passwortVerbergen": "Hide password",
+    "fehlerAktuell": "Current password is wrong.",
+    "fehlerAllgemein": "Change failed. Please try again."
+  },
   "team": {
     "title": "Manage team",
     "subtitle": "Create the caregivers of your service. They sign in with email and password, set up two-factor authentication on first login and land straight in service recording.",
@@ -37,6 +52,7 @@
   "nav": {
     "dashboard": "Dispatcher dashboard",
     "leistungErfassen": "Record service",
+    "konto": "Account",
     "admin": "Administration",
     "impressum": "Imprint",
     "datenschutz": "Privacy",
@@ -359,6 +375,13 @@
     "secret": "Secret",
     "fehlerLogin": "Wrong email or password.",
     "fehlerCode": "Invalid code.",
+    "pwWechselTitle": "Set a new password",
+    "pwWechselHinweis": "Your account was created with an initial password. Please set your own password now, then you'll set up two-factor authentication.",
+    "pwNeu": "New password",
+    "pwNeuWdh": "Repeat new password",
+    "pwUngleich": "The passwords do not match.",
+    "pwSpeichern": "Continue",
+    "fehlerPasswort": "Could not set the password.",
     "abmelden": "Sign out",
     "angemeldetAls": "Signed in as",
     "registriertHinweis": "Registration successful. Please sign in now.",

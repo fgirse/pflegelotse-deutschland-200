@@ -64,6 +64,10 @@ export const Users: CollectionConfig = {
       hooks: { beforeChange: [sealHook], afterRead: [openHook] },
     },
     { name: 'totpEnabled', type: 'checkbox', defaultValue: false },
+    // Erzwungener Passwortwechsel: der Admin setzt das Flag beim Anlegen (Initial-
+    // Passwort). Solange gesetzt, leitet requireDienstSeite auf /konto um; nach
+    // erfolgreichem Wechsel wird es serverseitig gelöscht.
+    { name: 'passwortWechselErforderlich', type: 'checkbox', defaultValue: false },
     // Offboarding: deaktivierte Konten verlieren zentral (getAuthUser) sofort
     // jeden Zugang — auch mit noch gültigem Cookie. Das Konto bleibt erhalten
     // (reversibel; History/Leistungsnachweise über pflegekraftId bleiben verknüpft).

@@ -11,6 +11,7 @@ export interface AuthUser {
   totpEnabled?: boolean
   dienstName?: string
   pflegekraftId?: string
+  passwortWechselErforderlich?: boolean
 }
 
 // Rollen mit Klientendatenzugriff — für sie ist 2FA verpflichtend (/Q110/).
@@ -32,6 +33,8 @@ export async function getAuthUser(headers: Headers): Promise<AuthUser | null> {
     totpEnabled: (user as { totpEnabled?: boolean }).totpEnabled,
     dienstName: (user as { dienstName?: string }).dienstName,
     pflegekraftId: (user as { pflegekraftId?: string }).pflegekraftId,
+    passwortWechselErforderlich: (user as { passwortWechselErforderlich?: boolean })
+      .passwortWechselErforderlich,
   }
 }
 

@@ -153,6 +153,7 @@ export interface User {
   tenantId?: string | null;
   totpSecret?: string | null;
   totpEnabled?: boolean | null;
+  passwortWechselErforderlich?: boolean | null;
   deaktiviert?: boolean | null;
   pflegekraftId?: string | null;
   dienstName?: string | null;
@@ -810,6 +811,7 @@ export interface UsersSelect<T extends boolean = true> {
   tenantId?: T;
   totpSecret?: T;
   totpEnabled?: T;
+  passwortWechselErforderlich?: T;
   deaktiviert?: T;
   pflegekraftId?: T;
   dienstName?: T;

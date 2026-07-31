@@ -3,6 +3,21 @@
     "name": "PflegeLotse Deutschland",
     "tagline": "Tourenoptimierung für ambulante Pflegedienste"
   },
+  "konto": {
+    "title": "Konto",
+    "subtitle": "Ändere hier dein Passwort.",
+    "pflichtHinweis": "Bitte vergib ein eigenes Passwort, bevor es weitergeht.",
+    "aktuell": "Aktuelles Passwort",
+    "neu": "Neues Passwort",
+    "neuWdh": "Neues Passwort wiederholen",
+    "ungleich": "Die Passwörter stimmen nicht überein.",
+    "speichern": "Passwort ändern",
+    "erfolg": "Passwort geändert.",
+    "passwortAnzeigen": "Passwort anzeigen",
+    "passwortVerbergen": "Passwort verbergen",
+    "fehlerAktuell": "Aktuelles Passwort ist falsch.",
+    "fehlerAllgemein": "Änderung fehlgeschlagen. Bitte erneut versuchen."
+  },
   "team": {
     "title": "Team verwalten",
     "subtitle": "Lege die Pflegekräfte deines Dienstes an. Sie melden sich mit E-Mail und Passwort an, richten beim ersten Login die Zwei-Faktor-Authentisierung ein und landen direkt in der Leistungserfassung.",
@@ -37,6 +52,7 @@
   "nav": {
     "dashboard": "Disponenten-Dashboard",
     "leistungErfassen": "Leistung erfassen",
+    "konto": "Konto",
     "admin": "Verwaltung",
     "impressum": "Impressum",
     "datenschutz": "Datenschutz",
@@ -358,6 +374,13 @@
     "secret": "Geheimnis",
     "fehlerLogin": "E-Mail oder Passwort falsch.",
     "fehlerCode": "Code ungültig.",
+    "pwWechselTitle": "Neues Passwort vergeben",
+    "pwWechselHinweis": "Dein Konto wurde mit einem Initial-Passwort angelegt. Bitte vergib jetzt dein eigenes Passwort, danach richtest du die Zwei-Faktor-Authentisierung ein.",
+    "pwNeu": "Neues Passwort",
+    "pwNeuWdh": "Neues Passwort wiederholen",
+    "pwUngleich": "Die Passwörter stimmen nicht überein.",
+    "pwSpeichern": "Weiter",
+    "fehlerPasswort": "Passwort konnte nicht gesetzt werden.",
     "abmelden": "Abmelden",
     "angemeldetAls": "Angemeldet als",
     "registriertHinweis": "Registrierung erfolgreich. Bitte melde dich jetzt an.",

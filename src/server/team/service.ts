@@ -62,6 +62,8 @@ export async function erstelleMitarbeiter(
       password: eingabe.password,
       role: 'pflegekraft',
       tenantId, // serverseitig aus der Admin-Sitzung
+      // Initial-Passwort vom Admin → beim ersten Login zwingend wechseln.
+      passwortWechselErforderlich: true,
       ...(eingabe.pflegekraftId ? { pflegekraftId: eingabe.pflegekraftId } : {}),
     },
     overrideAccess: true,

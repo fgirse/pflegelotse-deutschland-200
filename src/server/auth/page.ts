@@ -13,6 +13,10 @@ export async function requireDienstSeite(
   const user = await getAuthUser(h)
   if (!user) redirect(`/${locale}/login`)
 
+  // Erzwungener Passwortwechsel (Initial-Login): vor allem anderen auf die
+  // Konto-Seite. Der Wechsel läuft VOR der 2FA (Reihenfolge nach Vorgabe).
+  if (user.passwortWechselErforderlich) redirect(`/${locale}/konto?pflicht=1`)
+
   // 2FA-Pflicht für Klientendaten-Rollen.
   const cookie = h
     .get('cookie')
@@ -35,6 +39,17 @@ export async function requireDienstSeite(
 // Nutzer nötig — kein 2FA, kein Mandant (Suchende haben keinen Klientendaten-
 // zugriff). Sonst Weiterleitung zum Login.
 export async function requireAngehoerige(locale: string): Promise<AuthUser> {
+  const h = await headers()
+  const user = await getAuthUser(h)
+  if (!user) redirect(`/${locale}/login`)
+  return user
+}
+
+// Schützt eine Seite, die nur eine Anmeldung braucht (z. B. „Konto/Passwort"):
+// jede Rolle, kein 2FA-Zwang (sonst käme eine Pflegekraft vor der 2FA-
+// Einrichtung nicht an die erzwungene Passwort-Seite). Kein Redirect bei
+// gesetztem Wechsel-Flag — genau hier soll der Wechsel ja stattfinden.
+export async function requireAngemeldet(locale: string): Promise<AuthUser> {
   const h = await headers()
   const user = await getAuthUser(h)
   if (!user) redirect(`/${locale}/login`)

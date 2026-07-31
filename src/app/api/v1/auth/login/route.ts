@@ -38,6 +38,10 @@ export async function POST(req: NextRequest) {
       // Solange 2FA nicht eingerichtet/bestätigt ist, sind geschützte Routen gesperrt.
       twoFactorRequired: braucht2fa && totpEnabled,
       needsEnrollment: braucht2fa && !totpEnabled,
+      // Initial-Passwort: muss VOR der 2FA gewechselt werden.
+      passwortWechselErforderlich: Boolean(
+        (user as { passwortWechselErforderlich?: boolean }).passwortWechselErforderlich,
+      ),
     })
     if (token) {
       res.cookies.set('payload-token', token, {

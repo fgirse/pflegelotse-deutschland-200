@@ -108,12 +108,13 @@ export async function SiteHeader({ locale, ctx }: { locale: string; ctx: NavCont
                     )}
                   </Link>
                 )}
-                <span
-                  className="max-w-[12rem] truncate text-sm text-[var(--color-muted)]"
-                  title={userEmail}
+                <Link
+                  href="/konto"
+                  className="max-w-[12rem] truncate text-sm text-[var(--color-muted)] hover:text-[var(--color-ink)] hover:underline"
+                  title={t('nav.konto')}
                 >
                   {userLabel}
-                </span>
+                </Link>
                 <LogoutButton locale={locale} />
               </>
             ) : (

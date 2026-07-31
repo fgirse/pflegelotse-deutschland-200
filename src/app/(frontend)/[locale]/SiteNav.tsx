@@ -251,6 +251,13 @@ export function MobileMenu({
                       {userLabel}
                     </p>
                   )}
+                  <Link
+                    href="/konto"
+                    onClick={() => setOpen(false)}
+                    className="flex min-h-12 items-center rounded-xl px-4 text-base font-medium text-[var(--color-ink)] transition-colors hover:bg-[var(--color-line)]"
+                  >
+                    {t('nav.konto')}
+                  </Link>
                   <div onClick={() => setOpen(false)} className="px-1">
                     <LogoutButton locale={locale} />
                   </div>
