@@ -55,8 +55,14 @@ export async function ladeNavContext(): Promise<NavContext> {
     isLoggedIn: !!user,
     istDienst,
     istPflegekraft,
-    bereichHref: istDienst ? '/dashboard' : '/meine-bedarfe',
-    bereichLabel: istDienst ? t('nav.dashboard') : t('meineBedarfe.title'),
+    // Die Pflegekraft hat kein Disponenten-Dashboard: ihr „Bereich“ ist die
+    // mobile Erfassung. Disponent/Admin → Dashboard, Suchende → Meine Bedarfe.
+    bereichHref: istPflegekraft ? '/erfassung' : istDienst ? '/dashboard' : '/meine-bedarfe',
+    bereichLabel: istPflegekraft
+      ? t('nav.leistungErfassen')
+      : istDienst
+        ? t('nav.dashboard')
+        : t('meineBedarfe.title'),
     userLabel: user ? user.dienstName || user.email : '',
     userEmail: user?.email ?? '',
     angeboteBadge,
@@ -83,22 +89,25 @@ export async function SiteHeader({ locale, ctx }: { locale: string; ctx: NavCont
             <LocaleSwitcher locale={locale} />
             {isLoggedIn ? (
               <>
-                {istPflegekraft && (
+                {istPflegekraft ? (
+                  // Pflegekraft: die Erfassung IST ihr Bereich — ein Primär-Button
+                  // statt eines zusätzlichen (Dashboard-)Bereich-Links.
                   <Link href="/erfassung" className="btn btn-primary min-h-11">
                     {t('nav.leistungErfassen')}
                   </Link>
+                ) : (
+                  <Link href={bereichHref} className="btn btn-outline min-h-11">
+                    {bereichLabel}
+                    {angeboteBadge > 0 && (
+                      <span
+                        className="ml-1.5 rounded-full bg-[var(--color-accent-strong)] px-1.5 text-xs font-bold text-white"
+                        aria-label={`${angeboteBadge} neue Angebote`}
+                      >
+                        {angeboteBadge}
+                      </span>
+                    )}
+                  </Link>
                 )}
-                <Link href={bereichHref} className="btn btn-outline min-h-11">
-                  {bereichLabel}
-                  {angeboteBadge > 0 && (
-                    <span
-                      className="ml-1.5 rounded-full bg-[var(--color-accent-strong)] px-1.5 text-xs font-bold text-white"
-                      aria-label={`${angeboteBadge} neue Angebote`}
-                    >
-                      {angeboteBadge}
-                    </span>
-                  )}
-                </Link>
                 <span
                   className="max-w-[12rem] truncate text-sm text-[var(--color-muted)]"
                   title={userEmail}

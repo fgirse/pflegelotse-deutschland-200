@@ -234,7 +234,8 @@ export function MobileMenu({
               </p>
               {isLoggedIn ? (
                 <div className="flex flex-col gap-2">
-                  {istPflegekraft && (
+                  {istPflegekraft ? (
+                    // Pflegekraft: Erfassung als Primär-Button, kein Dashboard-Link.
                     <Link
                       href="/erfassung"
                       onClick={() => setOpen(false)}
@@ -242,8 +243,9 @@ export function MobileMenu({
                     >
                       {t('nav.leistungErfassen')}
                     </Link>
+                  ) : (
+                    zeile(bereichHref, bereichLabel, IconArea, angeboteBadge)
                   )}
-                  {zeile(bereichHref, bereichLabel, IconArea, angeboteBadge)}
                   {userLabel && (
                     <p className="truncate px-4 text-sm text-[var(--color-muted)]" title={userLabel}>
                       {userLabel}
