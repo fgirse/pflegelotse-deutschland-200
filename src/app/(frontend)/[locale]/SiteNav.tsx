@@ -114,6 +114,7 @@ export function DesktopNav() {
 export function MobileMenu({
   locale,
   isLoggedIn,
+  istPflegekraft,
   bereichHref,
   bereichLabel,
   userLabel,
@@ -121,6 +122,7 @@ export function MobileMenu({
 }: {
   locale: string
   isLoggedIn: boolean
+  istPflegekraft: boolean
   bereichHref: string
   bereichLabel: string
   userLabel: string
@@ -232,6 +234,15 @@ export function MobileMenu({
               </p>
               {isLoggedIn ? (
                 <div className="flex flex-col gap-2">
+                  {istPflegekraft && (
+                    <Link
+                      href="/erfassung"
+                      onClick={() => setOpen(false)}
+                      className="btn btn-primary min-h-12 text-base"
+                    >
+                      {t('nav.leistungErfassen')}
+                    </Link>
+                  )}
                   {zeile(bereichHref, bereichLabel, IconArea, angeboteBadge)}
                   {userLabel && (
                     <p className="truncate px-4 text-sm text-[var(--color-muted)]" title={userLabel}>

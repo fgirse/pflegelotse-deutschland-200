@@ -5,6 +5,7 @@
   },
   "nav": {
     "dashboard": "Dispatcher dashboard",
+    "leistungErfassen": "Record service",
     "admin": "Administration",
     "impressum": "Imprint",
     "datenschutz": "Privacy",

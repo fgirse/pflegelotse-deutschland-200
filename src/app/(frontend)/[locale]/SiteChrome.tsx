@@ -16,6 +16,7 @@ const DIENST_ROLLEN = ['disponent', 'admin', 'pflegekraft']
 export interface NavContext {
   isLoggedIn: boolean
   istDienst: boolean
+  istPflegekraft: boolean
   bereichHref: string
   bereichLabel: string
   userLabel: string
@@ -37,6 +38,9 @@ export async function ladeNavContext(): Promise<NavContext> {
   }
 
   const istDienst = user ? DIENST_ROLLEN.includes(user.role) : false
+  // Die Pflegekraft hat als Alltagsaktion die mobile Leistungserfassung —
+  // dafür bekommt sie einen eigenen, prominenten Header-Button.
+  const istPflegekraft = user?.role === 'pflegekraft'
   // In-App-Hinweis für Suchende: Anzahl Bedarfe mit neuen/offenen Angeboten.
   let angeboteBadge = 0
   if (user && !istDienst) {
@@ -50,6 +54,7 @@ export async function ladeNavContext(): Promise<NavContext> {
   return {
     isLoggedIn: !!user,
     istDienst,
+    istPflegekraft,
     bereichHref: istDienst ? '/dashboard' : '/meine-bedarfe',
     bereichLabel: istDienst ? t('nav.dashboard') : t('meineBedarfe.title'),
     userLabel: user ? user.dienstName || user.email : '',
@@ -62,7 +67,8 @@ export async function ladeNavContext(): Promise<NavContext> {
 // HTML sichtbar (kein Client-Flash).
 export async function SiteHeader({ locale, ctx }: { locale: string; ctx: NavContext }) {
   const t = await getTranslations()
-  const { isLoggedIn, bereichHref, bereichLabel, userLabel, userEmail, angeboteBadge } = ctx
+  const { isLoggedIn, istPflegekraft, bereichHref, bereichLabel, userLabel, userEmail, angeboteBadge } =
+    ctx
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-line)] bg-[var(--color-paper)]/85 backdrop-blur">
@@ -77,6 +83,11 @@ export async function SiteHeader({ locale, ctx }: { locale: string; ctx: NavCont
             <LocaleSwitcher locale={locale} />
             {isLoggedIn ? (
               <>
+                {istPflegekraft && (
+                  <Link href="/erfassung" className="btn btn-primary min-h-11">
+                    {t('nav.leistungErfassen')}
+                  </Link>
+                )}
                 <Link href={bereichHref} className="btn btn-outline min-h-11">
                   {bereichLabel}
                   {angeboteBadge > 0 && (
@@ -115,6 +126,7 @@ export async function SiteHeader({ locale, ctx }: { locale: string; ctx: NavCont
           <MobileMenu
             locale={locale}
             isLoggedIn={isLoggedIn}
+            istPflegekraft={istPflegekraft}
             bereichHref={bereichHref}
             bereichLabel={bereichLabel}
             userLabel={userLabel}
