@@ -22,6 +22,11 @@ function hhmmZuMin(s: string): number | null {
   return h * 60 + min
 }
 
+// Minuten seit Mitternacht → "HH:MM".
+function minZuHHMM(min: number): string {
+  return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`
+}
+
 // Formular zum Anlegen einer neuen Tour. Der Startpunkt (Depot) wird über eine
 // freie Adresse per Geocoding in Koordinaten aufgelöst. Nach dem Speichern
 // zurück aufs Dashboard, wo die Tour sofort erscheint.
@@ -33,6 +38,32 @@ export function TourNeuForm() {
   const [pflegekraftId, setPflegekraftId] = useState('')
   const [qualifikation, setQualifikation] = useState('')
   const [startZeit, setStartZeit] = useState('08:00')
+  // Hinweis, dass Werte aus dem Stammprofil der Pflegekraft übernommen wurden.
+  const [stammGeladen, setStammGeladen] = useState(false)
+
+  // Beim Verlassen des Pflegekraft-Felds das Stammprofil laden und leere Felder
+  // vorbelegen (Qualifikation, Startzeit). Geschlecht/Arbeitszeitende/max.
+  // Einsätze erbt die Tour-Anlage serverseitig. Eingaben werden nicht überschrieben.
+  async function ladeStamm() {
+    const id = pflegekraftId.trim()
+    setStammGeladen(false)
+    if (!id) return
+    try {
+      const res = await fetch(`/api/v1/team/stammdaten?pflegekraftId=${encodeURIComponent(id)}`)
+      if (!res.ok) return
+      const { stamm } = await res.json()
+      if (!stamm) return
+      if (!qualifikation.trim() && Array.isArray(stamm.qualifikation) && stamm.qualifikation.length) {
+        setQualifikation(stamm.qualifikation.join(', '))
+      }
+      if (startZeit === '08:00' && typeof stamm.standardStartzeit === 'number') {
+        setStartZeit(minZuHHMM(stamm.standardStartzeit))
+      }
+      setStammGeladen(true)
+    } catch {
+      // Vorbelegung ist optional; Fehler still ignorieren.
+    }
+  }
 
   // Adresse → Koordinaten (Depot).
   const [adresse, setAdresse] = useState('')
@@ -125,8 +156,12 @@ export function TourNeuForm() {
             className="input"
             value={pflegekraftId}
             onChange={(e) => setPflegekraftId(e.target.value)}
+            onBlur={ladeStamm}
             placeholder={t('pflegekraftPlatzhalter')}
           />
+          {stammGeladen && (
+            <span className="mt-1 text-xs text-[var(--color-success)]">{t('stammUebernommen')}</span>
+          )}
         </label>
 
         <label className="label">

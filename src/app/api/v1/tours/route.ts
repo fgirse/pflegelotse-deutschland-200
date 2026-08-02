@@ -19,12 +19,17 @@ export async function GET(req: NextRequest) {
 
 // Eingabe zum Erstellen einer neuen (leeren) Tour. tenantId setzt der Server
 // aus dem Nutzer, die id vergibt die DB.
+// Felder außer datum/pflegekraftId/start sind optional: fehlt eines, erbt die
+// Tour-Anlage den Wert aus dem Pflegekraft-Stammprofil (repo.erstelleTour).
 const neueTourSchema = z.object({
   datum: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Datum als YYYY-MM-DD erwartet'),
   pflegekraftId: z.string().min(1),
-  pflegekraftQualifikation: z.array(z.string()).default([]),
+  pflegekraftQualifikation: z.array(z.string()).optional(),
+  pflegekraftGeschlecht: z.enum(['m', 'w', 'd']).optional(),
   start: geoSchema, // Depot/Startpunkt (aus Adress-Geocoding)
-  startZeit: z.number().int().min(0).max(1439).default(480),
+  startZeit: z.number().int().min(0).max(1439).optional(),
+  verfuegbarBis: z.number().int().min(0).max(1439).optional(),
+  maxEinsaetze: z.number().int().min(0).max(50).optional(),
 })
 
 // POST /api/v1/tours — legt eine neue leere Tour an. Tourenplanung ist

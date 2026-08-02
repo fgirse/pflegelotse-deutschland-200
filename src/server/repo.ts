@@ -10,6 +10,7 @@ import {
 } from '@/shared/domain'
 import { tourSchluessel, type TourEntwurf } from './planning/wochenplan'
 import type { NachweisEintrag } from './nachweis/kette'
+import { ladePflegekraftStamm } from './stammdaten/service'
 
 // Liest Touren eines Mandanten (Säule 2) und bildet sie auf die Domäne ab.
 // overrideAccess: true — die v1-API läuft serverseitig vertrauenswürdig;
@@ -47,23 +48,43 @@ export type NeueTour = {
   datum: string // ISO YYYY-MM-DD
   pflegekraftId: string
   pflegekraftQualifikation?: string[]
+  pflegekraftGeschlecht?: 'm' | 'w' | 'd'
   start: { lat: number; lng: number } // Depot/Startpunkt
-  startZeit?: number // Min seit Mitternacht, Standard 08:00
+  startZeit?: number // Min seit Mitternacht
+  verfuegbarBis?: number // Schichtende (Min seit Mitternacht)
+  maxEinsaetze?: number
 }
 
 // Legt eine neue Tour ohne Einsätze an (Disponent plant sie danach voll).
+// Erbt Qualifikation/Geschlecht/Arbeitszeit aus dem Pflegekraft-Stammprofil,
+// sofern nicht explizit angegeben — explizite Eingabe hat immer Vorrang.
 export async function erstelleTour(input: NeueTour): Promise<Tour> {
   const payload = await payloadClient()
+  const stamm = await ladePflegekraftStamm(input.tenantId, input.pflegekraftId)
+
+  const qualifikation =
+    input.pflegekraftQualifikation && input.pflegekraftQualifikation.length > 0
+      ? input.pflegekraftQualifikation
+      : (stamm?.qualifikation ?? [])
+  const geschlecht = input.pflegekraftGeschlecht ?? stamm?.geschlecht
+  const startZeit = input.startZeit ?? stamm?.standardStartzeit ?? 480
+  const verfuegbarBis = input.verfuegbarBis ?? stamm?.standardEndzeit
+  const maxEinsaetze = input.maxEinsaetze ?? stamm?.maxEinsaetze
+
   const d = await payload.create({
     collection: 'touren',
     data: {
       tenantId: input.tenantId,
       datum: input.datum,
       pflegekraftId: input.pflegekraftId,
-      pflegekraftQualifikation: input.pflegekraftQualifikation ?? [],
+      pflegekraftQualifikation: qualifikation,
       start: input.start,
-      startZeit: input.startZeit ?? 480,
+      startZeit,
       einsaetze: [],
+      // Nur setzen, wenn vorhanden (aus Eingabe oder Stammprofil).
+      ...(geschlecht ? { pflegekraftGeschlecht: geschlecht } : {}),
+      ...(typeof verfuegbarBis === 'number' ? { verfuegbarBis } : {}),
+      ...(typeof maxEinsaetze === 'number' ? { maxEinsaetze } : {}),
     },
     overrideAccess: true,
     depth: 0,

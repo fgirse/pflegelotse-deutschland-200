@@ -286,6 +286,7 @@
     "datum": "Datum",
     "pflegekraft": "Pflegekraft (Kennung/Name)",
     "pflegekraftPlatzhalter": "z. B. pk-001 oder Kürzel",
+    "stammUebernommen": "✓ Stammdaten dieser Pflegekraft übernommen (Geschlecht und Arbeitszeit inklusive) – unten anpassbar.",
     "qualifikation": "Qualifikationen (optional, kommagetrennt)",
     "qualifikationPlatzhalter": "z. B. grundpflege, behandlungspflege",
     "startZeit": "Startzeit (Abfahrt am Depot)",

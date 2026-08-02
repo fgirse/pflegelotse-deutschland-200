@@ -51,6 +51,25 @@ export async function ladeAllePflegekraftStamm(
   return map
 }
 
+// Einzelnes Stammprofil einer Pflegekraft (oder null). Wird von der Tour-Anlage
+// zur Vererbung und vom Formular zur Vorbelegung genutzt.
+export async function ladePflegekraftStamm(
+  tenantId: string,
+  pflegekraftId: string,
+): Promise<PflegekraftStammDaten | null> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'pflegekraft_stamm',
+    where: {
+      and: [{ tenantId: { equals: tenantId } }, { pflegekraftId: { equals: pflegekraftId } }],
+    },
+    limit: 1,
+    overrideAccess: true,
+  })
+  const d = res.docs[0] as StammDoc | undefined
+  return d ? normalisiere(d) : null
+}
+
 // Legt das Stammprofil an oder aktualisiert es (Upsert je tenantId+pflegekraftId).
 export async function speicherePflegekraftStamm(
   tenantId: string,

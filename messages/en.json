@@ -287,6 +287,7 @@
     "datum": "Date",
     "pflegekraft": "Carer (ID/name)",
     "pflegekraftPlatzhalter": "e.g. pk-001 or initials",
+    "stammUebernommen": "✓ Master data of this caregiver applied (gender and working hours included) – adjustable below.",
     "qualifikation": "Qualifications (optional, comma-separated)",
     "qualifikationPlatzhalter": "e.g. grundpflege, behandlungspflege",
     "startZeit": "Start time (departure from depot)",
