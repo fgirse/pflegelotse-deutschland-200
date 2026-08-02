@@ -5,13 +5,19 @@ import { z } from 'zod'
 // Sitzung des Admins. So kann niemand eine Pflegekraft in einen fremden
 // Mandanten legen (keine Rechte-Eskalation, konsistent zur Selbstregistrierung).
 
+// Über die Team-Verwaltung anlegbare Dienst-Rollen (kein Admin/Plattform).
+export const mitarbeiterRolleSchema = z.enum(['pflegekraft', 'disponent'])
+export type MitarbeiterRolle = z.infer<typeof mitarbeiterRolleSchema>
+
 export const mitarbeiterAnlegenSchema = z.object({
   email: z.string().email('Bitte eine gültige E-Mail angeben'),
-  // Initial-Passwort; die Pflegekraft meldet sich damit an und richtet beim
+  // Rolle: Pflegekraft (mobile Erfassung) oder Disponent (Tourenplanung).
+  rolle: mitarbeiterRolleSchema.default('pflegekraft'),
+  // Initial-Passwort; der Mitarbeiter meldet sich damit an und richtet beim
   // ersten Login die 2FA ein.
   password: z.string().min(8, 'Passwort: mindestens 8 Zeichen'),
-  // Kürzel/ID, über das die Touren dieser Pflegekraft zugeordnet werden. Ohne
-  // Kürzel sieht das Konto alle Touren des Dienstes (Disponenten-Fallback).
+  // Kürzel/ID, über das die Touren einer Pflegekraft zugeordnet werden. Ohne
+  // Kürzel sieht das Konto alle Touren des Dienstes (nur für Pflegekräfte relevant).
   pflegekraftId: z.string().trim().min(1).max(64).optional(),
 })
 export type MitarbeiterAnlegen = z.infer<typeof mitarbeiterAnlegenSchema>
@@ -20,6 +26,7 @@ export type MitarbeiterAnlegen = z.infer<typeof mitarbeiterAnlegenSchema>
 export interface MitarbeiterZeile {
   id: string
   email: string
+  rolle: MitarbeiterRolle
   pflegekraftId?: string
   totpEnabled: boolean
   deaktiviert: boolean

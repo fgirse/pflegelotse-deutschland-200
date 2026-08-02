@@ -11,10 +11,14 @@ function generierePasswort(laenge = 12): string {
   return out
 }
 
+// Über die Team-Verwaltung verwaltbare Dienst-Rollen (kein Admin/Plattform).
+const VERWALTBARE_ROLLEN = ['pflegekraft', 'disponent']
+
 // Bildet einen Payload-User auf die schlanke Team-Zeile ab (ohne Geheimnisse).
 function zuZeile(d: {
   id: string | number
   email?: string
+  role?: string | null
   pflegekraftId?: string | null
   totpEnabled?: boolean | null
   deaktiviert?: boolean | null
@@ -23,6 +27,7 @@ function zuZeile(d: {
   return {
     id: String(d.id),
     email: d.email ?? '',
+    rolle: d.role === 'disponent' ? 'disponent' : 'pflegekraft',
     pflegekraftId: d.pflegekraftId ?? undefined,
     totpEnabled: Boolean(d.totpEnabled),
     deaktiviert: Boolean(d.deaktiviert),
@@ -30,12 +35,14 @@ function zuZeile(d: {
   }
 }
 
-// Listet alle Pflegekräfte eines Mandanten (neueste zuerst).
+// Listet alle Mitarbeiter (Pflegekräfte + Disponenten) eines Mandanten.
 export async function listeMitarbeiter(tenantId: string): Promise<MitarbeiterZeile[]> {
   const payload = await payloadClient()
   const res = await payload.find({
     collection: 'users',
-    where: { and: [{ tenantId: { equals: tenantId } }, { role: { equals: 'pflegekraft' } }] },
+    where: {
+      and: [{ tenantId: { equals: tenantId } }, { role: { in: VERWALTBARE_ROLLEN } }],
+    },
     limit: 200,
     sort: '-createdAt',
     overrideAccess: true,
@@ -47,8 +54,9 @@ export type AnlegenErgebnis =
   | { status: 'ok'; mitarbeiter: MitarbeiterZeile }
   | { status: 'email_existiert' }
 
-// Legt eine Pflegekraft im Mandanten des Admins an. Rolle fest 'pflegekraft',
-// tenantId AUSSCHLIESSLICH aus der Admin-Sitzung (nie aus dem Client).
+// Legt einen Mitarbeiter (Pflegekraft oder Disponent) im Mandanten des Admins
+// an. Rolle auf verwaltbare Werte begrenzt (Schema), tenantId AUSSCHLIESSLICH
+// aus der Admin-Sitzung (nie aus dem Client).
 export async function erstelleMitarbeiter(
   tenantId: string,
   eingabe: MitarbeiterAnlegen,
@@ -70,28 +78,33 @@ export async function erstelleMitarbeiter(
     data: {
       email,
       password: eingabe.password,
-      role: 'pflegekraft',
+      role: eingabe.rolle,
       tenantId, // serverseitig aus der Admin-Sitzung
       // Initial-Passwort vom Admin → beim ersten Login zwingend wechseln.
       passwortWechselErforderlich: true,
-      ...(eingabe.pflegekraftId ? { pflegekraftId: eingabe.pflegekraftId } : {}),
+      // Kürzel nur bei Pflegekräften (Tour-Bindung); bei Disponenten ignoriert.
+      ...(eingabe.rolle === 'pflegekraft' && eingabe.pflegekraftId
+        ? { pflegekraftId: eingabe.pflegekraftId }
+        : {}),
     },
     overrideAccess: true,
   })
   return { status: 'ok', mitarbeiter: zuZeile(doc as Parameters<typeof zuZeile>[0]) }
 }
 
-// Lädt eine Pflegekraft NUR, wenn sie zum Mandanten des Admins gehört und
-// tatsächlich Rolle 'pflegekraft' hat. Verhindert Zugriff auf fremde Mandanten
-// oder andere Rollen (z. B. einen anderen Admin deaktivieren/löschen).
-async function ladeEigeneKraft(tenantId: string, id: string) {
+// Lädt einen Mitarbeiter NUR, wenn er zum Mandanten des Admins gehört und eine
+// verwaltbare Rolle (Pflegekraft/Disponent) hat. Verhindert Zugriff auf fremde
+// Mandanten oder andere Rollen (z. B. einen anderen Admin deaktivieren/löschen).
+async function ladeEigenenMitarbeiter(tenantId: string, id: string) {
   const payload = await payloadClient()
   const doc = (await payload
     .findByID({ collection: 'users', id, overrideAccess: true })
     .catch(() => null)) as
     | { id: string | number; role?: string; tenantId?: string }
     | null
-  if (!doc || doc.role !== 'pflegekraft' || doc.tenantId !== tenantId) return null
+  if (!doc || !doc.role || !VERWALTBARE_ROLLEN.includes(doc.role) || doc.tenantId !== tenantId) {
+    return null
+  }
   return doc
 }
 
@@ -101,7 +114,7 @@ export async function setzeMitarbeiterStatus(
   id: string,
   deaktiviert: boolean,
 ): Promise<MitarbeiterZeile | null> {
-  if (!(await ladeEigeneKraft(tenantId, id))) return null
+  if (!(await ladeEigenenMitarbeiter(tenantId, id))) return null
   const payload = await payloadClient()
   const doc = await payload.update({
     collection: 'users',
@@ -115,7 +128,7 @@ export async function setzeMitarbeiterStatus(
 // Löscht eine Pflegekraft endgültig. Die pseudonyme Historie (Säule 2, per
 // pflegekraftId als String referenziert) bleibt davon unberührt.
 export async function loescheMitarbeiter(tenantId: string, id: string): Promise<boolean> {
-  if (!(await ladeEigeneKraft(tenantId, id))) return false
+  if (!(await ladeEigenenMitarbeiter(tenantId, id))) return false
   const payload = await payloadClient()
   await payload.delete({ collection: 'users', id, overrideAccess: true })
   return true
@@ -128,7 +141,7 @@ export async function setzeInitialPasswort(
   tenantId: string,
   id: string,
 ): Promise<string | null> {
-  if (!(await ladeEigeneKraft(tenantId, id))) return null
+  if (!(await ladeEigenenMitarbeiter(tenantId, id))) return null
   const payload = await payloadClient()
   const tempPasswort = generierePasswort()
   await payload.update({
@@ -146,7 +159,7 @@ export async function resette2faMitarbeiter(
   tenantId: string,
   id: string,
 ): Promise<MitarbeiterZeile | null> {
-  if (!(await ladeEigeneKraft(tenantId, id))) return null
+  if (!(await ladeEigenenMitarbeiter(tenantId, id))) return null
   const payload = await payloadClient()
   const doc = await payload.update({
     collection: 'users',

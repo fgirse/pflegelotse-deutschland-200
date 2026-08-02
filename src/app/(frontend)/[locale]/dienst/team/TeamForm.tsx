@@ -3,14 +3,15 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { PasswortFeld } from '../../PasswortFeld'
-import type { MitarbeiterZeile } from '@/shared/mitarbeiter'
+import type { MitarbeiterRolle, MitarbeiterZeile } from '@/shared/mitarbeiter'
 
-// Anlege-Formular + Liste der Pflegekräfte. Die neu angelegte Kraft wird sofort
-// oben in die Liste übernommen (ohne Reload).
+// Anlege-Formular + Liste der Mitarbeiter (Pflegekräfte + Disponenten). Der neu
+// angelegte Mitarbeiter wird sofort oben in die Liste übernommen (ohne Reload).
 export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] }) {
   const t = useTranslations('team')
   const [liste, setListe] = useState<MitarbeiterZeile[]>(anfangsListe)
   const [email, setEmail] = useState('')
+  const [rolle, setRolle] = useState<MitarbeiterRolle>('pflegekraft')
   const [password, setPassword] = useState('')
   const [kuerzel, setKuerzel] = useState('')
   const [erfolg, setErfolg] = useState<string | null>(null)
@@ -32,8 +33,11 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
           email,
+          rolle,
           password,
-          ...(kuerzel.trim() ? { pflegekraftId: kuerzel.trim() } : {}),
+          ...(rolle === 'pflegekraft' && kuerzel.trim()
+            ? { pflegekraftId: kuerzel.trim() }
+            : {}),
         }),
       })
       if (res.status === 409) {
@@ -166,6 +170,27 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
         )}
         {fehler && <p className="mt-3 text-sm text-danger">⚠ {fehler}</p>}
         <div className="mt-4 flex flex-col gap-3">
+          {/* Rollenauswahl: Pflegekraft (mobile Erfassung) oder Disponent. */}
+          <div className="label">
+            {t('rolle')}
+            <div className="mt-1 flex gap-2" role="group" aria-label={t('rolle')}>
+              {(['pflegekraft', 'disponent'] as const).map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRolle(r)}
+                  aria-pressed={rolle === r}
+                  className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
+                    rolle === r
+                      ? 'border-[var(--color-accent)] bg-[var(--color-accent-soft)] text-[var(--color-accent)]'
+                      : 'border-[var(--color-line)] text-[var(--color-muted)] hover:bg-[var(--color-line)]'
+                  }`}
+                >
+                  {r === 'pflegekraft' ? t('rollePflegekraft') : t('rolleDisponent')}
+                </button>
+              ))}
+            </div>
+          </div>
           <label className="label">
             {t('email')}
             <input
@@ -186,11 +211,18 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
             />
             <span className="mt-1 text-xs text-[var(--color-faint)]">{t('passwortHinweis')}</span>
           </label>
-          <label className="label">
-            {t('kuerzel')}
-            <input className="input" value={kuerzel} onChange={(e) => setKuerzel(e.target.value)} />
-            <span className="mt-1 text-xs text-[var(--color-faint)]">{t('kuerzelHinweis')}</span>
-          </label>
+          {/* Kürzel nur für Pflegekräfte relevant (Tour-Bindung). */}
+          {rolle === 'pflegekraft' && (
+            <label className="label">
+              {t('kuerzel')}
+              <input
+                className="input"
+                value={kuerzel}
+                onChange={(e) => setKuerzel(e.target.value)}
+              />
+              <span className="mt-1 text-xs text-[var(--color-faint)]">{t('kuerzelHinweis')}</span>
+            </label>
+          )}
           <button onClick={anlegen} disabled={busy || !gueltig} className="btn btn-primary mt-1">
             {t('anlegen')}
           </button>
@@ -208,6 +240,7 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
               <thead>
                 <tr className="border-b border-[var(--color-line)] text-[var(--color-muted)]">
                   <th className="py-2 pr-4 font-medium">{t('spalteEmail')}</th>
+                  <th className="py-2 pr-4 font-medium">{t('spalteRolle')}</th>
                   <th className="py-2 pr-4 font-medium">{t('spalteKuerzel')}</th>
                   <th className="py-2 pr-4 font-medium">{t('spalte2fa')}</th>
                   <th className="py-2 pr-4 font-medium">{t('spalteStatus')}</th>
@@ -223,6 +256,9 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
                     }`}
                   >
                     <td className="py-2 pr-4">{m.email}</td>
+                    <td className="py-2 pr-4">
+                      {m.rolle === 'disponent' ? t('rolleDisponent') : t('rollePflegekraft')}
+                    </td>
                     <td className="py-2 pr-4">
                       {m.pflegekraftId ?? <span className="text-[var(--color-faint)]">—</span>}
                     </td>
