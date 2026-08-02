@@ -76,6 +76,7 @@ export interface Config {
     verordnungen: Verordnungen;
     abrechnungskonfiguration: Abrechnungskonfiguration;
     pflegekraft_stamm: PflegekraftStamm;
+    leistungskatalog: Leistungskatalog;
     gdpr_audit_log: GdprAuditLog;
     bedarfe: Bedarfe;
     angehoerige_identitaet: AngehoerigeIdentitaet;
@@ -99,6 +100,7 @@ export interface Config {
     verordnungen: VerordnungenSelect<false> | VerordnungenSelect<true>;
     abrechnungskonfiguration: AbrechnungskonfigurationSelect<false> | AbrechnungskonfigurationSelect<true>;
     pflegekraft_stamm: PflegekraftStammSelect<false> | PflegekraftStammSelect<true>;
+    leistungskatalog: LeistungskatalogSelect<false> | LeistungskatalogSelect<true>;
     gdpr_audit_log: GdprAuditLogSelect<false> | GdprAuditLogSelect<true>;
     bedarfe: BedarfeSelect<false> | BedarfeSelect<true>;
     angehoerige_identitaet: AngehoerigeIdentitaetSelect<false> | AngehoerigeIdentitaetSelect<true>;
@@ -506,6 +508,22 @@ export interface PflegekraftStamm {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leistungskatalog".
+ */
+export interface Leistungskatalog {
+  id: string;
+  tenantId: string;
+  code: string;
+  bezeichnung?: string | null;
+  qualifikation?: ('grundpflege' | 'behandlungspflege') | null;
+  dauerMin?: number | null;
+  grundzeitMin?: number | null;
+  aktiv?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "gdpr_audit_log".
  */
 export interface GdprAuditLog {
@@ -770,6 +788,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pflegekraft_stamm';
         value: string | PflegekraftStamm;
+      } | null)
+    | ({
+        relationTo: 'leistungskatalog';
+        value: string | Leistungskatalog;
       } | null)
     | ({
         relationTo: 'gdpr_audit_log';
@@ -1104,6 +1126,21 @@ export interface PflegekraftStammSelect<T extends boolean = true> {
   standardEndzeit?: T;
   maxEinsaetze?: T;
   wochentage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leistungskatalog_select".
+ */
+export interface LeistungskatalogSelect<T extends boolean = true> {
+  tenantId?: T;
+  code?: T;
+  bezeichnung?: T;
+  qualifikation?: T;
+  dauerMin?: T;
+  grundzeitMin?: T;
+  aktiv?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -115,6 +115,9 @@ export default async function DashboardPage({
           <Link href="/abrechnung" className="btn btn-outline">
             {t('abrechnungLink')}
           </Link>
+          <Link href="/dienst/leistungen" className="btn btn-outline">
+            {t('leistungenLink')}
+          </Link>
           {/* Team-Verwaltung nur für den Dienst-Inhaber (admin). */}
           {user.role === 'admin' && (
             <Link href="/dienst/team" className="btn btn-outline">
