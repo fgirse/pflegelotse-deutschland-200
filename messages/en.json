@@ -45,6 +45,12 @@
     "aktivieren": "Activate",
     "loeschen": "Delete",
     "loeschenBestaetigen": "Permanently delete caregiver {email}? This cannot be undone.",
+    "passwortReset": "Reset password",
+    "passwortResetBestaetigen": "Generate a new initial password for {email}? The old password becomes invalid.",
+    "passwortResetErfolg": "New initial password for {email}: {passwort} — please pass it on. The caregiver must change it on next login.",
+    "zfaReset": "Reset 2FA",
+    "zfaResetBestaetigen": "Reset 2FA for {email}? They will have to set up two-factor authentication again on next login.",
+    "zfaResetErfolg": "2FA reset for {email} — new setup on next login.",
     "erfolg": "Caregiver created: {email}",
     "fehlerEmailExists": "This email is already registered.",
     "fehlerAllgemein": "Creation failed. Please try again."

@@ -1,5 +1,15 @@
+import { randomBytes } from 'node:crypto'
 import { payloadClient } from '@/server/payloadClient'
 import type { MitarbeiterAnlegen, MitarbeiterZeile } from '@/shared/mitarbeiter'
+
+// Lesbares Zufallspasswort ohne verwechselbare Zeichen (kein l/1/I, o/0/O).
+const PW_CHARS = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+function generierePasswort(laenge = 12): string {
+  const bytes = randomBytes(laenge)
+  let out = ''
+  for (let i = 0; i < laenge; i++) out += PW_CHARS[bytes[i] % PW_CHARS.length]
+  return out
+}
 
 // Bildet einen Payload-User auf die schlanke Team-Zeile ab (ohne Geheimnisse).
 function zuZeile(d: {
@@ -109,4 +119,40 @@ export async function loescheMitarbeiter(tenantId: string, id: string): Promise<
   const payload = await payloadClient()
   await payload.delete({ collection: 'users', id, overrideAccess: true })
   return true
+}
+
+// Setzt ein neues Initial-Passwort (z. B. bei „vergessen") und erzwingt den
+// Wechsel beim nächsten Login. Gibt das Klartext-Passwort EINMALIG zurück,
+// damit der Admin es der Pflegekraft übergeben kann.
+export async function setzeInitialPasswort(
+  tenantId: string,
+  id: string,
+): Promise<string | null> {
+  if (!(await ladeEigeneKraft(tenantId, id))) return null
+  const payload = await payloadClient()
+  const tempPasswort = generierePasswort()
+  await payload.update({
+    collection: 'users',
+    id,
+    data: { password: tempPasswort, passwortWechselErforderlich: true },
+    overrideAccess: true,
+  })
+  return tempPasswort
+}
+
+// Setzt die 2FA zurück (verlorenes Gerät): Secret löschen, deaktivieren. Beim
+// nächsten Login läuft die Ersteinrichtung erneut.
+export async function resette2faMitarbeiter(
+  tenantId: string,
+  id: string,
+): Promise<MitarbeiterZeile | null> {
+  if (!(await ladeEigeneKraft(tenantId, id))) return null
+  const payload = await payloadClient()
+  const doc = await payload.update({
+    collection: 'users',
+    id,
+    data: { totpSecret: null, totpEnabled: false },
+    overrideAccess: true,
+  })
+  return zuZeile(doc as Parameters<typeof zuZeile>[0])
 }

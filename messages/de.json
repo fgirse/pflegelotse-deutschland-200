@@ -45,6 +45,12 @@
     "aktivieren": "Aktivieren",
     "loeschen": "Löschen",
     "loeschenBestaetigen": "Pflegekraft {email} endgültig löschen? Das lässt sich nicht rückgängig machen.",
+    "passwortReset": "Passwort zurücksetzen",
+    "passwortResetBestaetigen": "Neues Initial-Passwort für {email} erzeugen? Das alte Passwort wird ungültig.",
+    "passwortResetErfolg": "Neues Initial-Passwort für {email}: {passwort} — bitte weitergeben. Die Pflegekraft muss es beim nächsten Login ändern.",
+    "zfaReset": "2FA zurücksetzen",
+    "zfaResetBestaetigen": "2FA für {email} zurücksetzen? Sie muss die Zwei-Faktor-Authentisierung beim nächsten Login neu einrichten.",
+    "zfaResetErfolg": "2FA für {email} zurückgesetzt — neue Einrichtung beim nächsten Login.",
     "erfolg": "Pflegekraft angelegt: {email}",
     "fehlerEmailExists": "Diese E-Mail ist bereits registriert.",
     "fehlerAllgemein": "Anlegen fehlgeschlagen. Bitte erneut versuchen."

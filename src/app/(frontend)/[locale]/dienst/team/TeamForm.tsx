@@ -82,6 +82,59 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
     }
   }
 
+  // Passwort zurücksetzen: neues Initial-Passwort erzeugen (einmalig anzeigen).
+  async function passwortReset(m: MitarbeiterZeile) {
+    if (aktionBusy) return
+    if (!window.confirm(t('passwortResetBestaetigen', { email: m.email }))) return
+    setAktionBusy(m.id)
+    setErfolg(null)
+    setFehler(null)
+    try {
+      const res = await fetch(`/api/v1/team/mitarbeiter/${m.id}/reset`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ typ: 'passwort' }),
+      })
+      if (!res.ok) {
+        setFehler(t('fehlerAllgemein'))
+        return
+      }
+      const data = (await res.json()) as { tempPasswort: string }
+      setErfolg(t('passwortResetErfolg', { email: m.email, passwort: data.tempPasswort }))
+    } catch {
+      setFehler(t('fehlerAllgemein'))
+    } finally {
+      setAktionBusy(null)
+    }
+  }
+
+  // 2FA zurücksetzen (verlorenes Gerät): Faktor löschen → neue Einrichtung.
+  async function zfaReset(m: MitarbeiterZeile) {
+    if (aktionBusy) return
+    if (!window.confirm(t('zfaResetBestaetigen', { email: m.email }))) return
+    setAktionBusy(m.id)
+    setErfolg(null)
+    setFehler(null)
+    try {
+      const res = await fetch(`/api/v1/team/mitarbeiter/${m.id}/reset`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ typ: '2fa' }),
+      })
+      if (!res.ok) {
+        setFehler(t('fehlerAllgemein'))
+        return
+      }
+      const data = (await res.json()) as { mitarbeiter: MitarbeiterZeile }
+      setListe((l) => l.map((x) => (x.id === m.id ? data.mitarbeiter : x)))
+      setErfolg(t('zfaResetErfolg', { email: m.email }))
+    } catch {
+      setFehler(t('fehlerAllgemein'))
+    } finally {
+      setAktionBusy(null)
+    }
+  }
+
   // Endgültig löschen (mit Rückfrage).
   async function loeschen(m: MitarbeiterZeile) {
     if (aktionBusy) return
@@ -188,20 +241,36 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
                       )}
                     </td>
                     <td className="py-2">
-                      <div className="flex gap-3 whitespace-nowrap">
+                      <div className="flex flex-wrap gap-x-3 gap-y-1">
                         <button
                           type="button"
                           onClick={() => statusWechseln(m)}
                           disabled={aktionBusy === m.id}
-                          className="font-medium text-[var(--color-accent)] hover:underline disabled:opacity-50"
+                          className="whitespace-nowrap font-medium text-[var(--color-accent)] hover:underline disabled:opacity-50"
                         >
                           {m.deaktiviert ? t('aktivieren') : t('deaktivieren')}
                         </button>
                         <button
                           type="button"
+                          onClick={() => passwortReset(m)}
+                          disabled={aktionBusy === m.id}
+                          className="whitespace-nowrap font-medium text-[var(--color-accent)] hover:underline disabled:opacity-50"
+                        >
+                          {t('passwortReset')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => zfaReset(m)}
+                          disabled={aktionBusy === m.id}
+                          className="whitespace-nowrap font-medium text-[var(--color-accent)] hover:underline disabled:opacity-50"
+                        >
+                          {t('zfaReset')}
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => loeschen(m)}
                           disabled={aktionBusy === m.id}
-                          className="font-medium text-[var(--color-danger)] hover:underline disabled:opacity-50"
+                          className="whitespace-nowrap font-medium text-[var(--color-danger)] hover:underline disabled:opacity-50"
                         >
                           {t('loeschen')}
                         </button>
