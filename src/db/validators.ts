@@ -1,4 +1,4 @@
-import type { Db } from 'mongodb'
+import type { Db, Document } from 'mongodb'
 import { UUID_V4_PATTERN } from '@/lib/pseudonym'
 
 // Serverseitiger $jsonSchema-Validator für Säule 2 (klienten_operativ).
@@ -54,12 +54,32 @@ const bedarfValidator = piiValidator(
   ['offen', 'in_bearbeitung', 'vergeben', 'abgesagt'],
 )
 
+// Validator für pflegekraft_stamm: verknüpft über pflegekraftId (Kürzel, keine
+// UUID), daher eigene Variante. Gleiche PII-Blackbox — Personaldaten bleiben in
+// Säule 1; hier nur operatives Profil (Qualifikation/Zeiten).
+const nichtPii = { not: { bsonType: ['string', 'object', 'array', 'null'] } }
+const stammValidator = {
+  $jsonSchema: {
+    bsonType: 'object',
+    required: ['tenantId', 'pflegekraftId'],
+    properties: {
+      tenantId: { bsonType: 'string' },
+      pflegekraftId: { bsonType: 'string' },
+      vorname: nichtPii,
+      nachname: nichtPii,
+      email: nichtPii,
+      adresse: nichtPii,
+      telefon: nichtPii,
+    },
+  },
+}
+
 // Wendet einen Validator auf eine Collection an (createCollection oder
 // collMod). Idempotent.
 async function applyPiiValidator(
   db: Db,
   name: string,
-  validator: ReturnType<typeof piiValidator>,
+  validator: Document,
 ): Promise<void> {
   const existing = await db.listCollections({ name }).toArray()
   if (existing.length === 0) {
@@ -81,9 +101,14 @@ async function applyPiiValidator(
 // Legt die Validatoren an (oder aktualisiert sie) und stellt die Indizes sicher.
 // Idempotent — kann beliebig oft laufen.
 export async function applyValidators(db: Db): Promise<void> {
-  // PII-Sperre für beide pseudonymen Säule-2-Collections.
+  // PII-Sperre für die pseudonymen Säule-2-Collections.
   await applyPiiValidator(db, 'klienten_operativ', operativValidator)
   await applyPiiValidator(db, 'bedarfe', bedarfValidator)
+  await applyPiiValidator(db, 'pflegekraft_stamm', stammValidator)
+  // Ein Stammprofil je Pflegekraft und Mandant.
+  await db
+    .collection('pflegekraft_stamm')
+    .createIndex({ tenantId: 1, pflegekraftId: 1 }, { unique: true })
 
   // Indizes (/L500/): mandantengescopte Lookups + Geo-Abfragen.
   const operativ = db.collection('klienten_operativ')

@@ -4,12 +4,23 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { PasswortFeld } from '../../PasswortFeld'
 import type { MitarbeiterRolle, MitarbeiterZeile } from '@/shared/mitarbeiter'
+import type { PflegekraftStammDaten } from '@/shared/pflegekraftStamm'
+import { StammEditor } from './StammEditor'
 
 // Anlege-Formular + Liste der Mitarbeiter (Pflegekräfte + Disponenten). Der neu
 // angelegte Mitarbeiter wird sofort oben in die Liste übernommen (ohne Reload).
-export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] }) {
+export function TeamForm({
+  anfangsListe,
+  stammMap: stammMapInit,
+}: {
+  anfangsListe: MitarbeiterZeile[]
+  stammMap: Record<string, PflegekraftStammDaten>
+}) {
   const t = useTranslations('team')
   const [liste, setListe] = useState<MitarbeiterZeile[]>(anfangsListe)
+  // Stammdaten je pflegekraftId (Vorbelegung der Editoren) + gerade offener Editor.
+  const [stammMap, setStammMap] = useState(stammMapInit)
+  const [stammFuer, setStammFuer] = useState<MitarbeiterZeile | null>(null)
   const [email, setEmail] = useState('')
   const [rolle, setRolle] = useState<MitarbeiterRolle>('pflegekraft')
   const [password, setPassword] = useState('')
@@ -278,6 +289,17 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
                     </td>
                     <td className="py-2">
                       <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        {m.rolle === 'pflegekraft' && (
+                          <button
+                            type="button"
+                            onClick={() => setStammFuer(m)}
+                            disabled={!m.pflegekraftId}
+                            title={!m.pflegekraftId ? t('stammKuerzelNoetig') : undefined}
+                            className="whitespace-nowrap font-medium text-[var(--color-accent)] hover:underline disabled:opacity-50"
+                          >
+                            {t('stammBearbeiten')}
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => statusWechseln(m)}
@@ -319,6 +341,22 @@ export function TeamForm({ anfangsListe }: { anfangsListe: MitarbeiterZeile[] })
           </div>
         )}
       </section>
+
+      {/* Stammdaten-Editor (nur eine Pflegekraft gleichzeitig). key erzwingt
+          Neu-Vorbelegung beim Wechsel der Zeile. */}
+      {stammFuer && (
+        <StammEditor
+          key={stammFuer.id}
+          mitarbeiter={stammFuer}
+          initial={stammFuer.pflegekraftId ? stammMap[stammFuer.pflegekraftId] : undefined}
+          onSaved={(pflegekraftId, daten) => {
+            setStammMap((m) => ({ ...m, [pflegekraftId]: daten }))
+            setErfolg(t('stammErfolg', { email: stammFuer.email }))
+            setStammFuer(null)
+          }}
+          onClose={() => setStammFuer(null)}
+        />
+      )}
     </div>
   )
 }

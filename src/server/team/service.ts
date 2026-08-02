@@ -100,12 +100,24 @@ async function ladeEigenenMitarbeiter(tenantId: string, id: string) {
   const doc = (await payload
     .findByID({ collection: 'users', id, overrideAccess: true })
     .catch(() => null)) as
-    | { id: string | number; role?: string; tenantId?: string }
+    | { id: string | number; role?: string; tenantId?: string; pflegekraftId?: string }
     | null
   if (!doc || !doc.role || !VERWALTBARE_ROLLEN.includes(doc.role) || doc.tenantId !== tenantId) {
     return null
   }
   return doc
+}
+
+// Liefert das Kürzel (pflegekraftId) einer eigenen Pflegekraft — nur wenn der
+// Nutzer eine Pflegekraft im eigenen Mandanten ist UND ein Kürzel gesetzt hat.
+// Dient dem Stammdaten-Endpoint als sichere Auflösung id → pflegekraftId.
+export async function ladeEigenePflegekraftId(
+  tenantId: string,
+  id: string,
+): Promise<string | null> {
+  const doc = await ladeEigenenMitarbeiter(tenantId, id)
+  if (!doc || doc.role !== 'pflegekraft' || !doc.pflegekraftId) return null
+  return doc.pflegekraftId
 }
 
 // Deaktiviert/aktiviert eine Pflegekraft (Offboarding, reversibel).

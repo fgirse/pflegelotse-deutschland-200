@@ -15,6 +15,7 @@ import { Stammtouren } from '@/collections/Stammtouren'
 import { Leistungsnachweise } from '@/collections/Leistungsnachweise'
 import { Verordnungen } from '@/collections/Verordnungen'
 import { Abrechnungskonfiguration } from '@/collections/Abrechnungskonfiguration'
+import { PflegekraftStamm } from '@/collections/PflegekraftStamm'
 import { GdprAuditLog } from '@/collections/GdprAuditLog'
 import { Bedarfe } from '@/collections/Bedarfe'
 import { AngehoerigeIdentitaet } from '@/collections/AngehoerigeIdentitaet'
@@ -37,6 +38,7 @@ export default buildConfig({
     Leistungsnachweise,
     Verordnungen,
     Abrechnungskonfiguration,
+    PflegekraftStamm,
     GdprAuditLog,
     Bedarfe,
     AngehoerigeIdentitaet,

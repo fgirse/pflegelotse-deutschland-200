@@ -75,6 +75,7 @@ export interface Config {
     leistungsnachweise: Leistungsnachweise;
     verordnungen: Verordnungen;
     abrechnungskonfiguration: Abrechnungskonfiguration;
+    pflegekraft_stamm: PflegekraftStamm;
     gdpr_audit_log: GdprAuditLog;
     bedarfe: Bedarfe;
     angehoerige_identitaet: AngehoerigeIdentitaet;
@@ -97,6 +98,7 @@ export interface Config {
     leistungsnachweise: LeistungsnachweiseSelect<false> | LeistungsnachweiseSelect<true>;
     verordnungen: VerordnungenSelect<false> | VerordnungenSelect<true>;
     abrechnungskonfiguration: AbrechnungskonfigurationSelect<false> | AbrechnungskonfigurationSelect<true>;
+    pflegekraft_stamm: PflegekraftStammSelect<false> | PflegekraftStammSelect<true>;
     gdpr_audit_log: GdprAuditLogSelect<false> | GdprAuditLogSelect<true>;
     bedarfe: BedarfeSelect<false> | BedarfeSelect<true>;
     angehoerige_identitaet: AngehoerigeIdentitaetSelect<false> | AngehoerigeIdentitaetSelect<true>;
@@ -471,6 +473,39 @@ export interface Abrechnungskonfiguration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pflegekraft_stamm".
+ */
+export interface PflegekraftStamm {
+  id: string;
+  tenantId: string;
+  pflegekraftId: string;
+  qualifikation?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  geschlecht?: ('m' | 'w' | 'd') | null;
+  standardStartzeit?: number | null;
+  standardEndzeit?: number | null;
+  maxEinsaetze?: number | null;
+  wochentage?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "gdpr_audit_log".
  */
 export interface GdprAuditLog {
@@ -731,6 +766,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'abrechnungskonfiguration';
         value: string | Abrechnungskonfiguration;
+      } | null)
+    | ({
+        relationTo: 'pflegekraft_stamm';
+        value: string | PflegekraftStamm;
       } | null)
     | ({
         relationTo: 'gdpr_audit_log';
@@ -1049,6 +1088,22 @@ export interface AbrechnungskonfigurationSelect<T extends boolean = true> {
   sachkontenlaenge?: T;
   erloesKonto?: T;
   debitorKonto?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pflegekraft_stamm_select".
+ */
+export interface PflegekraftStammSelect<T extends boolean = true> {
+  tenantId?: T;
+  pflegekraftId?: T;
+  qualifikation?: T;
+  geschlecht?: T;
+  standardStartzeit?: T;
+  standardEndzeit?: T;
+  maxEinsaetze?: T;
+  wochentage?: T;
   updatedAt?: T;
   createdAt?: T;
 }
