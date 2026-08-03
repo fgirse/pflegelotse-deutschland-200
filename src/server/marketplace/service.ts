@@ -6,6 +6,7 @@ import { berechneDeadline } from '@/server/sla/deadline'
 import { getNotifier } from '@/server/notify/Notifier'
 import { erfasseVermittlungsgebuehr } from '@/server/billing/service'
 import { ladeAlleTouren, ladeTour, speichereEinsaetze } from '@/server/repo'
+import { ladeKatalogMap, standardzeitenAusKatalog } from '@/server/leistungen/service'
 import { minToHHMM } from '@/shared/time'
 import { haversineKm } from '@/shared/orte'
 import { EINWILLIGUNG_VERSION } from '@/shared/consent'
@@ -295,6 +296,11 @@ export async function uebernehmeBedarfAlsKlient(
   const kontakt = await holeKontaktIntern(bedarfId)
   const pseudonymId = neuePseudonymId()
 
+  // Leistungskatalog-Konsum: fehlende Dauer/Qualifikation aus den LK-Codes des
+  // Bedarfs ableiten. Werte des Bedarfs haben Vorrang.
+  const katalogMap = await ladeKatalogMap(tenantId)
+  const abgeleitet = standardzeitenAusKatalog(bedarf.leistungen ?? [], katalogMap)
+
   // Säule 2: operativer Klient (pseudonym).
   await payload.create({
     collection: 'klienten_operativ',
@@ -304,9 +310,12 @@ export async function uebernehmeBedarfAlsKlient(
       geo: bedarf.geo,
       pflegegrad: bedarf.pflegegrad,
       leistungen: bedarf.leistungen,
-      qualifikation: bedarf.qualifikation,
+      qualifikation:
+        bedarf.qualifikation && bedarf.qualifikation.length > 0
+          ? bedarf.qualifikation
+          : abgeleitet.qualifikation,
       zeitfenster: bedarf.zeitfenster,
-      dauerMin: bedarf.dauerMin,
+      dauerMin: bedarf.dauerMin ?? abgeleitet.dauerMin ?? 30,
       // Kostenträger aus dem gewonnenen Bedarf mitführen (Abrechnung).
       kostentraegerArt: bedarf.kostentraegerArt,
       krankenversicherer: bedarf.krankenversicherer,

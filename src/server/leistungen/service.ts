@@ -148,6 +148,75 @@ export async function speichereLeistung(
   }
 }
 
+// ── Konsum: Standardzeiten aus dem Katalog ableiten ───────────────────────
+
+export interface KatalogZeit {
+  dauerMin?: number
+  grundzeitMin?: number
+  qualifikation?: 'grundpflege' | 'behandlungspflege'
+}
+
+// Katalog als Map code → Zeiten/Qualifikation (nur aktive Einträge). Anders als
+// ladeKatalog befüllt dieser Lookup NICHT vor — fehlt der Katalog, wird nichts
+// abgeleitet (die Anlage nutzt dann ihre eigenen Werte).
+export async function ladeKatalogMap(tenantId: string): Promise<Map<string, KatalogZeit>> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'leistungskatalog',
+    where: { and: [{ tenantId: { equals: tenantId } }, { aktiv: { not_equals: false } }] },
+    limit: 500,
+    overrideAccess: true,
+  })
+  const map = new Map<string, KatalogZeit>()
+  for (const d of res.docs as KatalogDoc[]) {
+    if (!d.code) continue
+    map.set(d.code, {
+      dauerMin: typeof d.dauerMin === 'number' ? d.dauerMin : undefined,
+      grundzeitMin: typeof d.grundzeitMin === 'number' ? d.grundzeitMin : undefined,
+      qualifikation: d.qualifikation ?? undefined,
+    })
+  }
+  return map
+}
+
+export interface AbgeleiteteZeiten {
+  dauerMin?: number // Summe der Leistungszeiten
+  grundzeitMin?: number // Grundzeit des Besuchs (einmal) = Maximum der Codes
+  qualifikation: string[] // Vereinigung der geforderten Qualifikationen
+}
+
+// Reine Ableitung: aus einer Menge LK-Codes + Katalog die Standardwerte. dauerMin
+// summiert (je Leistung), grundzeitMin als Maximum (Grundzeit fällt je Besuch
+// einmal an), qualifikation als Vereinigung. Unbekannte Codes werden ignoriert.
+export function standardzeitenAusKatalog(
+  codes: string[],
+  katalog: Map<string, KatalogZeit>,
+): AbgeleiteteZeiten {
+  let dauer = 0
+  let hatDauer = false
+  let grund = 0
+  let hatGrund = false
+  const quali = new Set<string>()
+  for (const code of codes) {
+    const e = katalog.get(code)
+    if (!e) continue
+    if (typeof e.dauerMin === 'number') {
+      dauer += e.dauerMin
+      hatDauer = true
+    }
+    if (typeof e.grundzeitMin === 'number') {
+      grund = Math.max(grund, e.grundzeitMin)
+      hatGrund = true
+    }
+    if (e.qualifikation) quali.add(e.qualifikation)
+  }
+  return {
+    dauerMin: hatDauer ? dauer : undefined,
+    grundzeitMin: hatGrund ? grund : undefined,
+    qualifikation: [...quali],
+  }
+}
+
 // Löscht einen Katalog-Eintrag (der Preis in der Abrechnungskonfiguration bleibt).
 export async function loescheLeistung(tenantId: string, code: string): Promise<boolean> {
   const payload = await payloadClient()

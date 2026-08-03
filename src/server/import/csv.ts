@@ -3,6 +3,7 @@ import { neuePseudonymId } from '@/lib/pseudonym'
 import { identityHash } from '@/lib/audit'
 import { geocode } from '@/server/geo/service'
 import { hhmmToMin } from '@/shared/time'
+import { ladeKatalogMap, standardzeitenAusKatalog } from '@/server/leistungen/service'
 
 // Reiner Parser ist in ./parse ausgelagert (eigenständig testbar, ohne DB).
 export { parseCsv } from './parse'
@@ -65,6 +66,10 @@ export async function importiereKlienten(
 ): Promise<ImportErgebnis> {
   const payload = await payloadClient()
   const fehler: ImportFehler[] = []
+
+  // Leistungskatalog einmal laden — daraus leiten wir Standard-Dauer und
+  // Qualifikation je Klient ab, wenn die CSV sie nicht selbst liefert.
+  const katalogMap = await ladeKatalogMap(tenantId)
 
   // Innerhalb eines Blocks nach external_id deduplizieren (last wins) — sonst
   // könnten zwei parallele Zeilen mit gleicher Kennung ein Duplikat erzeugen.
@@ -132,15 +137,21 @@ export async function importiereKlienten(
     }
 
     // ── Säule 2: operative Daten (niemals PII) ──
+    // Leistungskatalog-Konsum: fehlende Dauer/Qualifikation aus den LK-Codes
+    // ableiten. Explizite CSV-Werte haben immer Vorrang.
+    const leistungen = splitListe(row.leistungen)
+    const csvQualifikation = splitListe(row.qualifikation)
+    const csvDauer = zeitZuMin(row.dauer)
+    const abgeleitet = standardzeitenAusKatalog(leistungen, katalogMap)
     const operativDaten = {
       pseudonymId,
       tenantId,
       geo: { lat, lng },
       pflegegrad: row.pflegegrad ? Number(row.pflegegrad) : undefined,
-      leistungen: splitListe(row.leistungen),
-      qualifikation: splitListe(row.qualifikation),
+      leistungen,
+      qualifikation: csvQualifikation.length > 0 ? csvQualifikation : abgeleitet.qualifikation,
       zeitfenster: { von: zeitZuMin(row.zeitfenster_von) ?? 480, bis: zeitZuMin(row.zeitfenster_bis) ?? 1080 },
-      dauerMin: zeitZuMin(row.dauer) ?? 30,
+      dauerMin: csvDauer ?? abgeleitet.dauerMin ?? 30,
       status: 'aktiv' as const,
     }
     const opTreffer = await payload.find({
