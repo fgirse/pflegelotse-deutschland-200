@@ -32,6 +32,24 @@
     "erfolg": "Leistung {code} gespeichert.",
     "fehlerAllgemein": "Speichern fehlgeschlagen. Bitte erneut versuchen."
   },
+  "karte": {
+    "stopp": "Stopp",
+    "name": "Name",
+    "adresse": "Adresse",
+    "telefon": "Telefon",
+    "ankunft": "Geplante Ankunft",
+    "zeitfenster": "Zeitfenster",
+    "dauer": "Dauer",
+    "grundzeit": "Grundzeit",
+    "qualifikation": "Qualifikation",
+    "status": "Status",
+    "erledigt": "erledigt",
+    "probe": "Probe",
+    "offen": "offen",
+    "laedt": "lädt …",
+    "keineIdent": "Keine Identität hinterlegt",
+    "min": "Min."
+  },
   "konto": {
     "title": "Konto",
     "subtitle": "Ändere hier dein Passwort.",

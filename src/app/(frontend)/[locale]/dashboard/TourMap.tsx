@@ -1,8 +1,10 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { Tour } from '@/shared/domain'
+import { minToHHMM } from '@/shared/time'
+import type { Einsatz, Tour } from '@/shared/domain'
 
 interface Props {
   tours: Tour[]
@@ -10,12 +12,47 @@ interface Props {
   selected: { geo: { lat: number; lng: number } } | null
 }
 
+interface Identitaet {
+  vorname: string
+  nachname: string
+  adresse: string
+  telefon?: string
+}
+
+// HTML-Escape für Nutzerdaten (Name/Adresse) im Popup-HTML.
+function esc(v: string): string {
+  return v.replace(/[&<>"']/g, (c) =>
+    c === '&' ? '&amp;' : c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '"' ? '&quot;' : '&#39;',
+  )
+}
+
 // Tourenkarte auf Basis von MapLibre GL mit freiem OSM-Raster-Hintergrund
 // (kein API-Key nötig). maplibre-gl wird erst im Browser geladen, weil es
-// window/document referenziert. Die Karte ist eine visuelle Hilfe — die
-// gleichwertige Tabellenalternative steht im Umschalter daneben (/Q400/).
+// window/document referenziert. Klick auf einen Stopp öffnet ein Popup mit den
+// wichtigsten Daten; Name/Adresse (Säule 1) werden autorisiert nachgeladen.
 export function TourMap({ tours, selected }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const t = useTranslations('karte')
+  // Labels in einem Ref halten, damit der Karten-Effekt nicht bei jedem Render neu läuft.
+  const labelsRef = useRef<Record<string, string>>({})
+  labelsRef.current = {
+    stopp: t('stopp'),
+    name: t('name'),
+    adresse: t('adresse'),
+    telefon: t('telefon'),
+    ankunft: t('ankunft'),
+    zeitfenster: t('zeitfenster'),
+    dauer: t('dauer'),
+    grundzeit: t('grundzeit'),
+    qualifikation: t('qualifikation'),
+    status: t('status'),
+    erledigt: t('erledigt'),
+    probe: t('probe'),
+    offen: t('offen'),
+    laedt: t('laedt'),
+    keineIdent: t('keineIdent'),
+    min: t('min'),
+  }
 
   useEffect(() => {
     let map: import('maplibre-gl').Map | undefined
@@ -25,7 +62,6 @@ export function TourMap({ tours, selected }: Props) {
       const maplibregl = (await import('maplibre-gl')).default
       if (abgebrochen || !containerRef.current) return
 
-      // Mittelpunkt: erster Einsatz oder Freiburg-Zentrum.
       const center = tours[0]?.einsaetze[0]?.geo ?? { lat: 47.995, lng: 7.85 }
 
       map = new maplibregl.Map({
@@ -48,18 +84,58 @@ export function TourMap({ tours, selected }: Props) {
 
       map.addControl(new maplibregl.NavigationControl({}), 'top-right')
 
-      // Einsätze je Tour als nummerierte Marker.
+      // Ein wiederverwendetes Popup für alle Stopps.
+      const popup = new maplibregl.Popup({ offset: 16, closeButton: true, maxWidth: '260px' })
+
+      // Baut den Popup-Inhalt: erst die operativen Stoppdaten, Identität optional.
+      const baueHtml = (e: Einsatz, i: number, ident: Identitaet | null, laedt: boolean) => {
+        const L = labelsRef.current
+        const zeile = (label: string, wert?: string | null) =>
+          wert ? `<div><span style="color:#78716c">${label}:</span> ${esc(wert)}</div>` : ''
+        const kopf = laedt
+          ? `<div style="color:#78716c">${L.name}: ${L.laedt}</div>`
+          : ident
+            ? zeile(L.name, `${ident.vorname} ${ident.nachname}`.trim()) +
+              zeile(L.adresse, ident.adresse) +
+              zeile(L.telefon, ident.telefon)
+            : `<div style="color:#78716c">${L.keineIdent}</div>`
+        const status = e.erledigt ? L.erledigt : e.probe ? L.probe : L.offen
+        const dauer = `${e.dauerMin} ${L.min}${e.grundzeitMin ? ` (+${e.grundzeitMin} ${L.grundzeit})` : ''}`
+        return (
+          `<div style="font:13px/1.4 system-ui,sans-serif;min-width:190px">` +
+          `<div style="font-weight:700;margin-bottom:4px">${L.stopp} ${i + 1}</div>` +
+          kopf +
+          `<hr style="border:none;border-top:1px solid #e7e5e4;margin:6px 0"/>` +
+          zeile(L.ankunft, e.ankunft != null ? minToHHMM(e.ankunft) : null) +
+          zeile(L.zeitfenster, `${minToHHMM(e.zeitfenster.von)}–${minToHHMM(e.zeitfenster.bis)}`) +
+          zeile(L.dauer, dauer) +
+          zeile(L.qualifikation, e.qualifikation.join(', ') || undefined) +
+          zeile(L.status, status) +
+          `</div>`
+        )
+      }
+
+      // Einsätze je Tour als nummerierte, klickbare Marker.
       tours.forEach((tour) => {
         tour.einsaetze.forEach((e, i) => {
           const el = document.createElement('div')
           el.textContent = String(i + 1)
           el.setAttribute('aria-hidden', 'true')
-          // Tour-Marker in Tinte (Designsystem), nummeriert.
           el.style.cssText =
-            'background:#1c1917;color:#fff;border-radius:9999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff'
-          new maplibregl.Marker({ element: el })
-            .setLngLat([e.geo.lng, e.geo.lat])
-            .addTo(map!)
+            'background:#1c1917;color:#fff;border-radius:9999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff;cursor:pointer'
+          el.addEventListener('click', async (ev) => {
+            ev.stopPropagation()
+            if (!map) return
+            popup.setLngLat([e.geo.lng, e.geo.lat]).setHTML(baueHtml(e, i, null, true)).addTo(map)
+            try {
+              const res = await fetch(`/api/v1/klienten/${e.pseudonymId}/identitaet`)
+              const ident = res.ok ? ((await res.json()).identitaet as Identitaet) : null
+              popup.setHTML(baueHtml(e, i, ident, false))
+            } catch {
+              popup.setHTML(baueHtml(e, i, null, false))
+            }
+          })
+          new maplibregl.Marker({ element: el }).setLngLat([e.geo.lng, e.geo.lat]).addTo(map!)
         })
       })
 

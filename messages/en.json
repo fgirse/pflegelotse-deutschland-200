@@ -32,6 +32,24 @@
     "erfolg": "Service {code} saved.",
     "fehlerAllgemein": "Save failed. Please try again."
   },
+  "karte": {
+    "stopp": "Stop",
+    "name": "Name",
+    "adresse": "Address",
+    "telefon": "Phone",
+    "ankunft": "Planned arrival",
+    "zeitfenster": "Time window",
+    "dauer": "Duration",
+    "grundzeit": "base time",
+    "qualifikation": "Qualification",
+    "status": "Status",
+    "erledigt": "done",
+    "probe": "Trial",
+    "offen": "open",
+    "laedt": "loading …",
+    "keineIdent": "No identity on file",
+    "min": "min"
+  },
   "konto": {
     "title": "Account",
     "subtitle": "Change your password here.",
