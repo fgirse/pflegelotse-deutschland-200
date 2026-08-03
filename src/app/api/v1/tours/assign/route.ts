@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 import { geoSchema, zeitfensterSchema, pseudonymIdSchema, type Einsatz } from '@/shared/domain'
-import { ladeTour, speichereEinsaetze } from '@/server/repo'
+import { ladeTour, speichereEinsaetze, ladeLeistungenFuer } from '@/server/repo'
 import { planeTour } from '@/server/matching/service'
+import { ladeKatalogMap, standardzeitenAusKatalog } from '@/server/leistungen/service'
 import { requireAuth } from '@/server/auth/guard'
 
 const bodySchema = z.object({
@@ -41,13 +42,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Keine Berechtigung' }, { status: 403 })
   }
 
+  // Grundzeit ableiten, wenn keine mitgegeben wurde: aus den Leistungen des
+  // Klienten/Bedarfs über den Leistungskatalog (der Klient trägt selbst keine
+  // Grundzeit). Ein explizit übergebener Wert hat Vorrang.
+  let grundzeitMin = kandidat.grundzeitMin
+  if (grundzeitMin === undefined) {
+    const herkunft = await ladeLeistungenFuer(tour.tenantId, kandidat.pseudonymId)
+    const katalog = await ladeKatalogMap(tour.tenantId)
+    grundzeitMin =
+      herkunft.grundzeitMin ?? standardzeitenAusKatalog(herkunft.leistungen, katalog).grundzeitMin
+  }
+
   // Neuen Einsatz an Position einfügen.
   const neuerEinsatz: Einsatz = {
     pseudonymId: kandidat.pseudonymId,
     geo: kandidat.geo,
     zeitfenster: kandidat.zeitfenster,
     dauerMin: kandidat.dauerMin,
-    grundzeitMin: kandidat.grundzeitMin,
+    grundzeitMin,
     qualifikation: kandidat.qualifikation,
     probe: probe ?? false,
   }

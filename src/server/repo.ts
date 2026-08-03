@@ -120,6 +120,43 @@ export async function ladeKlientenOperativ(
   return res.docs.map((d) => klientOperativSchema.parse(normKlient(d)))
 }
 
+// Liefert die Leistungscodes (und eine ggf. vorhandene Grundzeit) zu einer
+// pseudonymId — erst als operativer Klient (kein Grundzeit-Feld), sonst als
+// Bedarf (trägt grundzeitMin). Für die Grundzeit-Ableitung am Einsatz.
+export async function ladeLeistungenFuer(
+  tenantId: string,
+  pseudonymId: string,
+): Promise<{ leistungen: string[]; grundzeitMin?: number }> {
+  const payload = await payloadClient()
+  const arr = (v: unknown) => (Array.isArray(v) ? (v as string[]) : [])
+
+  const klient = await payload.find({
+    collection: 'klienten_operativ',
+    where: { and: [{ tenantId: { equals: tenantId } }, { pseudonymId: { equals: pseudonymId } }] },
+    limit: 1,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const kd = klient.docs[0] as { leistungen?: unknown } | undefined
+  if (kd) return { leistungen: arr(kd.leistungen) }
+
+  const bedarf = await payload.find({
+    collection: 'bedarfe',
+    where: { pseudonymId: { equals: pseudonymId } },
+    limit: 1,
+    overrideAccess: true,
+    depth: 0,
+  })
+  const bd = bedarf.docs[0] as { leistungen?: unknown; grundzeitMin?: number } | undefined
+  if (bd) {
+    return {
+      leistungen: arr(bd.leistungen),
+      grundzeitMin: typeof bd.grundzeitMin === 'number' ? bd.grundzeitMin : undefined,
+    }
+  }
+  return { leistungen: [] }
+}
+
 // ── Stammtouren / Wochenplanung (§5.2.2) ──────────────────────────────────
 
 // Liest die Stammtouren eines Mandanten.
@@ -445,6 +482,8 @@ function normTour(d: any): unknown {
       geo: e.geo,
       zeitfenster: e.zeitfenster,
       dauerMin: e.dauerMin ?? 30,
+      // Grundzeit je Besuch mitführen — sonst ginge sie bei jedem Lesen verloren.
+      grundzeitMin: typeof e.grundzeitMin === 'number' ? e.grundzeitMin : undefined,
       qualifikation: arr(e.qualifikation),
       ankunft: e.ankunft,
       probe: Boolean(e.probe),
