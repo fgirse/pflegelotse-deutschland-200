@@ -66,6 +66,14 @@ describe('Wochenplan — Generierung', () => {
     }
   })
 
+  it('überspringt Tage, an denen die Pflegekraft abwesend ist', () => {
+    // Abwesend am Mittwoch (2024-01-03) → nur Mo und Fr bleiben übrig.
+    const istAbwesend = (pflegekraftId: string, datum: string) =>
+      pflegekraftId === 'pk-001' && datum >= '2024-01-03' && datum <= '2024-01-03'
+    const entwuerfe = generiereWoche([stammtour()], '2024-01-01', istAbwesend)
+    expect(entwuerfe.map((e) => e.datum)).toEqual(['2024-01-01', '2024-01-05'])
+  })
+
   it('berücksichtigt die eigene Frequenz je Stammeinsatz', () => {
     // Einsatz 1 an Mo/Mi/Fr, Einsatz 2 nur montags.
     const st = stammtour({ einsaetze: [einsatz(1), einsatz(2, [1])] })

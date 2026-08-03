@@ -320,6 +320,7 @@
     "planen": "Plan week",
     "plant": "Planning …",
     "ergebnis": "{erzeugt} tours created, {uebersprungen} already existed.",
+    "ergebnisAbwesend": "{n} skipped due to absence.",
     "fehler": "Planning failed. Please try again."
   },
   "tourNeu": {

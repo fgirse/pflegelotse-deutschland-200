@@ -45,7 +45,13 @@ export function wocheDaten(montagISO: string): string[] {
 // Stammtour, deren wochentage-Set den Tag enthält (und die im Gültigkeitsraum
 // liegt), entsteht eine Tour mit den an dem Tag fälligen Einsätzen. Leere
 // Touren (kein Einsatz an dem Tag) werden nicht erzeugt.
-export function generiereWoche(stammtouren: Stammtour[], montagISO: string): TourEntwurf[] {
+export function generiereWoche(
+  stammtouren: Stammtour[],
+  montagISO: string,
+  // Optionales Prädikat: ist die Pflegekraft an dem Tag abwesend (Urlaub/
+  // Krankheit)? Dann wird für sie an dem Tag keine Tour erzeugt.
+  istAbwesend?: (pflegekraftId: string, datum: string) => boolean,
+): TourEntwurf[] {
   const entwuerfe: TourEntwurf[] = []
   for (const datum of wocheDaten(montagISO)) {
     const wd = isoWochentag(datum)
@@ -53,6 +59,7 @@ export function generiereWoche(stammtouren: Stammtour[], montagISO: string): Tou
       if (!st.wochentage.includes(wd)) continue
       if (st.aktivAb && datum < st.aktivAb) continue
       if (st.aktivBis && datum > st.aktivBis) continue
+      if (istAbwesend?.(st.pflegekraftId, datum)) continue
 
       // Einsätze, die an diesem Wochentag fällig sind (eigenes Set oder das der Tour).
       const einsaetze = st.einsaetze

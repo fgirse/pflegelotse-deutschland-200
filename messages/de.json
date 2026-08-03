@@ -319,6 +319,7 @@
     "planen": "Woche planen",
     "plant": "Plane …",
     "ergebnis": "{erzeugt} Touren erzeugt, {uebersprungen} bereits vorhanden.",
+    "ergebnisAbwesend": "{n} wegen Abwesenheit übersprungen.",
     "fehler": "Planung fehlgeschlagen. Bitte erneut versuchen."
   },
   "tourNeu": {

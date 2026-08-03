@@ -56,6 +56,31 @@ export async function erstelleAbwesenheit(
   return zuZeile(doc as AbwDoc)
 }
 
+// Baut ein Prädikat istAbwesend(pflegekraftId, datum) aus allen Abwesenheiten
+// des Mandanten — für die Wochenplanung (überspringt abwesende Tage). Datums-
+// vergleich lexikografisch (YYYY-MM-DD).
+export async function ladeAbwesenheitPredikat(
+  tenantId: string,
+): Promise<(pflegekraftId: string, datum: string) => boolean> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'abwesenheiten',
+    where: { tenantId: { equals: tenantId } },
+    limit: 2000,
+    overrideAccess: true,
+  })
+  const map = new Map<string, { von: string; bis: string }[]>()
+  for (const d of res.docs as AbwDoc[]) {
+    const pid = (d as { pflegekraftId?: string }).pflegekraftId
+    if (!pid || !d.von || !d.bis) continue
+    const arr = map.get(pid) ?? []
+    arr.push({ von: d.von, bis: d.bis })
+    map.set(pid, arr)
+  }
+  return (pflegekraftId, datum) =>
+    (map.get(pflegekraftId) ?? []).some((r) => r.von <= datum && datum <= r.bis)
+}
+
 // Löscht eine Abwesenheit — nur wenn sie zum Mandanten UND zur Pflegekraft gehört.
 export async function loescheAbwesenheit(
   tenantId: string,

@@ -35,7 +35,13 @@ export function WochenplanButton() {
         return
       }
       const d = await res.json()
-      setInfo(t('ergebnis', { erzeugt: d.erzeugt, uebersprungen: d.uebersprungen }))
+      const basis = t('ergebnis', { erzeugt: d.erzeugt, uebersprungen: d.uebersprungen })
+      // Zusatzhinweis, wenn Tage wegen Abwesenheit (Urlaub/Krankheit) entfielen.
+      setInfo(
+        d.wegenAbwesenheit > 0
+          ? `${basis} ${t('ergebnisAbwesend', { n: d.wegenAbwesenheit })}`
+          : basis,
+      )
       router.refresh()
     } catch {
       setInfo(t('fehler'))
