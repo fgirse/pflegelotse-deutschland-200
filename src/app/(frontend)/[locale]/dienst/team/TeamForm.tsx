@@ -6,6 +6,7 @@ import { PasswortFeld } from '../../PasswortFeld'
 import type { MitarbeiterRolle, MitarbeiterZeile } from '@/shared/mitarbeiter'
 import type { PflegekraftStammDaten } from '@/shared/pflegekraftStamm'
 import { StammEditor } from './StammEditor'
+import { AbwesenheitEditor } from './AbwesenheitEditor'
 
 // Anlege-Formular + Liste der Mitarbeiter (Pflegekräfte + Disponenten). Der neu
 // angelegte Mitarbeiter wird sofort oben in die Liste übernommen (ohne Reload).
@@ -21,6 +22,7 @@ export function TeamForm({
   // Stammdaten je pflegekraftId (Vorbelegung der Editoren) + gerade offener Editor.
   const [stammMap, setStammMap] = useState(stammMapInit)
   const [stammFuer, setStammFuer] = useState<MitarbeiterZeile | null>(null)
+  const [abwFuer, setAbwFuer] = useState<MitarbeiterZeile | null>(null)
   const [email, setEmail] = useState('')
   const [rolle, setRolle] = useState<MitarbeiterRolle>('pflegekraft')
   const [password, setPassword] = useState('')
@@ -292,12 +294,29 @@ export function TeamForm({
                         {m.rolle === 'pflegekraft' && (
                           <button
                             type="button"
-                            onClick={() => setStammFuer(m)}
+                            onClick={() => {
+                              setStammFuer(m)
+                              setAbwFuer(null)
+                            }}
                             disabled={!m.pflegekraftId}
                             title={!m.pflegekraftId ? t('stammKuerzelNoetig') : undefined}
                             className="whitespace-nowrap font-medium text-[var(--color-accent)] hover:underline disabled:opacity-50"
                           >
                             {t('stammBearbeiten')}
+                          </button>
+                        )}
+                        {m.rolle === 'pflegekraft' && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAbwFuer(m)
+                              setStammFuer(null)
+                            }}
+                            disabled={!m.pflegekraftId}
+                            title={!m.pflegekraftId ? t('stammKuerzelNoetig') : undefined}
+                            className="whitespace-nowrap font-medium text-[var(--color-accent)] hover:underline disabled:opacity-50"
+                          >
+                            {t('abwesenheiten')}
                           </button>
                         )}
                         <button
@@ -355,6 +374,15 @@ export function TeamForm({
             setStammFuer(null)
           }}
           onClose={() => setStammFuer(null)}
+        />
+      )}
+
+      {/* Abwesenheiten-Editor (lädt seine Liste selbst). */}
+      {abwFuer && (
+        <AbwesenheitEditor
+          key={abwFuer.id}
+          mitarbeiter={abwFuer}
+          onClose={() => setAbwFuer(null)}
         />
       )}
     </div>

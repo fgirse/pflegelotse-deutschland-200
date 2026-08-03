@@ -76,6 +76,7 @@ export interface Config {
     verordnungen: Verordnungen;
     abrechnungskonfiguration: Abrechnungskonfiguration;
     pflegekraft_stamm: PflegekraftStamm;
+    abwesenheiten: Abwesenheiten;
     leistungskatalog: Leistungskatalog;
     gdpr_audit_log: GdprAuditLog;
     bedarfe: Bedarfe;
@@ -100,6 +101,7 @@ export interface Config {
     verordnungen: VerordnungenSelect<false> | VerordnungenSelect<true>;
     abrechnungskonfiguration: AbrechnungskonfigurationSelect<false> | AbrechnungskonfigurationSelect<true>;
     pflegekraft_stamm: PflegekraftStammSelect<false> | PflegekraftStammSelect<true>;
+    abwesenheiten: AbwesenheitenSelect<false> | AbwesenheitenSelect<true>;
     leistungskatalog: LeistungskatalogSelect<false> | LeistungskatalogSelect<true>;
     gdpr_audit_log: GdprAuditLogSelect<false> | GdprAuditLogSelect<true>;
     bedarfe: BedarfeSelect<false> | BedarfeSelect<true>;
@@ -508,6 +510,21 @@ export interface PflegekraftStamm {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "abwesenheiten".
+ */
+export interface Abwesenheiten {
+  id: string;
+  tenantId: string;
+  pflegekraftId: string;
+  von: string;
+  bis: string;
+  typ?: ('urlaub' | 'krankheit' | 'sonstiges') | null;
+  notiz?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "leistungskatalog".
  */
 export interface Leistungskatalog {
@@ -788,6 +805,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'pflegekraft_stamm';
         value: string | PflegekraftStamm;
+      } | null)
+    | ({
+        relationTo: 'abwesenheiten';
+        value: string | Abwesenheiten;
       } | null)
     | ({
         relationTo: 'leistungskatalog';
@@ -1126,6 +1147,20 @@ export interface PflegekraftStammSelect<T extends boolean = true> {
   standardEndzeit?: T;
   maxEinsaetze?: T;
   wochentage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "abwesenheiten_select".
+ */
+export interface AbwesenheitenSelect<T extends boolean = true> {
+  tenantId?: T;
+  pflegekraftId?: T;
+  von?: T;
+  bis?: T;
+  typ?: T;
+  notiz?: T;
   updatedAt?: T;
   createdAt?: T;
 }

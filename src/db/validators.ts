@@ -58,21 +58,26 @@ const bedarfValidator = piiValidator(
 // UUID), daher eigene Variante. Gleiche PII-Blackbox — Personaldaten bleiben in
 // Säule 1; hier nur operatives Profil (Qualifikation/Zeiten).
 const nichtPii = { not: { bsonType: ['string', 'object', 'array', 'null'] } }
-const stammValidator = {
-  $jsonSchema: {
-    bsonType: 'object',
-    required: ['tenantId', 'pflegekraftId'],
-    properties: {
-      tenantId: { bsonType: 'string' },
-      pflegekraftId: { bsonType: 'string' },
-      vorname: nichtPii,
-      nachname: nichtPii,
-      email: nichtPii,
-      adresse: nichtPii,
-      telefon: nichtPii,
+// PII-Sperre für über pflegekraftId (Kürzel) verknüpfte Säule-2-Collections.
+function kuerzelValidator() {
+  return {
+    $jsonSchema: {
+      bsonType: 'object',
+      required: ['tenantId', 'pflegekraftId'],
+      properties: {
+        tenantId: { bsonType: 'string' },
+        pflegekraftId: { bsonType: 'string' },
+        vorname: nichtPii,
+        nachname: nichtPii,
+        email: nichtPii,
+        adresse: nichtPii,
+        telefon: nichtPii,
+      },
     },
-  },
+  }
 }
+const stammValidator = kuerzelValidator()
+const abwesenheitValidator = kuerzelValidator()
 
 // Wendet einen Validator auf eine Collection an (createCollection oder
 // collMod). Idempotent.
@@ -109,6 +114,10 @@ export async function applyValidators(db: Db): Promise<void> {
   await db
     .collection('pflegekraft_stamm')
     .createIndex({ tenantId: 1, pflegekraftId: 1 }, { unique: true })
+
+  await applyPiiValidator(db, 'abwesenheiten', abwesenheitValidator)
+  // Abwesenheiten je Pflegekraft (mehrere Zeiträume) — kein Unique-Index.
+  await db.collection('abwesenheiten').createIndex({ tenantId: 1, pflegekraftId: 1 })
 
   // Indizes (/L500/): mandantengescopte Lookups + Geo-Abfragen.
   const operativ = db.collection('klienten_operativ')

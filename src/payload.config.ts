@@ -16,6 +16,7 @@ import { Leistungsnachweise } from '@/collections/Leistungsnachweise'
 import { Verordnungen } from '@/collections/Verordnungen'
 import { Abrechnungskonfiguration } from '@/collections/Abrechnungskonfiguration'
 import { PflegekraftStamm } from '@/collections/PflegekraftStamm'
+import { Abwesenheiten } from '@/collections/Abwesenheiten'
 import { Leistungskatalog } from '@/collections/Leistungskatalog'
 import { GdprAuditLog } from '@/collections/GdprAuditLog'
 import { Bedarfe } from '@/collections/Bedarfe'
@@ -40,6 +41,7 @@ export default buildConfig({
     Verordnungen,
     Abrechnungskonfiguration,
     PflegekraftStamm,
+    Abwesenheiten,
     Leistungskatalog,
     GdprAuditLog,
     Bedarfe,
