@@ -84,6 +84,38 @@ export function TourMap({ tours, selected }: Props) {
 
       map.addControl(new maplibregl.NavigationControl({}), 'top-right')
 
+      // Routenlinie je Tour (Depot → Stopps) — echte Straßenroute (OSRM) oder
+      // Luftlinie als Fallback. Layer erst nach dem Laden des Kartenstils.
+      map.on('load', () => {
+        tours.forEach(async (tour, idx) => {
+          try {
+            const res = await fetch(`/api/v1/tours/${tour.id}/route`)
+            if (!res.ok || abgebrochen || !map) return
+            const { geometrie } = (await res.json()) as { geometrie: { lat: number; lng: number }[] }
+            if (!Array.isArray(geometrie) || geometrie.length < 2 || !map || abgebrochen) return
+            const sid = `route-${idx}`
+            if (map.getSource(sid)) return
+            map.addSource(sid, {
+              type: 'geojson',
+              data: {
+                type: 'Feature',
+                properties: {},
+                geometry: { type: 'LineString', coordinates: geometrie.map((p) => [p.lng, p.lat]) },
+              },
+            })
+            map.addLayer({
+              id: sid,
+              type: 'line',
+              source: sid,
+              layout: { 'line-join': 'round', 'line-cap': 'round' },
+              paint: { 'line-color': '#b45309', 'line-width': 4, 'line-opacity': 0.75 },
+            })
+          } catch {
+            /* Route optional — Marker bleiben. */
+          }
+        })
+      })
+
       // Ein wiederverwendetes Popup für alle Stopps.
       const popup = new maplibregl.Popup({ offset: 16, closeButton: true, maxWidth: '260px' })
 

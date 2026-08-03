@@ -12,4 +12,9 @@ export interface RoutingProvider {
   // Bei OSRM/HERE echte Straßen-km; Haversine liefert die geometrische Schätzung.
   // Optional, damit schlanke Test-Stubs nur travelMatrix implementieren müssen.
   distanzMatrix?(points: Geo[]): Promise<number[][]>
+  // Optionale Straßen-Geometrie (Polyline) entlang der Punkte in Reihenfolge
+  // (Depot → Stopp 1 → …), für die Kartendarstellung der Route. Nur echte
+  // Straßen-Provider (OSRM); ohne Unterstützung fällt der Aufrufer auf die
+  // Luftlinie (die Eingabepunkte) zurück.
+  routeGeometrie?(points: Geo[]): Promise<Geo[]>
 }

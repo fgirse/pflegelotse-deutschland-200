@@ -47,6 +47,29 @@ describe('OsrmRoutingProvider distanzMatrix', () => {
   })
 })
 
+describe('OsrmRoutingProvider routeGeometrie', () => {
+  it('fragt den route-Service ab und mappt [lng,lat] auf {lat,lng}', async () => {
+    const fetchMock = mockFetch({
+      code: 'Ok',
+      routes: [{ geometry: { coordinates: [[7.85, 48.0], [7.855, 48.005], [7.86, 48.01]] } }],
+    })
+    vi.stubGlobal('fetch', fetchMock)
+
+    const osrm = new OsrmRoutingProvider('https://osrm.example.org/', 'driving')
+    const geo = await osrm.routeGeometrie(punkte)
+
+    const url = fetchMock.mock.calls[0][0] as string
+    expect(url).toContain('/route/v1/driving/')
+    expect(url).toContain('overview=full')
+    expect(url).toContain('geometries=geojson')
+    expect(geo).toEqual([
+      { lat: 48.0, lng: 7.85 },
+      { lat: 48.005, lng: 7.855 },
+      { lat: 48.01, lng: 7.86 },
+    ])
+  })
+})
+
 describe('OsrmRoutingProvider', () => {
   it('baut die table-URL mit lng,lat-Reihenfolge und rechnet Sekunden in Minuten um', async () => {
     const fetchMock = mockFetch({

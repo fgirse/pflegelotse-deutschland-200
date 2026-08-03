@@ -40,4 +40,12 @@ export class FallbackRoutingProvider implements RoutingProvider {
     if (this.ersatz.distanzMatrix) return this.ersatz.distanzMatrix(points)
     throw new Error('[routing] kein Distanzmatrix-Adapter verfügbar')
   }
+
+  // Straßen-Geometrie nur vom primären Provider (Haversine hat keine). Schlägt
+  // er fehl oder kann es nicht, wirft die Methode — der Aufrufer (routeGeometrie-
+  // Service) fällt dann auf die Luftlinie zurück.
+  async routeGeometrie(points: Geo[]): Promise<Geo[]> {
+    if (this.primaer.routeGeometrie) return this.primaer.routeGeometrie(points)
+    throw new Error('[routing] primärer Provider ohne Straßen-Geometrie')
+  }
 }

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { minToHHMM } from '@/shared/time'
 import { idbGet, idbSet } from './idb'
 import { enqueue, flushQueue, type ErfassungAktion } from './queue'
+import { RouteKarte } from './RouteKarte'
 
 interface StoppView {
   pseudonymId: string
@@ -173,6 +174,12 @@ export function ErfassungPwa() {
           <h2 className="mb-3 font-semibold">
             {tr.pflegekraftId} · {tr.datum}
           </h2>
+          {/* Tagesroute visuell: Stopps + verbindende Route. */}
+          {tr.einsaetze.length > 0 && (
+            <div className="mb-3">
+              <RouteKarte tourId={tr.id} stopps={tr.einsaetze} />
+            </div>
+          )}
           <ul className="flex flex-col gap-3">
             {tr.einsaetze.map((e, i) => (
               <li key={e.pseudonymId} className="rounded-lg border border-[var(--color-line)] p-3">

@@ -88,4 +88,36 @@ export class OsrmRoutingProvider implements RoutingProvider {
     // Meter → Kilometer; nicht erreichbar → Infinity.
     return data.distances.map((zeile) => zeile.map((m) => (m == null ? Infinity : m / 1000)))
   }
+
+  // Straßen-Geometrie der Route durch alle Punkte in Reihenfolge. Nutzt den
+  // `route`-Service mit overview=full & geometries=geojson → volle Polyline.
+  async routeGeometrie(points: Geo[]): Promise<Geo[]> {
+    if (points.length < 2) return points
+
+    const coords = points.map((p) => `${p.lng},${p.lat}`).join(';')
+    const base = this.baseUrl.replace(/\/+$/, '')
+    const url = `${base}/route/v1/${this.profile}/${coords}?overview=full&geometries=geojson`
+
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => ctrl.abort(), this.timeoutMs)
+    const headers = this.apiKey ? { 'X-Api-Key': this.apiKey } : undefined
+    let res: Response
+    try {
+      res = await fetch(url, { signal: ctrl.signal, headers })
+    } finally {
+      clearTimeout(timer)
+    }
+
+    if (!res.ok) throw new Error(`OSRM-Antwort ${res.status} ${res.statusText}`)
+    const data = (await res.json()) as {
+      code?: string
+      routes?: { geometry?: { coordinates?: [number, number][] } }[]
+    }
+    const line = data.routes?.[0]?.geometry?.coordinates
+    if (data.code !== 'Ok' || !Array.isArray(line)) {
+      throw new Error(`OSRM-Fehler: ${data.code ?? 'unbekannt'}`)
+    }
+    // OSRM liefert [lng, lat] → auf {lat, lng} abbilden.
+    return line.map(([lng, lat]) => ({ lat, lng }))
+  }
 }
