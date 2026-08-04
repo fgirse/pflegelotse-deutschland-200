@@ -7,9 +7,11 @@ import type { KlientListenZeile } from '@/server/klienten/liste'
 export function KlientenTabelle({
   anfang,
   kassen,
+  katalog,
 }: {
   anfang: KlientListenZeile[]
   kassen: string[]
+  katalog: { code: string; bezeichnung: string }[]
 }) {
   const t = useTranslations('klienten')
   const [liste, setListe] = useState(anfang)
@@ -24,7 +26,7 @@ export function KlientenTabelle({
   const [email, setEmail] = useState('')
   const [kostentraeger, setKostentraeger] = useState('')
   const [kasse, setKasse] = useState('')
-  const [leistungen, setLeistungen] = useState('')
+  const [leistungen, setLeistungen] = useState<string[]>([])
   const [pflegegrad, setPflegegrad] = useState('')
   const [status, setStatus] = useState('aktiv')
 
@@ -42,7 +44,7 @@ export function KlientenTabelle({
     setEmail(k.email ?? '')
     setKostentraeger(k.kostentraegerArt ?? '')
     setKasse(k.krankenversicherer ?? '')
-    setLeistungen(k.leistungen.join(', '))
+    setLeistungen(k.leistungen)
     setPflegegrad(k.pflegegrad != null ? String(k.pflegegrad) : '')
     setStatus(k.status || 'aktiv')
     setErfolg(null)
@@ -66,10 +68,7 @@ export function KlientenTabelle({
           email,
           kostentraegerArt: kostentraeger,
           krankenversicherer: kasse,
-          leistungen: leistungen
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean),
+          leistungen,
           pflegegrad: pflegegrad ? Number(pflegegrad) : null,
           status,
         }),
@@ -92,6 +91,18 @@ export function KlientenTabelle({
       setBusy(false)
     }
   }
+
+  function toggleLeistung(code: string) {
+    setLeistungen((l) => (l.includes(code) ? l.filter((c) => c !== code) : [...l, code]))
+  }
+
+  // Auswahl-Optionen: Katalog + bereits gesetzte Codes, die (noch) nicht im
+  // Katalog stehen (damit keine bestehende Auswahl verloren geht).
+  const codesImKatalog = new Set(katalog.map((k) => k.code))
+  const leistungOptionen = [
+    ...katalog,
+    ...leistungen.filter((c) => !codesImKatalog.has(c)).map((c) => ({ code: c, bezeichnung: '' })),
+  ]
 
   return (
     <div className="flex flex-col gap-6">
@@ -237,11 +248,30 @@ export function KlientenTabelle({
               )}
             </label>
 
-            <label className="label sm:col-span-2">
+            <div className="label sm:col-span-2">
               {t('spalteLeistungen')}
-              <input className="input" value={leistungen} onChange={(e) => setLeistungen(e.target.value)} />
-              <span className="mt-1 text-xs text-[var(--color-faint)]">{t('leistungenHinweis')}</span>
-            </label>
+              {leistungOptionen.length === 0 ? (
+                <span className="mt-1 block text-xs text-[var(--color-faint)]">
+                  {t('leistungenLeer')}
+                </span>
+              ) : (
+                <div className="mt-1 grid gap-1.5 sm:grid-cols-2">
+                  {leistungOptionen.map((o) => (
+                    <label key={o.code} className="flex items-center gap-2 text-sm font-normal">
+                      <input
+                        type="checkbox"
+                        checked={leistungen.includes(o.code)}
+                        onChange={() => toggleLeistung(o.code)}
+                      />
+                      <span className="font-medium">{o.code}</span>
+                      {o.bezeichnung ? (
+                        <span className="truncate text-[var(--color-muted)]">· {o.bezeichnung}</span>
+                      ) : null}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
             <label className="label">
               {t('spaltePflegegrad')}
               <select className="input" value={pflegegrad} onChange={(e) => setPflegegrad(e.target.value)}>

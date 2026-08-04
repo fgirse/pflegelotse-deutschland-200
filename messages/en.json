@@ -31,6 +31,7 @@
     "kostentraegerLeer": "not specified",
     "krankenkasse": "Health insurer",
     "leistungenHinweis": "Care package codes, comma-separated (e.g. LK01, LK15).",
+    "leistungenLeer": "No service catalog set up yet – create it under \"Services\" first.",
     "speichern": "Save",
     "abbrechen": "Cancel",
     "erfolg": "Client saved: {name}",

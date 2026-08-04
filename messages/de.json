@@ -31,6 +31,7 @@
     "kostentraegerLeer": "keine Angabe",
     "krankenkasse": "Krankenkasse",
     "leistungenHinweis": "Leistungskomplex-Codes, kommagetrennt (z. B. LK01, LK15).",
+    "leistungenLeer": "Kein Leistungskatalog hinterlegt – erst unter „Leistungen\" anlegen.",
     "speichern": "Speichern",
     "abbrechen": "Abbrechen",
     "erfolg": "Klient gespeichert: {name}",

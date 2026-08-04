@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { requireDienstSeite } from '@/server/auth/page'
 import { ladeKlientenListe } from '@/server/klienten/liste'
+import { ladeKatalogAuswahl } from '@/server/leistungen/service'
 import kassenListe from '@/shared/data/krankenkassen-gesetzlich.json'
 import { KlientenTabelle } from './KlientenTabelle'
 
@@ -20,7 +21,10 @@ export default async function KlientenPage({
   if (user.role !== 'admin' && user.role !== 'disponent') redirect(`/${locale}/dashboard`)
 
   const t = await getTranslations('klienten')
-  const klienten = await ladeKlientenListe(user.tenantId)
+  const [klienten, katalog] = await Promise.all([
+    ladeKlientenListe(user.tenantId),
+    ladeKatalogAuswahl(user.tenantId),
+  ])
   // Nur die Kassennamen ans Frontend (Dropdown bei gesetzlich Versicherten).
   const kassen = (kassenListe as { name: string }[]).map((k) => k.name)
 
@@ -30,7 +34,7 @@ export default async function KlientenPage({
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="mt-1 text-[var(--color-muted)]">{t('subtitle', { n: klienten.length })}</p>
       </header>
-      <KlientenTabelle anfang={klienten} kassen={kassen} />
+      <KlientenTabelle anfang={klienten} kassen={kassen} katalog={katalog} />
     </main>
   )
 }

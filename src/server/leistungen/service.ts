@@ -148,6 +148,24 @@ export async function speichereLeistung(
   }
 }
 
+// Aktive Katalog-Einträge (Code + Bezeichnung) für Auswahllisten — ohne
+// Vorbefüllung. Fehlt der Katalog, kommt eine leere Liste zurück.
+export async function ladeKatalogAuswahl(
+  tenantId: string,
+): Promise<{ code: string; bezeichnung: string }[]> {
+  const payload = await payloadClient()
+  const res = await payload.find({
+    collection: 'leistungskatalog',
+    where: { and: [{ tenantId: { equals: tenantId } }, { aktiv: { not_equals: false } }] },
+    limit: 500,
+    sort: 'code',
+    overrideAccess: true,
+  })
+  return (res.docs as KatalogDoc[])
+    .filter((d) => d.code)
+    .map((d) => ({ code: d.code as string, bezeichnung: d.bezeichnung ?? '' }))
+}
+
 // ── Konsum: Standardzeiten aus dem Katalog ableiten ───────────────────────
 
 export interface KatalogZeit {
