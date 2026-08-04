@@ -173,6 +173,18 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
     }
   }
 
+  // Tour endgültig löschen (mit Rückfrage).
+  async function loeschen(tourId: string) {
+    if (!window.confirm(t('loeschenBestaetigen'))) return
+    setAufloesenBusy(true)
+    try {
+      const res = await fetch(`/api/v1/tours/${tourId}`, { method: 'DELETE' })
+      if (res.ok) startTransition(() => router.refresh())
+    } finally {
+      setAufloesenBusy(false)
+    }
+  }
+
   // „Gewinnen": Angebot auf den offenen Bedarf abgeben.
   async function angebotAbgeben(bedarfId: string) {
     setLoading(true)
@@ -303,6 +315,13 @@ export function DashboardClient({ tenantId, tours, candidates, bedarfe }: Props)
                       {optimierId === x.tour.id ? t('optimiert') : t('optimieren')}
                     </button>
                   )}
+                  <button
+                    onClick={() => loeschen(x.tour.id)}
+                    disabled={aufloesenBusy || optimierId !== null}
+                    className="btn btn-outline min-h-8 px-3 py-1 text-xs text-[var(--color-danger)]"
+                  >
+                    {t('loeschen')}
+                  </button>
                 </span>
               </div>
               <Timeline tour={x.tour} />

@@ -26,6 +26,12 @@ function esc(v: string): string {
   )
 }
 
+// Farbpalette: jede Tour bekommt eine eigene Farbe (Linie + Marker + Legende).
+const PALETTE = [
+  '#b45309', '#1d4ed8', '#15803d', '#b91c1c', '#7c3aed', '#0891b2', '#c2410c', '#4d7c0f',
+]
+const farbe = (i: number) => PALETTE[i % PALETTE.length]
+
 // Tourenkarte auf Basis von MapLibre GL mit freiem OSM-Raster-Hintergrund
 // (kein API-Key nötig). maplibre-gl wird erst im Browser geladen, weil es
 // window/document referenziert. Klick auf einen Stopp öffnet ein Popup mit den
@@ -108,7 +114,7 @@ export function TourMap({ tours, selected }: Props) {
               type: 'line',
               source: sid,
               layout: { 'line-join': 'round', 'line-cap': 'round' },
-              paint: { 'line-color': '#b45309', 'line-width': 4, 'line-opacity': 0.75 },
+              paint: { 'line-color': farbe(idx), 'line-width': 4, 'line-opacity': 0.8 },
             })
           } catch {
             /* Route optional — Marker bleiben. */
@@ -147,14 +153,15 @@ export function TourMap({ tours, selected }: Props) {
         )
       }
 
-      // Einsätze je Tour als nummerierte, klickbare Marker.
-      tours.forEach((tour) => {
+      // Einsätze je Tour als nummerierte, klickbare Marker — in der Tour-Farbe.
+      tours.forEach((tour, tIdx) => {
+        const col = farbe(tIdx)
         tour.einsaetze.forEach((e, i) => {
           const el = document.createElement('div')
           el.textContent = String(i + 1)
           el.setAttribute('aria-hidden', 'true')
           el.style.cssText =
-            'background:#1c1917;color:#fff;border-radius:9999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff;cursor:pointer'
+            `background:${col};color:#fff;border-radius:9999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff;cursor:pointer`
           el.addEventListener('click', async (ev) => {
             ev.stopPropagation()
             if (!map) return
@@ -191,11 +198,28 @@ export function TourMap({ tours, selected }: Props) {
   }, [tours, selected])
 
   return (
-    <div
-      ref={containerRef}
-      role="img"
-      aria-label="Karte der Touren und Einsätze. Gleichwertige Daten in der Tabellenansicht."
-      className="h-[360px] w-full overflow-hidden rounded-lg border border-[var(--color-line)]"
-    />
+    <div className="flex flex-col gap-2">
+      <div
+        ref={containerRef}
+        role="img"
+        aria-label="Karte der Touren und Einsätze. Gleichwertige Daten in der Tabellenansicht."
+        className="h-[360px] w-full overflow-hidden rounded-lg border border-[var(--color-line)]"
+      />
+      {/* Legende: welche Farbe gehört zu welcher Tour (Pflegekraft). */}
+      {tours.length > 0 && (
+        <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--color-muted)]">
+          {tours.map((tour, i) => (
+            <span key={tour.id} className="flex items-center gap-1.5">
+              <span
+                className="inline-block h-2.5 w-2.5 rounded-full"
+                style={{ backgroundColor: farbe(i) }}
+                aria-hidden
+              />
+              {tour.pflegekraftId}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

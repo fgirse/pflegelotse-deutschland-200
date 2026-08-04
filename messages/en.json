@@ -253,6 +253,8 @@
     "optimieren": "Optimise tour",
     "optimiert": "Optimising …",
     "aufloesen": "Disband (sick leave)",
+    "loeschen": "Delete",
+    "loeschenBestaetigen": "Permanently delete this tour? This cannot be undone.",
     "aufloesenTitel": "Redistribution — preview",
     "umverteilt": "{n, plural, =0 {Nothing to redistribute} one {# visit redistributed} other {# visits redistributed}}",
     "nichtPlatzierbar": "{n, plural, one {# visit unplaceable} other {# visits unplaceable}}",

@@ -252,6 +252,8 @@
     "optimieren": "Tour optimieren",
     "optimiert": "Optimiere …",
     "aufloesen": "Auflösen (Krankmeldung)",
+    "loeschen": "Löschen",
+    "loeschenBestaetigen": "Diese Tour endgültig löschen? Das lässt sich nicht rückgängig machen.",
     "aufloesenTitel": "Umverteilung — Vorschau",
     "umverteilt": "{n, plural, =0 {Nichts umzuverteilen} one {# Einsatz umverteilt} other {# Einsätze umverteilt}}",
     "nichtPlatzierbar": "{n, plural, one {# Einsatz nicht platzierbar} other {# Einsätze nicht platzierbar}}",

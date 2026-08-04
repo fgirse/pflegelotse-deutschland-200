@@ -102,6 +102,16 @@ export async function ladeTour(id: string): Promise<Tour | null> {
   }
 }
 
+// Löscht eine Tour endgültig — nur im eigenen Mandanten. Bereits erfasste
+// Leistungsnachweise (WORM) bleiben davon unberührt (eigene Collection).
+export async function loescheTour(tenantId: string, id: string): Promise<boolean> {
+  const tour = await ladeTour(id)
+  if (!tour || tour.tenantId !== tenantId) return false
+  const payload = await payloadClient()
+  await payload.delete({ collection: 'touren', id, overrideAccess: true })
+  return true
+}
+
 // Liest operative Klienten (Säule 2). Optional nach Status gefiltert.
 export async function ladeKlientenOperativ(
   tenantId: string,
