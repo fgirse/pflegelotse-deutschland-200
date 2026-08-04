@@ -5,7 +5,8 @@ import { piiFeld } from './piiHooks'
 // dem Schreiben mit dem pro-Klient-Schlüssel verschlüsselt (Encryption-Port)
 // und erst beim Lesen wieder entschlüsselt. Wird der Schlüssel crypto-
 // geshreddet (Art. 17), liefern die Felder null — unumkehrbar unlesbar.
-const PII_FELDER = ['vorname', 'nachname', 'adresse', 'telefon', 'email'] as const
+// Geburtsdatum (YYYY-MM-DD) ist identifizierend → verschlüsselt in Säule 1.
+const PII_FELDER = ['vorname', 'nachname', 'geburtsdatum', 'adresse', 'telefon', 'email'] as const
 
 export const KlientenIdentitaet: CollectionConfig = {
   slug: 'klienten_identitaet',

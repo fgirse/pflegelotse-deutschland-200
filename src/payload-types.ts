@@ -201,6 +201,7 @@ export interface KlientenIdentitaet {
   externalId?: string | null;
   vorname?: string | null;
   nachname?: string | null;
+  geburtsdatum?: string | null;
   adresse?: string | null;
   telefon?: string | null;
   email?: string | null;
@@ -934,6 +935,7 @@ export interface KlientenIdentitaetSelect<T extends boolean = true> {
   externalId?: T;
   vorname?: T;
   nachname?: T;
+  geburtsdatum?: T;
   adresse?: T;
   telefon?: T;
   email?: T;

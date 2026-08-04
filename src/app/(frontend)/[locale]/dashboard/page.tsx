@@ -115,6 +115,9 @@ export default async function DashboardPage({
           <Link href="/abrechnung" className="btn btn-outline">
             {t('abrechnungLink')}
           </Link>
+          <Link href="/dienst/klienten" className="btn btn-outline">
+            {t('klientenLink')}
+          </Link>
           <Link href="/dienst/leistungen" className="btn btn-outline">
             {t('leistungenLink')}
           </Link>

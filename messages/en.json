@@ -3,6 +3,23 @@
     "name": "Pflegelotse Deutschland",
     "tagline": "Route optimisation for home-care services"
   },
+  "klienten": {
+    "title": "Clients",
+    "subtitle": "{n} client(s) of your service – identity and operational attributes merged.",
+    "leer": "No clients created yet (e.g. via CSV import).",
+    "spalteName": "Last name, first name",
+    "spalteGeburt": "Date of birth",
+    "spalteVersicherung": "Insurance",
+    "spalteLeistungen": "Services",
+    "spaltePflegegrad": "Care level",
+    "spalteStatus": "Status",
+    "ohneIdentitaet": "(no identity)",
+    "gesetzlich": "Statutory",
+    "privat": "Private",
+    "status_aktiv": "active",
+    "status_pausiert": "paused",
+    "status_beendet": "ended"
+  },
   "leistungen": {
     "title": "Service catalog",
     "subtitle": "Your service's care packages with standard duration, base time and price. Prefilled from the standard catalog on first open – add times and prices or your own codes.",
@@ -248,6 +265,7 @@
     "abrechnungLink": "Billing",
     "berichteLink": "Reports",
     "teamLink": "Team",
+    "klientenLink": "Clients",
     "leistungenLink": "Services",
     "erfassungLink": "Record service",
     "optimieren": "Optimise tour",

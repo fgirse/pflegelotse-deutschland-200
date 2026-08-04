@@ -3,6 +3,23 @@
     "name": "PflegeLotse Deutschland",
     "tagline": "Tourenoptimierung für ambulante Pflegedienste"
   },
+  "klienten": {
+    "title": "Klienten",
+    "subtitle": "{n} Klient(en) deines Dienstes – Identität und operative Merkmale zusammengeführt.",
+    "leer": "Noch keine Klienten angelegt (z. B. per CSV-Import).",
+    "spalteName": "Name, Vorname",
+    "spalteGeburt": "Geburtsdatum",
+    "spalteVersicherung": "Versicherung",
+    "spalteLeistungen": "Leistungen",
+    "spaltePflegegrad": "Pflegegrad",
+    "spalteStatus": "Status",
+    "ohneIdentitaet": "(ohne Identität)",
+    "gesetzlich": "Gesetzlich",
+    "privat": "Privat",
+    "status_aktiv": "aktiv",
+    "status_pausiert": "pausiert",
+    "status_beendet": "beendet"
+  },
   "leistungen": {
     "title": "Leistungskatalog",
     "subtitle": "Leistungskomplexe deines Dienstes mit Standard-Dauer, Grundzeit und Preis. Beim ersten Öffnen aus dem Standardkatalog vorbefüllt – ergänze Zeiten und Preise oder eigene Codes.",
@@ -247,6 +264,7 @@
     "abrechnungLink": "Abrechnung",
     "berichteLink": "Berichte",
     "teamLink": "Team",
+    "klientenLink": "Klienten",
     "leistungenLink": "Leistungen",
     "erfassungLink": "Leistung erfassen",
     "optimieren": "Tour optimieren",

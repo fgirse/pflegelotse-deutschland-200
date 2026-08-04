@@ -38,6 +38,7 @@ function piiValidator(required: string[], statusEnum: string[]) {
         // PII-BLACKBOX: identifizierende Felder werden serverseitig abgewiesen.
         vorname: { not: { bsonType: ['string', 'object', 'array', 'null'] } },
         nachname: { not: { bsonType: ['string', 'object', 'array', 'null'] } },
+        geburtsdatum: { not: { bsonType: ['string', 'object', 'array', 'null'] } },
         adresse: { not: { bsonType: ['string', 'object', 'array', 'null'] } },
         telefon: { not: { bsonType: ['string', 'object', 'array', 'null'] } },
       },
