@@ -4,6 +4,16 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { KlientListenZeile } from '@/server/klienten/liste'
 
+// "HH:MM" → Minuten seit Mitternacht; null bei ungültiger Eingabe.
+function hhmmZuMin(s: string): number | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(s)
+  if (!m) return null
+  const h = Number(m[1])
+  const min = Number(m[2])
+  if (h > 23 || min > 59) return null
+  return h * 60 + min
+}
+
 export function KlientenTabelle({
   anfang,
   kassen,
@@ -16,6 +26,7 @@ export function KlientenTabelle({
   const t = useTranslations('klienten')
   const [liste, setListe] = useState(anfang)
   const [editFuer, setEditFuer] = useState<KlientListenZeile | null>(null)
+  const [neu, setNeu] = useState(false)
 
   // Formularfelder
   const [vorname, setVorname] = useState('')
@@ -30,11 +41,40 @@ export function KlientenTabelle({
   const [pflegegrad, setPflegegrad] = useState('')
   const [status, setStatus] = useState('aktiv')
 
+  // Nur beim Anlegen: Koordinaten (aus Adresse geocodiert) + Zeitfenster.
+  const [geo, setGeo] = useState<{ lat: number; lng: number } | null>(null)
+  const [geoLabel, setGeoLabel] = useState<string | null>(null)
+  const [geoBusy, setGeoBusy] = useState(false)
+  const [zeitVon, setZeitVon] = useState('08:00')
+  const [zeitBis, setZeitBis] = useState('10:00')
+
   const [busy, setBusy] = useState(false)
   const [erfolg, setErfolg] = useState<string | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
 
+  function felderLeeren() {
+    setVorname('')
+    setNachname('')
+    setGeburtsdatum('')
+    setAdresse('')
+    setTelefon('')
+    setEmail('')
+    setKostentraeger('')
+    setKasse('')
+    setLeistungen([])
+    setPflegegrad('')
+    setStatus('aktiv')
+    setErfolg(null)
+    setFehler(null)
+  }
+
+  function schliessen() {
+    setEditFuer(null)
+    setNeu(false)
+  }
+
   function oeffne(k: KlientListenZeile) {
+    setNeu(false)
     setEditFuer(k)
     setVorname(k.vorname)
     setNachname(k.nachname)
@@ -51,40 +91,103 @@ export function KlientenTabelle({
     setFehler(null)
   }
 
+  function oeffneNeu() {
+    setEditFuer(null)
+    setNeu(true)
+    felderLeeren()
+    setGeo(null)
+    setGeoLabel(null)
+    setZeitVon('08:00')
+    setZeitBis('10:00')
+  }
+
+  async function adresseSuchen() {
+    if (adresse.trim().length < 3) return
+    setGeoBusy(true)
+    setGeoLabel(null)
+    setGeo(null)
+    try {
+      const res = await fetch(`/api/v1/geo/geocode?q=${encodeURIComponent(adresse)}`)
+      if (!res.ok) {
+        setGeoLabel(t('adresseNichtGefunden'))
+        return
+      }
+      const d = await res.json()
+      setGeo({ lat: d.lat, lng: d.lng })
+      setGeoLabel(d.displayName)
+    } catch {
+      setGeoLabel(t('adresseNichtGefunden'))
+    } finally {
+      setGeoBusy(false)
+    }
+  }
+
+  function felder() {
+    return {
+      vorname,
+      nachname,
+      geburtsdatum,
+      adresse,
+      telefon,
+      email,
+      kostentraegerArt: kostentraeger,
+      krankenversicherer: kasse,
+      leistungen,
+      pflegegrad: pflegegrad ? Number(pflegegrad) : null,
+      status,
+    }
+  }
+
+  function einsortieren(k: KlientListenZeile, l: KlientListenZeile[]) {
+    return [...l.filter((x) => x.pseudonymId !== k.pseudonymId), k].sort(
+      (a, b) => a.nachname.localeCompare(b.nachname) || a.vorname.localeCompare(b.vorname),
+    )
+  }
+
   async function speichern() {
-    if (!editFuer || busy) return
+    if (busy) return
     setBusy(true)
     setFehler(null)
     try {
-      const res = await fetch(`/api/v1/klienten/${editFuer.pseudonymId}`, {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          vorname,
-          nachname,
-          geburtsdatum,
-          adresse,
-          telefon,
-          email,
-          kostentraegerArt: kostentraeger,
-          krankenversicherer: kasse,
-          leistungen,
-          pflegegrad: pflegegrad ? Number(pflegegrad) : null,
-          status,
-        }),
-      })
-      if (!res.ok) {
-        setFehler(t('fehlerAllgemein'))
-        return
+      if (neu) {
+        if (!geo) {
+          setFehler(t('geoFehlt'))
+          return
+        }
+        const von = hhmmZuMin(zeitVon)
+        const bis = hhmmZuMin(zeitBis)
+        if (von == null || bis == null) {
+          setFehler(t('zeitUngueltig'))
+          return
+        }
+        const res = await fetch('/api/v1/klienten', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ ...felder(), geo, zeitfenster: { von, bis } }),
+        })
+        if (!res.ok) {
+          setFehler(t('fehlerAllgemein'))
+          return
+        }
+        const { klient } = (await res.json()) as { klient: KlientListenZeile }
+        setListe((l) => einsortieren(klient, l))
+        setErfolg(t('neuErfolg', { name: `${klient.nachname}, ${klient.vorname}`.trim() }))
+        setNeu(false)
+      } else if (editFuer) {
+        const res = await fetch(`/api/v1/klienten/${editFuer.pseudonymId}`, {
+          method: 'PUT',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(felder()),
+        })
+        if (!res.ok) {
+          setFehler(t('fehlerAllgemein'))
+          return
+        }
+        const { klient } = (await res.json()) as { klient: KlientListenZeile }
+        setListe((l) => einsortieren(klient, l))
+        setErfolg(t('erfolg', { name: `${klient.nachname}, ${klient.vorname}`.trim() }))
+        setEditFuer(null)
       }
-      const { klient } = (await res.json()) as { klient: KlientListenZeile }
-      setListe((l) =>
-        l
-          .map((x) => (x.pseudonymId === klient.pseudonymId ? klient : x))
-          .sort((a, b) => a.nachname.localeCompare(b.nachname) || a.vorname.localeCompare(b.vorname)),
-      )
-      setErfolg(t('erfolg', { name: `${klient.nachname}, ${klient.vorname}`.trim() }))
-      setEditFuer(null)
     } catch {
       setFehler(t('fehlerAllgemein'))
     } finally {
@@ -96,17 +199,22 @@ export function KlientenTabelle({
     setLeistungen((l) => (l.includes(code) ? l.filter((c) => c !== code) : [...l, code]))
   }
 
-  // Auswahl-Optionen: Katalog + bereits gesetzte Codes, die (noch) nicht im
-  // Katalog stehen (damit keine bestehende Auswahl verloren geht).
   const codesImKatalog = new Set(katalog.map((k) => k.code))
   const leistungOptionen = [
     ...katalog,
     ...leistungen.filter((c) => !codesImKatalog.has(c)).map((c) => ({ code: c, bezeichnung: '' })),
   ]
+  const panelOffen = neu || editFuer !== null
 
   return (
     <div className="flex flex-col gap-6">
       <section className="card p-5">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 className="font-display text-lg font-semibold">{t('listeTitel')}</h2>
+          <button onClick={oeffneNeu} className="btn btn-primary min-h-9 px-3 text-sm">
+            + {t('neuerKlient')}
+          </button>
+        </div>
         {erfolg && <p className="mb-3 rounded-lg bg-accent-soft p-3 text-sm text-accent">{erfolg}</p>}
         {liste.length === 0 ? (
           <p className="text-sm text-[var(--color-faint)]">{t('leer')}</p>
@@ -171,16 +279,20 @@ export function KlientenTabelle({
         )}
       </section>
 
-      {/* Bearbeiten-Panel */}
-      {editFuer && (
+      {/* Anlegen-/Bearbeiten-Panel */}
+      {panelOffen && (
         <section className="card border-2 border-[var(--color-accent)] p-5">
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-display text-lg font-semibold">
-              {t('bearbeitenTitel', { name: `${editFuer.nachname}, ${editFuer.vorname}`.trim() || '—' })}
+              {neu
+                ? t('neuerKlient')
+                : t('bearbeitenTitel', {
+                    name: `${editFuer?.nachname}, ${editFuer?.vorname}`.trim() || '—',
+                  })}
             </h2>
             <button
               type="button"
-              onClick={() => setEditFuer(null)}
+              onClick={schliessen}
               className="text-sm text-[var(--color-muted)] hover:underline"
             >
               {t('abbrechen')}
@@ -210,6 +322,49 @@ export function KlientenTabelle({
               {t('adresse')}
               <input className="input" value={adresse} onChange={(e) => setAdresse(e.target.value)} />
             </label>
+
+            {/* Nur beim Anlegen: Adresse → Koordinaten + Zeitfenster. */}
+            {neu && (
+              <>
+                <div className="label sm:col-span-2">
+                  {t('adresseSuche')}
+                  <div className="mt-1 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={adresseSuchen}
+                      disabled={geoBusy || adresse.trim().length < 3}
+                      className="btn btn-outline shrink-0"
+                    >
+                      {t('suchen')}
+                    </button>
+                    {geoLabel && (
+                      <span className="text-xs text-[var(--color-faint)]">
+                        {geo ? `✓ ${geoLabel}` : geoLabel}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <label className="label">
+                  {t('zeitVon')}
+                  <input
+                    type="time"
+                    className="input"
+                    value={zeitVon}
+                    onChange={(e) => setZeitVon(e.target.value)}
+                  />
+                </label>
+                <label className="label">
+                  {t('zeitBis')}
+                  <input
+                    type="time"
+                    className="input"
+                    value={zeitBis}
+                    onChange={(e) => setZeitBis(e.target.value)}
+                  />
+                </label>
+              </>
+            )}
+
             <label className="label">
               {t('telefon')}
               <input className="input" value={telefon} onChange={(e) => setTelefon(e.target.value)} />
@@ -233,7 +388,6 @@ export function KlientenTabelle({
             </label>
             <label className="label">
               {t('krankenkasse')}
-              {/* Bei gesetzlich: Dropdown aus der Kassenliste; sonst Freitext. */}
               {kostentraeger === 'gesetzlich' ? (
                 <select className="input" value={kasse} onChange={(e) => setKasse(e.target.value)}>
                   <option value="">—</option>
@@ -295,9 +449,9 @@ export function KlientenTabelle({
 
           <div className="mt-4 flex gap-2">
             <button onClick={speichern} disabled={busy} className="btn btn-primary">
-              {t('speichern')}
+              {neu ? t('anlegen') : t('speichern')}
             </button>
-            <button type="button" onClick={() => setEditFuer(null)} className="btn btn-outline">
+            <button type="button" onClick={schliessen} className="btn btn-outline">
               {t('abbrechen')}
             </button>
           </div>

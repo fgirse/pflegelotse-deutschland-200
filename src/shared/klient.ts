@@ -23,3 +23,15 @@ export const klientBearbeitenSchema = z.object({
   status: z.enum(['aktiv', 'pausiert', 'beendet']).default('aktiv'),
 })
 export type KlientBearbeiten = z.infer<typeof klientBearbeitenSchema>
+
+// Anlegen = Bearbeiten-Felder + operative Pflichtfelder (Koordinaten aus der
+// Adresse geocodiert, Zeitfenster). Dauer/Qualifikation leitet der Server aus
+// den Leistungen über den Katalog ab.
+export const klientAnlegenSchema = klientBearbeitenSchema.extend({
+  geo: z.object({ lat: z.number(), lng: z.number() }),
+  zeitfenster: z.object({
+    von: z.number().int().min(0).max(1439),
+    bis: z.number().int().min(0).max(1439),
+  }),
+})
+export type KlientAnlegen = z.infer<typeof klientAnlegenSchema>
