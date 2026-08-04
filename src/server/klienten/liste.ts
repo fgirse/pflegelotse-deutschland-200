@@ -8,6 +8,9 @@ export interface KlientListenZeile {
   vorname: string
   nachname: string
   geburtsdatum?: string
+  adresse?: string
+  telefon?: string
+  email?: string
   kostentraegerArt?: 'gesetzlich' | 'privat'
   krankenversicherer?: string
   leistungen: string[]
@@ -28,6 +31,9 @@ type IdDoc = {
   vorname?: string
   nachname?: string
   geburtsdatum?: string
+  adresse?: string
+  telefon?: string
+  email?: string
 }
 
 // Lädt alle Klienten eines Mandanten als zusammengeführte Liste (nach Nachname).
@@ -60,6 +66,9 @@ export async function ladeKlientenListe(tenantId: string): Promise<KlientListenZ
       vorname: i.vorname ?? '',
       nachname: i.nachname ?? '',
       geburtsdatum: i.geburtsdatum || undefined,
+      adresse: i.adresse || undefined,
+      telefon: i.telefon || undefined,
+      email: i.email || undefined,
       kostentraegerArt: o.kostentraegerArt ?? undefined,
       krankenversicherer: o.krankenversicherer || undefined,
       leistungen: Array.isArray(o.leistungen) ? (o.leistungen as string[]) : [],
