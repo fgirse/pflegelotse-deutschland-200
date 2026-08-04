@@ -185,8 +185,15 @@ export function ErfassungPwa() {
             {tr.einsaetze.map((e, i) => (
               <li key={e.pseudonymId} className="rounded-lg border border-[var(--color-line)] p-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">
-                    {i + 1}. {minToHHMM(e.zeitfenster.von)}–{minToHHMM(e.zeitfenster.bis)}
+                  <span className="flex items-center gap-2 font-medium">
+                    {/* Nummer-Badge in der Tour-Farbe — passend zu den Karten-Markern. */}
+                    <span
+                      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white"
+                      style={{ backgroundColor: tourFarbe(idx) }}
+                    >
+                      {i + 1}
+                    </span>
+                    {minToHHMM(e.zeitfenster.von)}–{minToHHMM(e.zeitfenster.bis)}
                   </span>
                   {e.erledigt ? (
                     <span className="text-sm font-medium text-[var(--color-success)]">✓ {t('erledigt')}</span>
