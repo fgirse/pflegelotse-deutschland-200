@@ -32,6 +32,8 @@
     "adresseNichtGefunden": "Address not found.",
     "neuErfolg": "Client created: {name}",
     "bearbeiten": "Edit",
+    "loeschen": "Delete",
+    "loeschenBestaetigen": "Permanently delete client {name}? Both records are removed and the key is crypto-shredded (irreversible, Art. 17).",
     "bearbeitenTitel": "Edit client – {name}",
     "vorname": "First name",
     "nachname": "Last name",

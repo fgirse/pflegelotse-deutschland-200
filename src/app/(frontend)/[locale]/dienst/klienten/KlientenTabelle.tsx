@@ -49,6 +49,7 @@ export function KlientenTabelle({
   const [zeitBis, setZeitBis] = useState('10:00')
 
   const [busy, setBusy] = useState(false)
+  const [aktionBusy, setAktionBusy] = useState<string | null>(null)
   const [erfolg, setErfolg] = useState<string | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
 
@@ -195,6 +196,28 @@ export function KlientenTabelle({
     }
   }
 
+  async function loeschen(k: KlientListenZeile) {
+    if (aktionBusy) return
+    const name = `${k.nachname}, ${k.vorname}`.trim() || '—'
+    if (!window.confirm(t('loeschenBestaetigen', { name }))) return
+    setAktionBusy(k.pseudonymId)
+    setErfolg(null)
+    setFehler(null)
+    try {
+      const res = await fetch(`/api/v1/klienten/${k.pseudonymId}`, { method: 'DELETE' })
+      if (!res.ok) {
+        setFehler(t('fehlerAllgemein'))
+        return
+      }
+      setListe((l) => l.filter((x) => x.pseudonymId !== k.pseudonymId))
+      if (editFuer?.pseudonymId === k.pseudonymId) schliessen()
+    } catch {
+      setFehler(t('fehlerAllgemein'))
+    } finally {
+      setAktionBusy(null)
+    }
+  }
+
   function toggleLeistung(code: string) {
     setLeistungen((l) => (l.includes(code) ? l.filter((c) => c !== code) : [...l, code]))
   }
@@ -263,13 +286,23 @@ export function KlientenTabelle({
                     <td className="py-2 pr-4">{k.pflegegrad ?? '—'}</td>
                     <td className="py-2 pr-4">{t(`status_${k.status}`)}</td>
                     <td className="py-2">
-                      <button
-                        type="button"
-                        onClick={() => oeffne(k)}
-                        className="font-medium text-[var(--color-accent)] hover:underline"
-                      >
-                        {t('bearbeiten')}
-                      </button>
+                      <div className="flex gap-3 whitespace-nowrap">
+                        <button
+                          type="button"
+                          onClick={() => oeffne(k)}
+                          className="font-medium text-[var(--color-accent)] hover:underline"
+                        >
+                          {t('bearbeiten')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => loeschen(k)}
+                          disabled={aktionBusy === k.pseudonymId}
+                          className="font-medium text-[var(--color-danger)] hover:underline disabled:opacity-50"
+                        >
+                          {t('loeschen')}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

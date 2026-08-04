@@ -32,6 +32,8 @@
     "adresseNichtGefunden": "Adresse nicht gefunden.",
     "neuErfolg": "Klient angelegt: {name}",
     "bearbeiten": "Bearbeiten",
+    "loeschen": "Löschen",
+    "loeschenBestaetigen": "Klient {name} endgültig löschen? Beide Datensätze werden entfernt und der Schlüssel crypto-geshreddet (unwiderruflich, Art. 17).",
     "bearbeitenTitel": "Klient bearbeiten – {name}",
     "vorname": "Vorname",
     "nachname": "Nachname",
