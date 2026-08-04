@@ -6,6 +6,7 @@
   "klienten": {
     "title": "Klienten",
     "subtitle": "{n} Klient(en) deines Dienstes – Identität und operative Merkmale zusammengeführt.",
+    "importLink": "CSV-Import",
     "leer": "Noch keine Klienten angelegt (z. B. per CSV-Import).",
     "spalteName": "Name, Vorname",
     "spalteGeburt": "Geburtsdatum",

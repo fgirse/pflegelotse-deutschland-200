@@ -126,6 +126,7 @@ export async function importiereKlienten(
       externalId,
       vorname: row.vorname ?? '',
       nachname: row.nachname ?? '',
+      geburtsdatum: normDatum(row.geburtsdatum),
       adresse: row.adresse ?? '',
       telefon: row.telefon ?? '',
       email: row.email ?? '',
@@ -152,6 +153,8 @@ export async function importiereKlienten(
       qualifikation: csvQualifikation.length > 0 ? csvQualifikation : abgeleitet.qualifikation,
       zeitfenster: { von: zeitZuMin(row.zeitfenster_von) ?? 480, bis: zeitZuMin(row.zeitfenster_bis) ?? 1080 },
       dauerMin: csvDauer ?? abgeleitet.dauerMin ?? 30,
+      kostentraegerArt: normKostentraeger(row.kostentraeger),
+      krankenversicherer: (row.krankenkasse ?? '').trim() || undefined,
       status: 'aktiv' as const,
     }
     const opTreffer = await payload.find({
@@ -214,4 +217,22 @@ function zeitZuMin(v: string | undefined): number | undefined {
   if (v.includes(':')) return hhmmToMin(v)
   const n = Number(v)
   return Number.isFinite(n) ? n : undefined
+}
+
+// Geburtsdatum → YYYY-MM-DD (akzeptiert TT.MM.JJJJ und JJJJ-MM-TT); sonst ''.
+function normDatum(v: string | undefined): string {
+  const s = (v ?? '').trim()
+  let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s)
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`
+  m = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(s)
+  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`
+  return ''
+}
+
+// Kostenträger-Freitext → Enum (gesetzlich/privat) oder undefined.
+function normKostentraeger(v: string | undefined): 'gesetzlich' | 'privat' | undefined {
+  const s = (v ?? '').toLowerCase()
+  if (s.includes('gesetz') || s.includes('gkv')) return 'gesetzlich'
+  if (s.includes('privat') || s.includes('pkv')) return 'privat'
+  return undefined
 }
