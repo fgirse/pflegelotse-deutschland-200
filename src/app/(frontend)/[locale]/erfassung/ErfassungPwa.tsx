@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { minToHHMM } from '@/shared/time'
+import { tourFarbe } from '@/shared/tourfarben'
 import { idbGet, idbSet } from './idb'
 import { enqueue, flushQueue, type ErfassungAktion } from './queue'
 import { RouteKarte } from './RouteKarte'
@@ -169,7 +170,7 @@ export function ErfassungPwa() {
         )}
       </div>
 
-      {touren.map((tr) => (
+      {touren.map((tr, idx) => (
         <section key={tr.id} className="card p-4">
           <h2 className="mb-3 font-semibold">
             {tr.pflegekraftId} · {tr.datum}
@@ -177,7 +178,7 @@ export function ErfassungPwa() {
           {/* Tagesroute visuell: Stopps + verbindende Route. */}
           {tr.einsaetze.length > 0 && (
             <div className="mb-3">
-              <RouteKarte tourId={tr.id} stopps={tr.einsaetze} />
+              <RouteKarte tourId={tr.id} stopps={tr.einsaetze} farbe={tourFarbe(idx)} />
             </div>
           )}
           <ul className="flex flex-col gap-3">

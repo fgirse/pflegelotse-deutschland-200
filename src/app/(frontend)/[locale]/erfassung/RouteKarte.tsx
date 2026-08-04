@@ -10,7 +10,15 @@ interface Stopp {
 // Schlanke Routen-Karte für die Pflegekraft: nummerierte Stopps + verbindende
 // Route (echte Straßenroute via OSRM, sonst Luftlinie). Pseudonym, kein PII.
 // Offline lädt der Kartenhintergrund nicht — die Liste bleibt die Hauptansicht.
-export function RouteKarte({ tourId, stopps }: { tourId: string; stopps: Stopp[] }) {
+export function RouteKarte({
+  tourId,
+  stopps,
+  farbe = '#b45309',
+}: {
+  tourId: string
+  stopps: Stopp[]
+  farbe?: string
+}) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -62,7 +70,7 @@ export function RouteKarte({ tourId, stopps }: { tourId: string; stopps: Stopp[]
             type: 'line',
             source: 'route',
             layout: { 'line-join': 'round', 'line-cap': 'round' },
-            paint: { 'line-color': '#b45309', 'line-width': 4, 'line-opacity': 0.75 },
+            paint: { 'line-color': farbe, 'line-width': 4, 'line-opacity': 0.8 },
           })
         } catch {
           /* Route optional. */
@@ -75,7 +83,7 @@ export function RouteKarte({ tourId, stopps }: { tourId: string; stopps: Stopp[]
         el.textContent = String(i + 1)
         el.setAttribute('aria-hidden', 'true')
         el.style.cssText =
-          'background:#1c1917;color:#fff;border-radius:9999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff'
+          `background:${farbe};color:#fff;border-radius:9999px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff`
         new maplibregl.Marker({ element: el }).setLngLat([s.geo.lng, s.geo.lat]).addTo(map!)
       })
     })()
@@ -84,7 +92,7 @@ export function RouteKarte({ tourId, stopps }: { tourId: string; stopps: Stopp[]
       abgebrochen = true
       map?.remove()
     }
-  }, [tourId, stopps])
+  }, [tourId, stopps, farbe])
 
   return (
     <div

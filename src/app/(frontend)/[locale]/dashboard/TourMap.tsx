@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { minToHHMM } from '@/shared/time'
+import { tourFarbe as farbe } from '@/shared/tourfarben'
 import type { Einsatz, Tour } from '@/shared/domain'
 
 interface Props {
@@ -26,11 +27,6 @@ function esc(v: string): string {
   )
 }
 
-// Farbpalette: jede Tour bekommt eine eigene Farbe (Linie + Marker + Legende).
-const PALETTE = [
-  '#b45309', '#1d4ed8', '#15803d', '#b91c1c', '#7c3aed', '#0891b2', '#c2410c', '#4d7c0f',
-]
-const farbe = (i: number) => PALETTE[i % PALETTE.length]
 
 // Tourenkarte auf Basis von MapLibre GL mit freiem OSM-Raster-Hintergrund
 // (kein API-Key nötig). maplibre-gl wird erst im Browser geladen, weil es
