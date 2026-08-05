@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-import { Link } from '@/i18n/navigation'
 import { requireDienstSeite } from '@/server/auth/page'
+import { DienstShell } from '../DienstShell'
 import { AbrechnungClient } from './AbrechnungClient'
 
 // Abrechnungs-Exporte (§8.3): DATEV-EXTF-Buchungsstapel + abrechnungsvorbereitendes
@@ -14,19 +14,16 @@ export default async function AbrechnungPage({
 }) {
   const { locale } = await params
   setRequestLocale(locale)
-  await requireDienstSeite(locale)
+  const user = await requireDienstSeite(locale)
   const t = await getTranslations('abrechnung')
 
   return (
-    <main className="container-page max-w-xl py-8">
+    <DienstShell role={user.role} active="abrechnung">
       <header className="mb-6">
-        <Link href="/dashboard" className="text-sm text-[var(--color-accent)] hover:underline">
-          ← {t('zurueck')}
-        </Link>
-        <h1 className="mt-3 text-3xl font-bold">{t('title')}</h1>
+        <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
       </header>
       <AbrechnungClient />
-    </main>
+    </DienstShell>
   )
 }

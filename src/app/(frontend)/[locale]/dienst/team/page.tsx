@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { requireDienstSeite } from '@/server/auth/page'
+import { DienstShell } from '../../DienstShell'
 import { listeMitarbeiter } from '@/server/team/service'
 import { ladeAllePflegekraftStamm } from '@/server/stammdaten/service'
 import { TeamForm } from './TeamForm'
@@ -27,12 +28,12 @@ export default async function TeamPage({
   ])
 
   return (
-    <main className="container-page max-w-3xl py-8">
+    <DienstShell role={user.role} active="team">
       <header className="mb-6">
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
       </header>
       <TeamForm anfangsListe={mitarbeiter} stammMap={stammMap} />
-    </main>
+    </DienstShell>
   )
 }

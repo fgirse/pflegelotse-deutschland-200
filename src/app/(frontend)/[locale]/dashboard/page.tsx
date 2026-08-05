@@ -4,6 +4,7 @@ import { ladeTouren, ladeKlientenOperativ } from '@/server/repo'
 import { planeTour, berechneFitScore, berechneSollIst } from '@/server/matching/service'
 import { listeBedarfeFuerDienst } from '@/server/marketplace/service'
 import { requireDienstSeite } from '@/server/auth/page'
+import { DienstShell } from '../DienstShell'
 import { DashboardClient } from './DashboardClient'
 import { DashboardImport } from './DashboardImport'
 import { WochenplanButton } from './WochenplanButton'
@@ -93,7 +94,7 @@ export default async function DashboardPage({
   const tl = await getTranslations('login')
 
   return (
-    <main className="container-page max-w-7xl py-8">
+    <DienstShell role={user.role} active="dashboard">
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <span className="chip">
@@ -102,31 +103,8 @@ export default async function DashboardPage({
           <h1 className="mt-3 text-3xl font-bold">{t('title')}</h1>
           <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
         </div>
-        {/* Primäraktion: neue Tour anlegen; daneben der Abrechnungs-Export.
-            Vorangestellt der direkte Einstieg in die mobile Leistungserfassung
-            (§5.3) — der Alltagsweg der Pflegekraft nach erfolgter Leistung. */}
+        {/* Die Navigation liegt jetzt im Seitenmenü; hier bleibt die Primäraktion. */}
         <div className="flex shrink-0 gap-2">
-          <Link href="/erfassung" className="btn btn-primary">
-            {t('erfassungLink')}
-          </Link>
-          <Link href="/berichte" className="btn btn-outline">
-            {t('berichteLink')}
-          </Link>
-          <Link href="/abrechnung" className="btn btn-outline">
-            {t('abrechnungLink')}
-          </Link>
-          <Link href="/dienst/klienten" className="btn btn-outline">
-            {t('klientenLink')}
-          </Link>
-          <Link href="/dienst/leistungen" className="btn btn-outline">
-            {t('leistungenLink')}
-          </Link>
-          {/* Team-Verwaltung nur für den Dienst-Inhaber (admin). */}
-          {user.role === 'admin' && (
-            <Link href="/dienst/team" className="btn btn-outline">
-              {t('teamLink')}
-            </Link>
-          )}
           <Link href="/dashboard/tour-neu" className="btn btn-primary">
             + {t('tourErstellen')}
           </Link>
@@ -198,7 +176,7 @@ export default async function DashboardPage({
         candidates={kandidaten}
         bedarfe={bedarfeKandidaten}
       />
-    </main>
+    </DienstShell>
   )
 }
 

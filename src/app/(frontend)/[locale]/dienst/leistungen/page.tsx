@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { requireDienstSeite } from '@/server/auth/page'
+import { DienstShell } from '../../DienstShell'
 import { ladeKatalog } from '@/server/leistungen/service'
 import { LeistungenVerwaltung } from './LeistungenVerwaltung'
 
@@ -22,12 +23,12 @@ export default async function LeistungenPage({
   const katalog = await ladeKatalog(user.tenantId)
 
   return (
-    <main className="container-page max-w-4xl py-8">
+    <DienstShell role={user.role} active="leistungen">
       <header className="mb-6">
         <h1 className="text-3xl font-bold">{t('title')}</h1>
         <p className="mt-1 text-[var(--color-muted)]">{t('subtitle')}</p>
       </header>
       <LeistungenVerwaltung anfang={katalog} />
-    </main>
+    </DienstShell>
   )
 }

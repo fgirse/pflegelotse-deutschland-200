@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import { Link } from '@/i18n/navigation'
 import { requireDienstSeite } from '@/server/auth/page'
+import { DienstShell } from '../../DienstShell'
 import { ladeKlientenListe } from '@/server/klienten/liste'
 import { ladeKatalogAuswahl } from '@/server/leistungen/service'
 import kassenListe from '@/shared/data/krankenkassen-gesetzlich.json'
@@ -30,7 +31,7 @@ export default async function KlientenPage({
   const kassen = (kassenListe as { name: string }[]).map((k) => k.name)
 
   return (
-    <main className="container-page max-w-5xl py-8">
+    <DienstShell role={user.role} active="klienten">
       <header className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">{t('title')}</h1>
@@ -41,6 +42,6 @@ export default async function KlientenPage({
         </Link>
       </header>
       <KlientenTabelle anfang={klienten} kassen={kassen} katalog={katalog} />
-    </main>
+    </DienstShell>
   )
 }
