@@ -48,7 +48,6 @@ export function BedarfForm() {
   // Schritt 1 — Person
   const [strasse, setStrasse] = useState('')
   const [hausnummer, setHausnummer] = useState('')
-  const [stadtteil, setStadtteil] = useState<keyof typeof ORTE>('Wiehre')
   const [alter, setAlter] = useState('')
   const [wohnsituation, setWohnsituation] = useState<'' | 'alleinlebend' | 'gemeinschaft'>('')
   const [pflegegrad, setPflegegrad] = useState('')
@@ -82,24 +81,30 @@ export function BedarfForm() {
     setGruppen((g) => ({ ...g, [key]: { ...g[key], ...patch } }))
   }
 
-  const step1Ok = strasse && hausnummer && stadtteil && Number(alter) >= 1 && pflegegrad && startDatum
+  const step1Ok = strasse && hausnummer && Number(alter) >= 1 && pflegegrad && startDatum
   const step3Ok = name.trim() && email.trim() && kontaktart.length > 0 && datenschutz
 
   async function absenden() {
     setSende(true)
     setFehler(null)
     try {
-      // Adresse geokodieren (für die Tour); Fallback = Stadtteil-Mittelpunkt.
-      let geo = ORTE[stadtteil]
+      // Adresse geokodieren (für die Tour); Fallback = Freiburg-Zentrum. Der
+      // grobe Stadtteil (für die anonyme Dienst-Anzeige) wird aus dem Geocoder-
+      // Ergebnis abgeleitet, sofern ein bekannter Ort darin vorkommt.
+      let geo = ORTE.Innenstadt
+      let stadtteil: string | undefined
       try {
-        const q = `${strasse} ${hausnummer}, ${stadtteil}, Freiburg`
+        const q = `${strasse} ${hausnummer}, Freiburg`
         const res = await fetch(`/api/v1/geo/geocode?q=${encodeURIComponent(q)}`)
         if (res.ok) {
           const d = await res.json()
           if (typeof d.lat === 'number' && typeof d.lng === 'number') geo = { lat: d.lat, lng: d.lng }
+          if (typeof d.displayName === 'string') {
+            stadtteil = Object.keys(ORTE).find((o) => d.displayName.includes(o))
+          }
         }
       } catch {
-        /* Fallback bleibt Stadtteil-Mittelpunkt */
+        /* Fallback bleibt Freiburg-Zentrum */
       }
 
       // Leistungsauswahl strukturiert + legacy-kompatible Ableitungen.
@@ -164,7 +169,7 @@ export function BedarfForm() {
             nachname,
             telefon: telefon || undefined,
             email,
-            adresse: `${strasse} ${hausnummer}, ${stadtteil}`,
+            adresse: `${strasse} ${hausnummer}, Freiburg`,
             beratungsstelle: beratungsstelle || undefined,
             kontaktart,
             kontaktzeitraum: kontaktzeitraum || undefined,
@@ -257,14 +262,6 @@ export function BedarfForm() {
               <input value={hausnummer} onChange={(e) => setHausnummer(e.target.value)} className={inputCls} />
             </label>
           </div>
-          <label className="label">
-            {t('bedarf.stadtteil')} *
-            <select value={stadtteil} onChange={(e) => setStadtteil(e.target.value)} className={inputCls}>
-              {Object.keys(ORTE).map((o) => (
-                <option key={o} value={o}>{o}</option>
-              ))}
-            </select>
-          </label>
           <label className="label">
             {t('bedarf.alter')} *
             <input

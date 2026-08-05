@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { ORTE } from '@/shared/orte'
 
-// Formular zum Festlegen des Einzugsgebiets eines Dienstes: Mittelpunkt (über
-// die bekannten Orte der Pilotregion) + Radius in km. Bedarfe im Umkreis
-// erscheinen dann unter „Eingänge" — auch ohne bestehende Tour.
+// Formular zum Festlegen des Einzugsgebiets eines Dienstes: Mittelpunkt (per
+// Adress-/Ortssuche geokodiert) + Radius in km. Bedarfe im Umkreis erscheinen
+// dann unter „Eingänge" — auch ohne bestehende Tour.
 export function EinzugsgebietForm() {
   const t = useTranslations('einzugsgebiet')
-  const [ort, setOrt] = useState<string>(Object.keys(ORTE)[0])
   const [radius, setRadius] = useState(15)
   const [gesetzt, setGesetzt] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -55,10 +53,11 @@ export function EinzugsgebietForm() {
   }, [])
 
   async function speichern() {
+    if (!geocodedGeo) return
     setBusy(true)
     setOk(false)
-    // Geocodierter Mittelpunkt hat Vorrang, sonst der gewählte Ort.
-    const geo = geocodedGeo ?? ORTE[ort]
+    // Mittelpunkt kommt ausschließlich aus der Adress-/Ortssuche.
+    const geo = geocodedGeo
     const res = await fetch('/api/v1/dienst/einzugsgebiet', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -82,17 +81,7 @@ export function EinzugsgebietForm() {
         </p>
       )}
       <div className="flex flex-col gap-3">
-        <label className="label">
-          {t('ort')}
-          <select className="input" value={ort} onChange={(e) => setOrt(e.target.value)}>
-            {Object.keys(ORTE).map((o) => (
-              <option key={o} value={o}>
-                {o}
-              </option>
-            ))}
-          </select>
-        </label>
-        {/* Optional: freie Adresse/Ort per Geocoding. */}
+        {/* Mittelpunkt per Adress-/Ortssuche (Geocoding). */}
         <div>
           <span className="label">{t('adresseSuche')}</span>
           <div className="mt-1 flex gap-2">
@@ -128,7 +117,7 @@ export function EinzugsgebietForm() {
             onChange={(e) => setRadius(Number(e.target.value))}
           />
         </label>
-        <button onClick={speichern} disabled={busy} className="btn btn-primary mt-1">
+        <button onClick={speichern} disabled={busy || !geocodedGeo} className="btn btn-primary mt-1">
           {t('speichern')}
         </button>
       </div>
