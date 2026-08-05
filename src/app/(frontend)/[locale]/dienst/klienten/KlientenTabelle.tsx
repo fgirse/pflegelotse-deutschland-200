@@ -59,6 +59,18 @@ export function KlientenTabelle({
   const [fVersicherung, setFVersicherung] = useState('')
   const [fPflegegrad, setFPflegegrad] = useState('')
 
+  // Sortierung nach Spalte.
+  type SortKey = 'name' | 'geburtsdatum' | 'versicherung' | 'pflegegrad' | 'status'
+  const [sortKey, setSortKey] = useState<SortKey>('name')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc')
+  function sortieren(key: SortKey) {
+    if (sortKey === key) setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    else {
+      setSortKey(key)
+      setSortDir('asc')
+    }
+  }
+
   function felderLeeren() {
     setVorname('')
     setNachname('')
@@ -248,6 +260,32 @@ export function KlientenTabelle({
     return true
   })
 
+  // Sortierschlüssel je Zeile (leere Werte hinten via ￿ / Infinity).
+  function sortWert(k: KlientListenZeile): string | number {
+    switch (sortKey) {
+      case 'geburtsdatum':
+        return k.geburtsdatum || '￿'
+      case 'versicherung':
+        return k.kostentraegerArt ? `${k.kostentraegerArt} ${k.krankenversicherer ?? ''}` : '￿'
+      case 'pflegegrad':
+        return k.pflegegrad ?? Infinity
+      case 'status':
+        return k.status
+      default:
+        return `${k.nachname} ${k.vorname}`.trim() || '￿'
+    }
+  }
+  const sortiert = [...gefiltert].sort((a, b) => {
+    const av = sortWert(a)
+    const bv = sortWert(b)
+    const c =
+      typeof av === 'number' && typeof bv === 'number'
+        ? av - bv
+        : String(av).localeCompare(String(bv))
+    return sortDir === 'asc' ? c : -c
+  })
+  const pfeil = (key: SortKey) => (sortKey === key ? (sortDir === 'asc' ? ' ▲' : ' ▼') : '')
+
   return (
     <div className="flex flex-col gap-6">
       <section className="card p-5">
@@ -308,17 +346,59 @@ export function KlientenTabelle({
                 <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-[var(--color-line)] text-[var(--color-muted)]">
-                  <th className="py-2 pr-4 font-medium">{t('spalteName')}</th>
-                  <th className="py-2 pr-4 font-medium">{t('spalteGeburt')}</th>
-                  <th className="py-2 pr-4 font-medium">{t('spalteVersicherung')}</th>
+                  {(
+                    [
+                      ['name', 'spalteName'],
+                      ['geburtsdatum', 'spalteGeburt'],
+                      ['versicherung', 'spalteVersicherung'],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <th
+                      key={key}
+                      className="py-2 pr-4 font-medium"
+                      aria-sort={
+                        sortKey === key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'
+                      }
+                    >
+                      <button
+                        type="button"
+                        onClick={() => sortieren(key)}
+                        className="font-medium hover:text-[var(--color-ink)]"
+                      >
+                        {t(label)}
+                        {pfeil(key)}
+                      </button>
+                    </th>
+                  ))}
                   <th className="py-2 pr-4 font-medium">{t('spalteLeistungen')}</th>
-                  <th className="py-2 pr-4 font-medium">{t('spaltePflegegrad')}</th>
-                  <th className="py-2 pr-4 font-medium">{t('spalteStatus')}</th>
+                  {(
+                    [
+                      ['pflegegrad', 'spaltePflegegrad'],
+                      ['status', 'spalteStatus'],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <th
+                      key={key}
+                      className="py-2 pr-4 font-medium"
+                      aria-sort={
+                        sortKey === key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none'
+                      }
+                    >
+                      <button
+                        type="button"
+                        onClick={() => sortieren(key)}
+                        className="font-medium hover:text-[var(--color-ink)]"
+                      >
+                        {t(label)}
+                        {pfeil(key)}
+                      </button>
+                    </th>
+                  ))}
                   <th className="py-2 font-medium">{t('spalteAktionen')}</th>
                 </tr>
               </thead>
               <tbody>
-                {gefiltert.map((k) => (
+                {sortiert.map((k) => (
                   <tr key={k.pseudonymId} className="border-b border-[var(--color-line)] last:border-0">
                     <td className="py-2 pr-4">
                       {k.nachname || k.vorname ? (
