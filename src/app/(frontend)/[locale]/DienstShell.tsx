@@ -19,6 +19,7 @@ export async function DienstShell({
   const t = await getTranslations('dashboard')
   const alle: { id: DienstNavId; href: string; label: string; adminOnly?: boolean }[] = [
     { id: 'dashboard', href: '/dashboard', label: t('navDashboard') },
+    { id: 'eingaenge', href: '/eingaenge', label: t('eingaengeNav') },
     { id: 'klienten', href: '/dienst/klienten', label: t('klientenLink') },
     { id: 'leistungen', href: '/dienst/leistungen', label: t('leistungenLink') },
     { id: 'berichte', href: '/berichte', label: t('berichteLink') },

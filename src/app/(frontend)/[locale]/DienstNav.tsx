@@ -5,6 +5,7 @@ import { Link } from '@/i18n/navigation'
 
 export type DienstNavId =
   | 'dashboard'
+  | 'eingaenge'
   | 'klienten'
   | 'leistungen'
   | 'berichte'
@@ -36,6 +37,13 @@ function NavIcon({ id }: { id: DienstNavId }) {
           <circle cx="6" cy="18" r="2" />
           <circle cx="18" cy="6" r="2" />
           <path d="M8 18h4a3 3 0 0 0 0-6h-2a3 3 0 0 1 0-6h6" />
+        </svg>
+      )
+    case 'eingaenge': // Posteingang
+      return (
+        <svg {...p}>
+          <path d="M5 12l1.6-6.4A1 1 0 0 1 7.6 5h8.8a1 1 0 0 1 1 .76L19 12" />
+          <path d="M5 12h4l1 2h4l1-2h4v6a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z" />
         </svg>
       )
     case 'klienten':

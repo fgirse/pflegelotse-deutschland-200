@@ -3,6 +3,7 @@ import { listeBedarfeFuerDienst, listeVergebenFuerDienst } from '@/server/market
 import { berechneFitScore } from '@/server/matching/service'
 import { ladeTouren } from '@/server/repo'
 import { requireDienstSeite } from '@/server/auth/page'
+import { DienstShell } from '../DienstShell'
 import { EingaengeClient } from './EingaengeClient'
 
 // Liest zur Laufzeit aus der DB — nicht statisch vorrendern.
@@ -72,9 +73,11 @@ export default async function EingaengePage({
   )
 
   return (
-    <main className="container-page max-w-3xl py-10 sm:py-14">
-      <h1 className="text-3xl font-bold sm:text-4xl">{t('dienstTitel')}</h1>
-      <p className="mt-2 text-[var(--color-muted)]">{t('dienstSubtitle')}</p>
+    <DienstShell role={user.role} active="eingaenge">
+      <header className="mb-6">
+        <h1 className="text-3xl font-bold">{t('dienstTitel')}</h1>
+        <p className="mt-1 text-[var(--color-muted)]">{t('dienstSubtitle')}</p>
+      </header>
       <EingaengeClient
         tenantId={TENANT}
         offene={offeneMitFit}
@@ -83,6 +86,6 @@ export default async function EingaengePage({
           uebernommen: Boolean(b.uebernommenAt),
         }))}
       />
-    </main>
+    </DienstShell>
   )
 }
