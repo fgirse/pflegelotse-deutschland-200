@@ -53,6 +53,12 @@ export function KlientenTabelle({
   const [erfolg, setErfolg] = useState<string | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
 
+  // Suche + Filter (clientseitig — die Liste ist bereits geladen).
+  const [suche, setSuche] = useState('')
+  const [fStatus, setFStatus] = useState('')
+  const [fVersicherung, setFVersicherung] = useState('')
+  const [fPflegegrad, setFPflegegrad] = useState('')
+
   function felderLeeren() {
     setVorname('')
     setNachname('')
@@ -229,6 +235,19 @@ export function KlientenTabelle({
   ]
   const panelOffen = neu || editFuer !== null
 
+  // Angewandte Suche/Filter.
+  const q = suche.trim().toLowerCase()
+  const gefiltert = liste.filter((k) => {
+    if (fStatus && k.status !== fStatus) return false
+    if (fVersicherung && (k.kostentraegerArt ?? '') !== fVersicherung) return false
+    if (fPflegegrad && String(k.pflegegrad ?? '') !== fPflegegrad) return false
+    if (q) {
+      const heu = `${k.vorname} ${k.nachname} ${k.krankenversicherer ?? ''} ${k.leistungen.join(' ')}`
+      if (!heu.toLowerCase().includes(q)) return false
+    }
+    return true
+  })
+
   return (
     <div className="flex flex-col gap-6">
       <section className="card p-5">
@@ -242,8 +261,51 @@ export function KlientenTabelle({
         {liste.length === 0 ? (
           <p className="text-sm text-[var(--color-faint)]">{t('leer')}</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+          <>
+            {/* Suche + Filter */}
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <input
+                className="input max-w-[16rem]"
+                placeholder={t('suchePlatzhalter')}
+                value={suche}
+                onChange={(e) => setSuche(e.target.value)}
+              />
+              <select className="input w-auto" value={fStatus} onChange={(e) => setFStatus(e.target.value)}>
+                <option value="">{t('filterStatusAlle')}</option>
+                <option value="aktiv">{t('status_aktiv')}</option>
+                <option value="pausiert">{t('status_pausiert')}</option>
+                <option value="beendet">{t('status_beendet')}</option>
+              </select>
+              <select
+                className="input w-auto"
+                value={fVersicherung}
+                onChange={(e) => setFVersicherung(e.target.value)}
+              >
+                <option value="">{t('filterVersAlle')}</option>
+                <option value="gesetzlich">{t('gesetzlich')}</option>
+                <option value="privat">{t('privat')}</option>
+              </select>
+              <select
+                className="input w-auto"
+                value={fPflegegrad}
+                onChange={(e) => setFPflegegrad(e.target.value)}
+              >
+                <option value="">{t('filterPgAlle')}</option>
+                {[1, 2, 3, 4, 5].map((g) => (
+                  <option key={g} value={g}>
+                    {g}
+                  </option>
+                ))}
+              </select>
+              <span className="text-sm text-[var(--color-muted)]">
+                {t('trefferAnzahl', { n: gefiltert.length })}
+              </span>
+            </div>
+            {gefiltert.length === 0 ? (
+              <p className="text-sm text-[var(--color-faint)]">{t('keineTreffer')}</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-[var(--color-line)] text-[var(--color-muted)]">
                   <th className="py-2 pr-4 font-medium">{t('spalteName')}</th>
@@ -256,7 +318,7 @@ export function KlientenTabelle({
                 </tr>
               </thead>
               <tbody>
-                {liste.map((k) => (
+                {gefiltert.map((k) => (
                   <tr key={k.pseudonymId} className="border-b border-[var(--color-line)] last:border-0">
                     <td className="py-2 pr-4">
                       {k.nachname || k.vorname ? (
@@ -307,8 +369,10 @@ export function KlientenTabelle({
                   </tr>
                 ))}
               </tbody>
-            </table>
-          </div>
+                </table>
+              </div>
+            )}
+          </>
         )}
       </section>
 
