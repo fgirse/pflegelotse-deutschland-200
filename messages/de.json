@@ -7,6 +7,7 @@
     "title": "Klienten",
     "subtitle": "{n} Klient(en) deines Dienstes – Identität und operative Merkmale zusammengeführt.",
     "importLink": "CSV-Import",
+    "exportButton": "CSV-Export",
     "leer": "Noch keine Klienten angelegt (z. B. per CSV-Import).",
     "suchePlatzhalter": "Suche: Name, Kasse, Leistung …",
     "filterStatusAlle": "Status: alle",

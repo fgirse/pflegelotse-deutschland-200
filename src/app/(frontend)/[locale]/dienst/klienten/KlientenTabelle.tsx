@@ -4,6 +4,12 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { KlientListenZeile } from '@/server/klienten/liste'
 
+// CSV-Feld für den Export: bei ; " oder Zeilenumbruch in Anführungszeichen
+// setzen und "-Zeichen verdoppeln (RFC 4180, Trenner ;).
+function csvFeld(v: string): string {
+  return /[";\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v
+}
+
 // "HH:MM" → Minuten seit Mitternacht; null bei ungültiger Eingabe.
 function hhmmZuMin(s: string): number | null {
   const m = /^(\d{1,2}):(\d{2})$/.exec(s)
@@ -286,14 +292,65 @@ export function KlientenTabelle({
   })
   const pfeil = (key: SortKey) => (sortKey === key ? (sortDir === 'asc' ? ' ▲' : ' ▼') : '')
 
+  // Exportiert die aktuell gefilterte/sortierte Liste als CSV (Download).
+  function exportiereCsv() {
+    if (sortiert.length === 0) return
+    const kopf = [
+      'Nachname',
+      'Vorname',
+      'Geburtsdatum',
+      'Adresse',
+      'Telefon',
+      'E-Mail',
+      'Kostenträger',
+      'Krankenkasse',
+      'Leistungen',
+      'Pflegegrad',
+      'Status',
+    ]
+    const zeilen = sortiert.map((k) => [
+      k.nachname,
+      k.vorname,
+      k.geburtsdatum ?? '',
+      k.adresse ?? '',
+      k.telefon ?? '',
+      k.email ?? '',
+      k.kostentraegerArt ?? '',
+      k.krankenversicherer ?? '',
+      k.leistungen.join(', '),
+      k.pflegegrad != null ? String(k.pflegegrad) : '',
+      k.status,
+    ])
+    const csv = [kopf, ...zeilen]
+      .map((r) => r.map((f) => csvFeld(String(f))).join(';'))
+      .join('\r\n')
+    // ﻿ = BOM, damit Excel UTF-8 (Umlaute) korrekt erkennt.
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `klienten-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <section className="card p-5">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="font-display text-lg font-semibold">{t('listeTitel')}</h2>
-          <button onClick={oeffneNeu} className="btn btn-primary min-h-9 px-3 text-sm">
-            + {t('neuerKlient')}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={exportiereCsv}
+              disabled={sortiert.length === 0}
+              className="btn btn-outline min-h-9 px-3 text-sm disabled:opacity-50"
+            >
+              {t('exportButton')}
+            </button>
+            <button onClick={oeffneNeu} className="btn btn-primary min-h-9 px-3 text-sm">
+              + {t('neuerKlient')}
+            </button>
+          </div>
         </div>
         {erfolg && <p className="mb-3 rounded-lg bg-accent-soft p-3 text-sm text-accent">{erfolg}</p>}
         {liste.length === 0 ? (

@@ -7,6 +7,7 @@
     "title": "Clients",
     "subtitle": "{n} client(s) of your service – identity and operational attributes merged.",
     "importLink": "CSV import",
+    "exportButton": "CSV export",
     "leer": "No clients created yet (e.g. via CSV import).",
     "suchePlatzhalter": "Search: name, insurer, service …",
     "filterStatusAlle": "Status: all",
