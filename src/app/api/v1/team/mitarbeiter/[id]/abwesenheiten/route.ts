@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 // Pflegekraft lesen/anlegen. Nur Admin; die Kraft muss zum eigenen Mandanten
 // gehören und ein Kürzel (pflegekraftId) haben.
 async function pflegekraftId(req: NextRequest, id: string) {
-  const auth = await requireAuth(req.headers, { roles: ['admin'] })
+  const auth = await requireAuth(req.headers, { roles: ['disponent', 'admin'] })
   if (!auth.ok) return { error: auth.response as NextResponse }
   if (!auth.user.tenantId) {
     return { error: NextResponse.json({ error: 'Kein Mandant zugeordnet' }, { status: 403 }) }

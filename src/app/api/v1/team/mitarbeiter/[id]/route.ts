@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 // PATCH /api/v1/team/mitarbeiter/[id] { deaktiviert } — Offboarding-Statuswechsel.
 // Nur Admin; die Kraft muss zum eigenen Mandanten gehören (im Service geprüft).
 export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const auth = await requireAuth(req.headers, { roles: ['admin'] })
+  const auth = await requireAuth(req.headers, { roles: ['disponent', 'admin'] })
   if (!auth.ok) return auth.response
   if (!auth.user.tenantId) {
     return NextResponse.json({ error: 'Kein Mandant zugeordnet' }, { status: 403 })
@@ -27,7 +27,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
 
 // DELETE /api/v1/team/mitarbeiter/[id] — Pflegekraft endgültig löschen.
 export async function DELETE(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const auth = await requireAuth(req.headers, { roles: ['admin'] })
+  const auth = await requireAuth(req.headers, { roles: ['disponent', 'admin'] })
   if (!auth.ok) return auth.response
   if (!auth.user.tenantId) {
     return NextResponse.json({ error: 'Kein Mandant zugeordnet' }, { status: 403 })

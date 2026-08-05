@@ -18,8 +18,8 @@ export default async function TeamPage({
   const { locale } = await params
   setRequestLocale(locale)
   const user = await requireDienstSeite(locale)
-  // Nur der Dienst-Inhaber (admin) verwaltet das Team; andere Rollen zurück.
-  if (user.role !== 'admin') redirect(`/${locale}/dashboard`)
+  // Team verwalten dürfen die planenden Rollen (Admin + Disponent); übrige zurück.
+  if (!['admin', 'disponent'].includes(user.role ?? '')) redirect(`/${locale}/dashboard`)
 
   const t = await getTranslations('team')
   const [mitarbeiter, stammMap] = await Promise.all([

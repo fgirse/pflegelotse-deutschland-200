@@ -11,7 +11,7 @@ export async function DELETE(
   req: NextRequest,
   ctx: { params: Promise<{ id: string; abwesenheitId: string }> },
 ) {
-  const auth = await requireAuth(req.headers, { roles: ['admin'] })
+  const auth = await requireAuth(req.headers, { roles: ['disponent', 'admin'] })
   if (!auth.ok) return auth.response
   if (!auth.user.tenantId) {
     return NextResponse.json({ error: 'Kein Mandant zugeordnet' }, { status: 403 })

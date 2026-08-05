@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 // GET /api/v1/team/mitarbeiter — Pflegekräfte des eigenen Mandanten.
 // Nur der Dienst-Inhaber (admin); tenantId kommt aus der Sitzung.
 export async function GET(req: NextRequest) {
-  const auth = await requireAuth(req.headers, { roles: ['admin'] })
+  const auth = await requireAuth(req.headers, { roles: ['disponent', 'admin'] })
   if (!auth.ok) return auth.response
   if (!auth.user.tenantId) {
     return NextResponse.json({ error: 'Kein Mandant zugeordnet' }, { status: 403 })
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
 // POST /api/v1/team/mitarbeiter — neue Pflegekraft anlegen. Rolle + tenantId
 // werden serverseitig gesetzt; der Client liefert nur die fachlichen Felder.
 export async function POST(req: NextRequest) {
-  const auth = await requireAuth(req.headers, { roles: ['admin'] })
+  const auth = await requireAuth(req.headers, { roles: ['disponent', 'admin'] })
   if (!auth.ok) return auth.response
   if (!auth.user.tenantId) {
     return NextResponse.json({ error: 'Kein Mandant zugeordnet' }, { status: 403 })

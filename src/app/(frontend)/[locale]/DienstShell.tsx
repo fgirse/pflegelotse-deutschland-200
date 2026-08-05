@@ -17,17 +17,20 @@ export async function DienstShell({
   children: ReactNode
 }) {
   const t = await getTranslations('dashboard')
-  const alle: { id: DienstNavId; href: string; label: string; adminOnly?: boolean }[] = [
+  // Team-Verwaltung ist den planenden Rollen vorbehalten (Admin + Disponent);
+  // Pflegekräfte sehen den Punkt nicht.
+  const nurPlanung = ['admin', 'disponent']
+  const alle: { id: DienstNavId; href: string; label: string; rollen?: string[] }[] = [
     { id: 'dashboard', href: '/dashboard', label: t('navDashboard') },
     { id: 'eingaenge', href: '/eingaenge', label: t('eingaengeNav') },
     { id: 'klienten', href: '/dienst/klienten', label: t('klientenLink') },
     { id: 'leistungen', href: '/dienst/leistungen', label: t('leistungenLink') },
     { id: 'berichte', href: '/berichte', label: t('berichteLink') },
     { id: 'abrechnung', href: '/abrechnung', label: t('abrechnungLink') },
-    { id: 'team', href: '/dienst/team', label: t('teamLink'), adminOnly: true },
+    { id: 'team', href: '/dienst/team', label: t('teamLink'), rollen: nurPlanung },
   ]
   const items = alle
-    .filter((i) => !i.adminOnly || role === 'admin')
+    .filter((i) => !i.rollen || i.rollen.includes(role))
     .map((i) => ({ id: i.id, href: i.href, label: i.label }))
 
   return (

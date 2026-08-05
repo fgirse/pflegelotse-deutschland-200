@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 // Pflegekraft speichern. Nur Admin; die Kraft muss zum eigenen Mandanten gehören
 // und ein Kürzel (pflegekraftId) haben, sonst gibt es keinen Verknüpfungsschlüssel.
 export async function PUT(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const auth = await requireAuth(req.headers, { roles: ['admin'] })
+  const auth = await requireAuth(req.headers, { roles: ['disponent', 'admin'] })
   if (!auth.ok) return auth.response
   if (!auth.user.tenantId) {
     return NextResponse.json({ error: 'Kein Mandant zugeordnet' }, { status: 403 })

@@ -12,7 +12,7 @@ const schema = z.object({ typ: z.enum(['passwort', '2fa']) })
 // gehören (im Service geprüft). Beim Passwort-Reset kommt das neue Initial-
 // Passwort EINMALIG in der Antwort zurück.
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const auth = await requireAuth(req.headers, { roles: ['admin'] })
+  const auth = await requireAuth(req.headers, { roles: ['disponent', 'admin'] })
   if (!auth.ok) return auth.response
   if (!auth.user.tenantId) {
     return NextResponse.json({ error: 'Kein Mandant zugeordnet' }, { status: 403 })
