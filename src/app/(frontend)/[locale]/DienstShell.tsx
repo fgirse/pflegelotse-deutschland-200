@@ -48,10 +48,10 @@ export async function DienstShell({
                   key={i.id}
                   href={i.href}
                   aria-current={aktiv ? 'page' : undefined}
-                  className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                  className={`shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-sm transition-colors ${
                     aktiv
-                      ? 'bg-[var(--color-accent-soft)] text-[var(--color-accent)]'
-                      : 'text-[var(--color-muted)] hover:bg-[var(--color-line)] hover:text-[var(--color-ink)]'
+                      ? 'bg-[var(--color-accent-soft)] font-bold text-[var(--color-accent)]'
+                      : 'font-medium text-[var(--color-muted)] hover:bg-[var(--color-line)] hover:text-[var(--color-ink)]'
                   }`}
                 >
                   {i.label}
