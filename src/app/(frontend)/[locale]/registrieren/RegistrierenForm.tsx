@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
-import { ORTE } from '@/shared/orte'
 import { PasswortFeld } from '../PasswortFeld'
 
 type Typ = 'suchende' | 'dienst'
@@ -18,8 +17,7 @@ export function RegistrierenForm({ locale }: { locale: string }) {
   const [password, setPassword] = useState('')
   const [suchendeTyp, setSuchendeTyp] = useState('angehoerige')
   const [dienstName, setDienstName] = useState('')
-  // Einzugsgebiet des Dienstes: Ortsauswahl (Fallback) + optionale Adresssuche.
-  const [ortWahl, setOrtWahl] = useState<string>(Object.keys(ORTE)[0])
+  // Einzugsgebiet des Dienstes: Mittelpunkt per Adresssuche (Pflicht) + Radius.
   const [radius, setRadius] = useState(15)
   const [adresseSuche, setAdresseSuche] = useState('')
   const [geocodedGeo, setGeocodedGeo] = useState<{ lat: number; lng: number } | null>(null)
@@ -55,7 +53,8 @@ export function RegistrierenForm({ locale }: { locale: string }) {
     setBusy(true)
     setFehler(null)
     try {
-      const einzugsGeo = geocodedGeo ?? ORTE[ortWahl]
+      // Mittelpunkt kommt ausschließlich aus der Adress-/Ortssuche.
+      const einzugsGeo = geocodedGeo
       const body =
         typ === 'dienst'
           ? { typ, email, password, dienstName, einzugsGeo, einzugsRadiusKm: radius, einwilligung: einw }
@@ -91,7 +90,8 @@ export function RegistrierenForm({ locale }: { locale: string }) {
     email.length > 3 &&
     password.length >= 8 &&
     einw &&
-    (typ === 'suchende' || dienstName.length >= 2)
+    // Dienste brauchen Name UND einen per Adresssuche gesetzten Mittelpunkt.
+    (typ === 'suchende' || (dienstName.length >= 2 && Boolean(geocodedGeo)))
 
   return (
     <div className="card mt-6 p-5">
@@ -139,17 +139,7 @@ export function RegistrierenForm({ locale }: { locale: string }) {
             <div className="rounded-lg border border-[var(--color-line)] bg-[var(--color-paper)] p-3">
               <p className="text-sm font-medium">{t('einzugsTitel')}</p>
               <p className="mt-1 text-xs text-[var(--color-faint)]">{t('einzugsHinweis')}</p>
-              <label className="label mt-3">
-                {t('ort')}
-                <select className="input" value={ortWahl} onChange={(e) => setOrtWahl(e.target.value)}>
-                  {Object.keys(ORTE).map((o) => (
-                    <option key={o} value={o}>
-                      {o}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <span className="label mt-3">{t('adresseSuche')}</span>
+              <span className="label mt-3">{t('adresseSuche')} *</span>
               <div className="mt-1 flex gap-2">
                 <input
                   value={adresseSuche}
