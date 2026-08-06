@@ -48,6 +48,11 @@ export function BedarfForm() {
   // Schritt 1 — Person
   const [strasse, setStrasse] = useState('')
   const [hausnummer, setHausnummer] = useState('')
+  // Adresse muss vor dem Fortfahren geokodiert (bestätigt) werden.
+  const [geocodedGeo, setGeocodedGeo] = useState<{ lat: number; lng: number } | null>(null)
+  const [geoStadtteil, setGeoStadtteil] = useState<string | undefined>(undefined)
+  const [geoLabel, setGeoLabel] = useState<string | null>(null)
+  const [geoBusy, setGeoBusy] = useState(false)
   const [alter, setAlter] = useState('')
   const [wohnsituation, setWohnsituation] = useState<'' | 'alleinlebend' | 'gemeinschaft'>('')
   const [pflegegrad, setPflegegrad] = useState('')
@@ -81,31 +86,60 @@ export function BedarfForm() {
     setGruppen((g) => ({ ...g, [key]: { ...g[key], ...patch } }))
   }
 
-  const step1Ok = strasse && hausnummer && Number(alter) >= 1 && pflegegrad && startDatum
+  // Adresse geokodieren und bestätigen. Der grobe Stadtteil (für die anonyme
+  // Dienst-Anzeige) wird aus dem Treffer abgeleitet, sofern erkennbar.
+  async function adresseSuchen() {
+    if (strasse.trim().length < 2 || hausnummer.trim().length < 1) return
+    setGeoBusy(true)
+    setGeoLabel(null)
+    try {
+      const q = `${strasse} ${hausnummer}, Freiburg`
+      const res = await fetch(`/api/v1/geo/geocode?q=${encodeURIComponent(q)}`)
+      if (!res.ok) {
+        setGeocodedGeo(null)
+        setGeoLabel(t('bedarf.adresseNichtGefunden'))
+        return
+      }
+      const d = await res.json()
+      if (typeof d.lat === 'number' && typeof d.lng === 'number') {
+        setGeocodedGeo({ lat: d.lat, lng: d.lng })
+        setGeoLabel(typeof d.displayName === 'string' ? d.displayName : '')
+        setGeoStadtteil(
+          typeof d.displayName === 'string'
+            ? Object.keys(ORTE).find((o) => d.displayName.includes(o))
+            : undefined,
+        )
+      } else {
+        setGeocodedGeo(null)
+        setGeoLabel(t('bedarf.adresseNichtGefunden'))
+      }
+    } catch {
+      setGeocodedGeo(null)
+      setGeoLabel(t('bedarf.adresseNichtGefunden'))
+    } finally {
+      setGeoBusy(false)
+    }
+  }
+
+  // Änderung an der Adresse verwirft eine frühere Bestätigung.
+  function adresseGeaendert(setter: (v: string) => void, wert: string) {
+    setter(wert)
+    setGeocodedGeo(null)
+    setGeoLabel(null)
+  }
+
+  const step1Ok =
+    strasse && hausnummer && geocodedGeo && Number(alter) >= 1 && pflegegrad && startDatum
   const step3Ok = name.trim() && email.trim() && kontaktart.length > 0 && datenschutz
 
   async function absenden() {
     setSende(true)
     setFehler(null)
     try {
-      // Adresse geokodieren (für die Tour); Fallback = Freiburg-Zentrum. Der
-      // grobe Stadtteil (für die anonyme Dienst-Anzeige) wird aus dem Geocoder-
-      // Ergebnis abgeleitet, sofern ein bekannter Ort darin vorkommt.
-      let geo = ORTE.Innenstadt
-      let stadtteil: string | undefined
-      try {
-        const q = `${strasse} ${hausnummer}, Freiburg`
-        const res = await fetch(`/api/v1/geo/geocode?q=${encodeURIComponent(q)}`)
-        if (res.ok) {
-          const d = await res.json()
-          if (typeof d.lat === 'number' && typeof d.lng === 'number') geo = { lat: d.lat, lng: d.lng }
-          if (typeof d.displayName === 'string') {
-            stadtteil = Object.keys(ORTE).find((o) => d.displayName.includes(o))
-          }
-        }
-      } catch {
-        /* Fallback bleibt Freiburg-Zentrum */
-      }
+      // Adresse ist bereits bestätigt (Pflicht in Schritt 1) — Koordinaten und
+      // abgeleiteten Stadtteil direkt übernehmen.
+      const geo = geocodedGeo ?? ORTE.Innenstadt
+      const stadtteil = geoStadtteil
 
       // Leistungsauswahl strukturiert + legacy-kompatible Ableitungen.
       const leistungsauswahl: Record<string, unknown> = {}
@@ -255,12 +289,39 @@ export function BedarfForm() {
           <div className="flex gap-3">
             <label className="label flex-1">
               {t('bedarf.strasse')} *
-              <input value={strasse} onChange={(e) => setStrasse(e.target.value)} className={inputCls} />
+              <input
+                value={strasse}
+                onChange={(e) => adresseGeaendert(setStrasse, e.target.value)}
+                className={inputCls}
+              />
             </label>
             <label className="label w-32">
               {t('bedarf.hausnummer')} *
-              <input value={hausnummer} onChange={(e) => setHausnummer(e.target.value)} className={inputCls} />
+              <input
+                value={hausnummer}
+                onChange={(e) => adresseGeaendert(setHausnummer, e.target.value)}
+                className={inputCls}
+              />
             </label>
+          </div>
+          {/* Adresse verpflichtend bestätigen (geokodieren) — sonst kein Weiter. */}
+          <div>
+            <button
+              type="button"
+              onClick={adresseSuchen}
+              disabled={geoBusy || strasse.trim().length < 2 || hausnummer.trim().length < 1}
+              className="btn btn-outline"
+            >
+              {t('bedarf.adressePruefen')}
+            </button>
+            {geoLabel && (
+              <p className="mt-1 text-xs text-[var(--color-faint)]">
+                {geocodedGeo ? `✓ ${geoLabel}` : geoLabel}
+              </p>
+            )}
+            {!geocodedGeo && !geoLabel && (
+              <p className="mt-1 text-xs text-[var(--color-faint)]">{t('bedarf.adressePruefenHinweis')}</p>
+            )}
           </div>
           <label className="label">
             {t('bedarf.alter')} *
