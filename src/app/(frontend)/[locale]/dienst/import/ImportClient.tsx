@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { ZIELFELDER, rateMapping } from '@/shared/importMapping'
+import { KASSEN_PRIVAT } from '@/shared/krankenkassen'
 
 type Ergebnis = {
   neu: number
@@ -10,6 +11,12 @@ type Ergebnis = {
   verarbeitet: number
   fehler: { externalId: string; grund: string }[]
 }
+
+// Privat versicherte Import-Zeile für die KV-Korrektur.
+type KvZeile = { externalId: string; kasseRoh: string; bekannt: boolean }
+
+// Rohnamen (klein) → offizieller Schreibweise, für die Vorbelegung des Dropdowns.
+const PRIVAT_BY_LOWER = new Map(KASSEN_PRIVAT.map((n) => [n.toLowerCase(), n]))
 
 export function ImportClient({ initialText }: { initialText?: string } = {}) {
   const t = useTranslations('import')
@@ -21,10 +28,16 @@ export function ImportClient({ initialText }: { initialText?: string } = {}) {
   const [fehler, setFehler] = useState<string | null>(null)
   const [ergebnis, setErgebnis] = useState<Ergebnis | null>(null)
   const [fortschritt, setFortschritt] = useState<{ fertig: number; gesamt: number } | null>(null)
+  // KV-Korrektur: privat versicherte Zeilen + je external_id gewählte Kasse.
+  const [kvZeilen, setKvZeilen] = useState<KvZeile[] | null>(null)
+  const [kvOverrides, setKvOverrides] = useState<Record<string, string>>({})
+  const [kvBusy, setKvBusy] = useState(false)
 
   async function verarbeiteText(text: string) {
     setFehler(null)
     setErgebnis(null)
+    setKvZeilen(null)
+    setKvOverrides({})
     setCsv(text)
     const res = await fetch('/api/v1/import/preview', {
       method: 'POST',
@@ -52,6 +65,38 @@ export function ImportClient({ initialText }: { initialText?: string } = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialText])
 
+  // Privat versicherte Zeilen serverseitig ermitteln und je Klient die Kasse
+  // aus dem privaten Katalog bestätigen/korrigieren lassen. Vorbelegung: exakte
+  // Treffer werden auf die offizielle Schreibweise gesetzt, Rest bleibt offen.
+  async function kvPruefen() {
+    setKvBusy(true)
+    setFehler(null)
+    try {
+      const res = await fetch('/api/v1/import/kv-vorschau', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ csv, mapping }),
+      })
+      if (!res.ok) {
+        setFehler(t('fehlerImport'))
+        return
+      }
+      const d = (await res.json()) as { zeilen: KvZeile[] }
+      const zeilen = d.zeilen ?? []
+      const vorbelegt: Record<string, string> = {}
+      for (const z of zeilen) {
+        const treffer = PRIVAT_BY_LOWER.get(z.kasseRoh.toLowerCase())
+        if (treffer) vorbelegt[z.externalId] = treffer
+      }
+      setKvOverrides(vorbelegt)
+      setKvZeilen(zeilen)
+    } catch {
+      setFehler(t('fehlerImport'))
+    } finally {
+      setKvBusy(false)
+    }
+  }
+
   // Import in Blöcken (Client-Chunking): große Dateien würden in EINEM Request
   // das Serverless-Timeout reißen. Wir senden je BLOCK Zeilen nacheinander,
   // aggregieren die Ergebnisse und zeigen den Fortschritt. Header wird jedem
@@ -67,6 +112,11 @@ export function ImportClient({ initialText }: { initialText?: string } = {}) {
     const gesamt = daten.length
     setFortschritt({ fertig: 0, gesamt })
 
+    // Nur nicht-leere Korrekturen senden — leere würden den Rohwert löschen.
+    const kassenOverrides = Object.fromEntries(
+      Object.entries(kvOverrides).filter(([, v]) => v),
+    )
+
     let neu = 0
     let aktualisiert = 0
     let verarbeitet = 0
@@ -79,7 +129,7 @@ export function ImportClient({ initialText }: { initialText?: string } = {}) {
           const res = await fetch('/api/v1/import/clients', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ csv: blockCsv, mapping }),
+            body: JSON.stringify({ csv: blockCsv, mapping, kassenOverrides }),
           })
           if (res.ok) {
             const d = (await res.json()) as Ergebnis
@@ -149,7 +199,12 @@ export function ImportClient({ initialText }: { initialText?: string } = {}) {
                 <select
                   className="input mt-0"
                   value={mapping[f.key] ?? ''}
-                  onChange={(e) => setMapping((m) => ({ ...m, [f.key]: e.target.value }))}
+                  onChange={(e) => {
+                    setMapping((m) => ({ ...m, [f.key]: e.target.value }))
+                    // Zuordnung geändert → KV-Vorschau ist nicht mehr aktuell.
+                    setKvZeilen(null)
+                    setKvOverrides({})
+                  }}
                 >
                   <option value="">— {t('nichtZuordnen')} —</option>
                   {headers.map((h) => (
@@ -162,6 +217,68 @@ export function ImportClient({ initialText }: { initialText?: string } = {}) {
             ))}
           </div>
           {!geoOk && <p className="mt-3 text-sm text-[var(--color-danger)]">⚠ {t('geoNoetig')}</p>}
+
+          {/* Private Kassen bestätigen/korrigieren (Dropdown je Klient). Nur
+              sinnvoll, wenn Kostenträger UND Kasse zugeordnet sind. */}
+          {bereit && mapping.kostentraeger && mapping.krankenkasse && (
+            <div className="mt-4 rounded-lg border border-[var(--color-line)] p-4">
+              <h3 className="font-display font-semibold">{t('kvTitel')}</h3>
+              <p className="mt-1 text-xs text-[var(--color-faint)]">{t('kvHinweis')}</p>
+              {kvZeilen === null ? (
+                <button
+                  onClick={kvPruefen}
+                  disabled={kvBusy}
+                  className="btn btn-outline mt-3"
+                >
+                  {kvBusy ? t('kvLaedt') : t('kvPruefen')}
+                </button>
+              ) : kvZeilen.length === 0 ? (
+                <p className="mt-3 text-sm text-[var(--color-muted)]">{t('kvKeine')}</p>
+              ) : (
+                <>
+                  {(() => {
+                    const offen = kvZeilen.filter((z) => !kvOverrides[z.externalId]).length
+                    return offen > 0 ? (
+                      <p className="mt-3 text-sm text-[var(--color-danger)]">
+                        ⚠ {t('kvOffen', { n: offen })}
+                      </p>
+                    ) : (
+                      <p className="mt-3 text-sm text-[var(--color-success)]">
+                        ✓ {t('kvVollstaendig', { n: kvZeilen.length })}
+                      </p>
+                    )
+                  })()}
+                  <div className="mt-3 flex max-h-72 flex-col gap-2 overflow-y-auto">
+                    {kvZeilen.map((z) => (
+                      <div key={z.externalId} className="grid grid-cols-2 items-center gap-2 text-sm">
+                        <span className="truncate">
+                          <span className="font-medium">{z.externalId}</span>
+                          {z.kasseRoh && (
+                            <span className="text-[var(--color-faint)]"> · {z.kasseRoh}</span>
+                          )}
+                        </span>
+                        <select
+                          className="input mt-0"
+                          value={kvOverrides[z.externalId] ?? ''}
+                          onChange={(e) =>
+                            setKvOverrides((m) => ({ ...m, [z.externalId]: e.target.value }))
+                          }
+                        >
+                          <option value="">— {t('kvWaehlen')} —</option>
+                          {KASSEN_PRIVAT.map((name) => (
+                            <option key={name} value={name}>
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
           <button
             onClick={importieren}
             disabled={busy || !bereit}

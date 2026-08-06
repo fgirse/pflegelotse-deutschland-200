@@ -454,7 +454,15 @@
     "ergebnis": "{neu} neu angelegt, {aktualisiert} aktualisiert.",
     "fehlerTitel": "{n} Datensätze übersprungen:",
     "fehlerDatei": "Datei konnte nicht gelesen werden.",
-    "fehlerImport": "Import fehlgeschlagen. Bitte erneut versuchen."
+    "fehlerImport": "Import fehlgeschlagen. Bitte erneut versuchen.",
+    "kvTitel": "Private Krankenkassen bestätigen",
+    "kvHinweis": "Ordne jedem privat versicherten Klienten die Kasse aus dem Katalog zu. Bekannte Namen sind vorbelegt.",
+    "kvPruefen": "Private Kassen prüfen",
+    "kvLaedt": "Prüfe …",
+    "kvKeine": "Keine privat versicherten Klienten in der Datei.",
+    "kvWaehlen": "wählen",
+    "kvOffen": "{n} private Kasse(n) noch nicht zugeordnet — nicht zugeordnete behalten den Wert aus der Datei.",
+    "kvVollstaendig": "{n} private Kasse(n) zugeordnet."
   },
   "tools": {
     "title": "Kostenlose Tools",

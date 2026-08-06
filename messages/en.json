@@ -455,7 +455,15 @@
     "ergebnis": "{neu} created, {aktualisiert} updated.",
     "fehlerTitel": "{n} records skipped:",
     "fehlerDatei": "Could not read the file.",
-    "fehlerImport": "Import failed. Please try again."
+    "fehlerImport": "Import failed. Please try again.",
+    "kvTitel": "Confirm private health insurers",
+    "kvHinweis": "Assign each privately insured client an insurer from the catalogue. Known names are pre-filled.",
+    "kvPruefen": "Check private insurers",
+    "kvLaedt": "Checking …",
+    "kvKeine": "No privately insured clients in the file.",
+    "kvWaehlen": "select",
+    "kvOffen": "{n} private insurer(s) not yet assigned — unassigned ones keep the value from the file.",
+    "kvVollstaendig": "{n} private insurer(s) assigned."
   },
   "tools": {
     "title": "Free tools",

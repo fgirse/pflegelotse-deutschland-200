@@ -16,6 +16,8 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null)
   const csv: string = typeof body?.csv === 'string' ? body.csv : ''
   const mapping: Record<string, string> = body?.mapping ?? {}
+  // Je external_id ein im UI bestätigter/korrigierter privater Kassenname.
+  const kassenOverrides: Record<string, string> = body?.kassenOverrides ?? {}
   if (!csv.trim()) {
     return NextResponse.json({ error: 'Leere CSV-Daten' }, { status: 400 })
   }
@@ -27,6 +29,9 @@ export async function POST(req: NextRequest) {
     for (const [feld, spalte] of Object.entries(mapping)) {
       if (spalte) o[feld] = r[spalte] ?? ''
     }
+    // Korrektur der privaten KV aus der UI-Vorschau hat Vorrang vor dem Rohwert.
+    const override = o.external_id ? kassenOverrides[o.external_id.trim()] : undefined
+    if (override) o.krankenkasse = override
     return o
   })
 

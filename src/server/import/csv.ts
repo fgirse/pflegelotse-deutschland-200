@@ -230,7 +230,7 @@ function normDatum(v: string | undefined): string {
 }
 
 // Kostenträger-Freitext → Enum (gesetzlich/privat) oder undefined.
-function normKostentraeger(v: string | undefined): 'gesetzlich' | 'privat' | undefined {
+export function normKostentraeger(v: string | undefined): 'gesetzlich' | 'privat' | undefined {
   const s = (v ?? '').toLowerCase()
   if (s.includes('gesetz') || s.includes('gkv')) return 'gesetzlich'
   if (s.includes('privat') || s.includes('pkv')) return 'privat'
