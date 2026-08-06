@@ -23,10 +23,12 @@ function hhmmZuMin(s: string): number | null {
 export function KlientenTabelle({
   anfang,
   kassen,
+  kassenPrivat,
   katalog,
 }: {
   anfang: KlientListenZeile[]
   kassen: string[]
+  kassenPrivat: string[]
   katalog: { code: string; bezeichnung: string }[]
 }) {
   const t = useTranslations('klienten')
@@ -613,7 +615,11 @@ export function KlientenTabelle({
               <select
                 className="input"
                 value={kostentraeger}
-                onChange={(e) => setKostentraeger(e.target.value)}
+                onChange={(e) => {
+                  // Art gewechselt → bisherige Kassenwahl passt nicht mehr zur Liste.
+                  setKostentraeger(e.target.value)
+                  setKasse('')
+                }}
               >
                 <option value="">{t('kostentraegerLeer')}</option>
                 <option value="gesetzlich">{t('gesetzlich')}</option>
@@ -622,10 +628,10 @@ export function KlientenTabelle({
             </label>
             <label className="label">
               {t('krankenkasse')}
-              {kostentraeger === 'gesetzlich' ? (
+              {kostentraeger === 'gesetzlich' || kostentraeger === 'privat' ? (
                 <select className="input" value={kasse} onChange={(e) => setKasse(e.target.value)}>
                   <option value="">—</option>
-                  {kassen.map((name) => (
+                  {(kostentraeger === 'privat' ? kassenPrivat : kassen).map((name) => (
                     <option key={name} value={name}>
                       {name}
                     </option>

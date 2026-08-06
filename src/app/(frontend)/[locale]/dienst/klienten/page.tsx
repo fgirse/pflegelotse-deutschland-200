@@ -5,7 +5,7 @@ import { requireDienstSeite } from '@/server/auth/page'
 import { DienstShell } from '../../DienstShell'
 import { ladeKlientenListe } from '@/server/klienten/liste'
 import { ladeKatalogAuswahl } from '@/server/leistungen/service'
-import kassenListe from '@/shared/data/krankenkassen-gesetzlich.json'
+import { KASSEN_GESETZLICH, KASSEN_PRIVAT } from '@/shared/krankenkassen'
 import { KlientenTabelle } from './KlientenTabelle'
 
 // Klientenliste (Stammdaten): führt Identität (Säule 1) und operative Merkmale
@@ -27,8 +27,10 @@ export default async function KlientenPage({
     ladeKlientenListe(user.tenantId),
     ladeKatalogAuswahl(user.tenantId),
   ])
-  // Nur die Kassennamen ans Frontend (Dropdown bei gesetzlich Versicherten).
-  const kassen = (kassenListe as { name: string }[]).map((k) => k.name)
+  // Kassennamen je Art ans Frontend — Dropdown für gesetzlich UND privat
+  // Versicherte (Quelle: src/shared/data/krankenkassen-{gesetzlich,privat}.json).
+  const kassen = KASSEN_GESETZLICH
+  const kassenPrivat = KASSEN_PRIVAT
 
   return (
     <DienstShell role={user.role} active="klienten">
@@ -41,7 +43,7 @@ export default async function KlientenPage({
           {t('importLink')}
         </Link>
       </header>
-      <KlientenTabelle anfang={klienten} kassen={kassen} katalog={katalog} />
+      <KlientenTabelle anfang={klienten} kassen={kassen} kassenPrivat={kassenPrivat} katalog={katalog} />
     </DienstShell>
   )
 }
