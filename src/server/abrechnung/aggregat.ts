@@ -47,6 +47,7 @@ export function aggregiere(
   nachweise: NachweisEintrag[],
   preise: Record<string, number>,
   klienten: Map<string, KlientInfo>,
+  preisePrivat: Record<string, number> = {},
 ): Aggregat {
   const positionen: AbrechnungPosition[] = []
   const buchungen: Buchung[] = []
@@ -54,13 +55,15 @@ export function aggregiere(
 
   for (const n of nachweise) {
     const info = klienten.get(n.pseudonymId) ?? { name: 'Unbekannt' }
+    const istPrivat = info.kostentraegerArt === 'privat'
     // Gleiche Leistungscodes eines Besuchs zu einer Menge zusammenfassen.
     const zaehler = new Map<string, number>()
     for (const code of n.erbrachteLeistungen) zaehler.set(code, (zaehler.get(code) ?? 0) + 1)
 
     let besuchBetrag = 0
     for (const [code, menge] of zaehler) {
-      const einzel = preise[code] ?? 0
+      // Privatversicherte zum PKV-Satz abrechnen; fehlt er, gilt der GKV-Satz.
+      const einzel = (istPrivat ? preisePrivat[code] : undefined) ?? preise[code] ?? 0
       const betrag = rund(einzel * menge)
       besuchBetrag += betrag
       positionen.push({

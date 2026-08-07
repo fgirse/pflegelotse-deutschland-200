@@ -467,6 +467,15 @@ export interface Abrechnungskonfiguration {
     | number
     | boolean
     | null;
+  preisePrivat?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   beraterNr?: string | null;
   mandantenNr?: string | null;
   wjBeginn?: string | null;
@@ -1127,6 +1136,7 @@ export interface VerordnungenSelect<T extends boolean = true> {
 export interface AbrechnungskonfigurationSelect<T extends boolean = true> {
   tenantId?: T;
   preise?: T;
+  preisePrivat?: T;
   beraterNr?: T;
   mandantenNr?: T;
   wjBeginn?: T;

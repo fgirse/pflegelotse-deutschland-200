@@ -360,6 +360,7 @@ export async function erstelleKlientOperativ(o: {
 
 export interface Abrechnungskonfig {
   preise: Record<string, number>
+  preisePrivat: Record<string, number>
   beraterNr?: string
   mandantenNr?: string
   wjBeginn?: string
@@ -381,6 +382,7 @@ export async function ladeAbrechnungskonfig(tenantId: string): Promise<Abrechnun
   if (!d) return null
   return {
     preise: d.preise && typeof d.preise === 'object' ? d.preise : {},
+    preisePrivat: d.preisePrivat && typeof d.preisePrivat === 'object' ? d.preisePrivat : {},
     beraterNr: d.beraterNr ?? undefined,
     mandantenNr: d.mandantenNr ?? undefined,
     wjBeginn: d.wjBeginn ?? undefined,

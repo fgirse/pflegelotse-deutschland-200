@@ -4,16 +4,25 @@ import type { LeistungEintrag, LeistungSpeichern } from '@/shared/leistungskatal
 
 type Payload = Awaited<ReturnType<typeof payloadClient>>
 
-// Preise des Mandanten aus der Abrechnungskonfiguration (Single Source Preise).
-async function ladePreise(payload: Payload, tenantId: string): Promise<Record<string, number>> {
+// GKV- und PKV-Preise des Mandanten aus der Abrechnungskonfiguration
+// (Single Source der Preise).
+async function ladePreise(
+  payload: Payload,
+  tenantId: string,
+): Promise<{ preise: Record<string, number>; preisePrivat: Record<string, number> }> {
   const res = await payload.find({
     collection: 'abrechnungskonfiguration',
     where: { tenantId: { equals: tenantId } },
     limit: 1,
     overrideAccess: true,
   })
-  const d = res.docs[0] as { preise?: Record<string, number> } | undefined
-  return d?.preise && typeof d.preise === 'object' ? d.preise : {}
+  const d = res.docs[0] as
+    | { preise?: Record<string, number>; preisePrivat?: Record<string, number> }
+    | undefined
+  return {
+    preise: d?.preise && typeof d.preise === 'object' ? d.preise : {},
+    preisePrivat: d?.preisePrivat && typeof d.preisePrivat === 'object' ? d.preisePrivat : {},
+  }
 }
 
 type KatalogDoc = {
@@ -25,7 +34,11 @@ type KatalogDoc = {
   aktiv?: boolean | null
 }
 
-function zuEintrag(d: KatalogDoc, preise: Record<string, number>): LeistungEintrag {
+function zuEintrag(
+  d: KatalogDoc,
+  preise: Record<string, number>,
+  preisePrivat: Record<string, number>,
+): LeistungEintrag {
   const code = d.code ?? ''
   return {
     code,
@@ -34,6 +47,7 @@ function zuEintrag(d: KatalogDoc, preise: Record<string, number>): LeistungEintr
     dauerMin: typeof d.dauerMin === 'number' ? d.dauerMin : undefined,
     grundzeitMin: typeof d.grundzeitMin === 'number' ? d.grundzeitMin : undefined,
     preis: typeof preise[code] === 'number' ? preise[code] : undefined,
+    preisPrivat: typeof preisePrivat[code] === 'number' ? preisePrivat[code] : undefined,
     aktiv: d.aktiv !== false,
   }
 }
@@ -67,38 +81,48 @@ export async function ladeKatalog(tenantId: string): Promise<LeistungEintrag[]> 
     }
     res = await payload.find(query)
   }
-  const preise = await ladePreise(payload, tenantId)
-  return res.docs.map((d) => zuEintrag(d as KatalogDoc, preise))
+  const { preise, preisePrivat } = await ladePreise(payload, tenantId)
+  return res.docs.map((d) => zuEintrag(d as KatalogDoc, preise, preisePrivat))
 }
 
-// Schreibt den Preis in die Abrechnungskonfiguration (Upsert des Mandanten-Docs).
+// Schreibt GKV- und/oder PKV-Preis in die Abrechnungskonfiguration (Upsert des
+// Mandanten-Docs). Nur übergebene Werte werden gesetzt; undefined bleibt unberührt.
 async function setzePreis(
   payload: Payload,
   tenantId: string,
   code: string,
-  preis: number,
+  preis: number | undefined,
+  preisPrivat: number | undefined,
 ): Promise<void> {
+  if (preis === undefined && preisPrivat === undefined) return
   const res = await payload.find({
     collection: 'abrechnungskonfiguration',
     where: { tenantId: { equals: tenantId } },
     limit: 1,
     overrideAccess: true,
   })
-  const doc = res.docs[0] as { id: string | number; preise?: Record<string, number> } | undefined
+  const doc = res.docs[0] as
+    | { id: string | number; preise?: Record<string, number>; preisePrivat?: Record<string, number> }
+    | undefined
+  const merge = (
+    vorhanden: Record<string, number> | undefined,
+    wert: number | undefined,
+  ): Record<string, number> | undefined => {
+    if (wert === undefined) return vorhanden && typeof vorhanden === 'object' ? vorhanden : undefined
+    return { ...(vorhanden && typeof vorhanden === 'object' ? vorhanden : {}), [code]: wert }
+  }
   if (doc) {
-    const preise = { ...(doc.preise && typeof doc.preise === 'object' ? doc.preise : {}), [code]: preis }
-    await payload.update({
-      collection: 'abrechnungskonfiguration',
-      id: doc.id,
-      data: { preise },
-      overrideAccess: true,
-    })
+    const data: { preise?: Record<string, number>; preisePrivat?: Record<string, number> } = {}
+    if (preis !== undefined) data.preise = merge(doc.preise, preis)
+    if (preisPrivat !== undefined) data.preisePrivat = merge(doc.preisePrivat, preisPrivat)
+    await payload.update({ collection: 'abrechnungskonfiguration', id: doc.id, data, overrideAccess: true })
   } else {
-    await payload.create({
-      collection: 'abrechnungskonfiguration',
-      data: { tenantId, preise: { [code]: preis } },
-      overrideAccess: true,
-    })
+    const data: { tenantId: string; preise?: Record<string, number>; preisePrivat?: Record<string, number> } = {
+      tenantId,
+    }
+    if (preis !== undefined) data.preise = { [code]: preis }
+    if (preisPrivat !== undefined) data.preisePrivat = { [code]: preisPrivat }
+    await payload.create({ collection: 'abrechnungskonfiguration', data, overrideAccess: true })
   }
 }
 
@@ -135,7 +159,7 @@ export async function speichereLeistung(
   } else {
     await payload.create({ collection: 'leistungskatalog', data, overrideAccess: true })
   }
-  if (typeof daten.preis === 'number') await setzePreis(payload, tenantId, code, daten.preis)
+  await setzePreis(payload, tenantId, code, daten.preis, daten.preisPrivat)
 
   return {
     code,
@@ -144,6 +168,7 @@ export async function speichereLeistung(
     dauerMin: daten.dauerMin,
     grundzeitMin: daten.grundzeitMin,
     preis: daten.preis,
+    preisPrivat: daten.preisPrivat,
     aktiv: daten.aktiv,
   }
 }

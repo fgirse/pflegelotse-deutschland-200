@@ -27,7 +27,7 @@ async function sammle(tenantId: string, von: string, bis: string) {
     }),
   )
 
-  const agg: Aggregat = aggregiere(imZeitraum, konfig?.preise ?? {}, klienten)
+  const agg: Aggregat = aggregiere(imZeitraum, konfig?.preise ?? {}, klienten, konfig?.preisePrivat ?? {})
   return { agg, konfig, integritaet }
 }
 

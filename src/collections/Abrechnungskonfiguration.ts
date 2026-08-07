@@ -17,6 +17,8 @@ export const Abrechnungskonfiguration: CollectionConfig = {
     { name: 'tenantId', type: 'text', required: true, unique: true, index: true },
     // Preise je Leistungskomplex-Code in Euro, z. B. { "LK01": 25.5, "LK02": 18 }.
     { name: 'preise', type: 'json', defaultValue: {} },
+    // Abweichende Privatsätze (PKV) je Code. Fehlt ein Code, gilt der GKV-Satz.
+    { name: 'preisePrivat', type: 'json', defaultValue: {} },
     // ── DATEV-Kopfdaten (EXTF-Buchungsstapel) ──
     { name: 'beraterNr', type: 'text' }, // DATEV-Beraternummer
     { name: 'mandantenNr', type: 'text' }, // DATEV-Mandantennummer

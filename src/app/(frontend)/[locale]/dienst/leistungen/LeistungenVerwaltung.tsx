@@ -25,6 +25,7 @@ export function LeistungenVerwaltung({ anfang }: { anfang: LeistungEintrag[] }) 
   const [dauer, setDauer] = useState('')
   const [grundzeit, setGrundzeit] = useState('')
   const [preis, setPreis] = useState('')
+  const [preisPrivat, setPreisPrivat] = useState('')
   const [aktiv, setAktiv] = useState(true)
 
   const [busy, setBusy] = useState(false)
@@ -40,6 +41,7 @@ export function LeistungenVerwaltung({ anfang }: { anfang: LeistungEintrag[] }) 
     setDauer('')
     setGrundzeit('')
     setPreis('')
+    setPreisPrivat('')
     setAktiv(true)
     setErfolg(null)
     setFehler(null)
@@ -53,6 +55,7 @@ export function LeistungenVerwaltung({ anfang }: { anfang: LeistungEintrag[] }) 
     setDauer(e.dauerMin != null ? String(e.dauerMin) : '')
     setGrundzeit(e.grundzeitMin != null ? String(e.grundzeitMin) : '')
     setPreis(e.preis != null ? String(e.preis) : '')
+    setPreisPrivat(e.preisPrivat != null ? String(e.preisPrivat) : '')
     setAktiv(e.aktiv)
     setErfolg(null)
     setFehler(null)
@@ -76,6 +79,7 @@ export function LeistungenVerwaltung({ anfang }: { anfang: LeistungEintrag[] }) 
           dauerMin: zahl(dauer),
           grundzeitMin: zahl(grundzeit),
           preis: zahl(preis, true),
+          preisPrivat: zahl(preisPrivat, true),
           aktiv,
         }),
       })
@@ -162,6 +166,16 @@ export function LeistungenVerwaltung({ anfang }: { anfang: LeistungEintrag[] }) 
             />
           </label>
           <label className="label">
+            {t('preisPrivat')}
+            <input
+              className="input"
+              inputMode="decimal"
+              value={preisPrivat}
+              onChange={(e) => setPreisPrivat(e.target.value)}
+              placeholder="0,00"
+            />
+          </label>
+          <label className="label">
             {t('dauer')}
             <input
               className="input"
@@ -211,6 +225,7 @@ export function LeistungenVerwaltung({ anfang }: { anfang: LeistungEintrag[] }) 
                 <th className="py-2 pr-4 font-medium">{t('dauerKurz')}</th>
                 <th className="py-2 pr-4 font-medium">{t('grundzeitKurz')}</th>
                 <th className="py-2 pr-4 font-medium">{t('preisKurz')}</th>
+                <th className="py-2 pr-4 font-medium">{t('preisPrivatKurz')}</th>
                 <th className="py-2 font-medium">{t('spalteAktionen')}</th>
               </tr>
             </thead>
@@ -232,6 +247,7 @@ export function LeistungenVerwaltung({ anfang }: { anfang: LeistungEintrag[] }) 
                   <td className="py-2 pr-4">{e.dauerMin != null ? e.dauerMin : '—'}</td>
                   <td className="py-2 pr-4">{e.grundzeitMin != null ? e.grundzeitMin : '—'}</td>
                   <td className="py-2 pr-4">{e.preis != null ? e.preis.toFixed(2) : '—'}</td>
+                  <td className="py-2 pr-4">{e.preisPrivat != null ? e.preisPrivat.toFixed(2) : '—'}</td>
                   <td className="py-2">
                     <div className="flex gap-3 whitespace-nowrap">
                       <button
