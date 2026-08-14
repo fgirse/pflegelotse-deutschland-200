@@ -9,6 +9,10 @@ export interface DatevKonfig {
   sachkontenlaenge?: number
   erloesKonto?: string
   debitorKonto?: string
+  // Abweichende Konten für Privatversicherte (PKV). Fehlen sie, gelten die
+  // Standardkonten oben (erloesKonto/debitorKonto).
+  erloesKontoPrivat?: string
+  debitorKontoPrivat?: string
 }
 
 const q = (s: string) => `"${s.replace(/"/g, '""')}"`
@@ -55,22 +59,29 @@ export function baueDatevStapel(
 
   const spaltenZeile = DATEV_SPALTEN.map(q).join(';')
 
-  const zeilen = buchungen.map((b, i) => [
-    euro(b.betragEuro), // Umsatz
-    'S', // Soll/Haben: Debitor im Soll
-    'EUR',
-    '', // Kurs
-    '', // Basis-Umsatz
-    '', // WKZ Basis-Umsatz
-    konfig.debitorKonto ?? '', // Konto (Debitor)
-    konfig.erloesKonto ?? '', // Gegenkonto (Erlöse)
-    '', // BU-Schlüssel
-    ttmm(b.datum), // Belegdatum DDMM
-    `R${i + 1}`, // Belegfeld 1 (Referenz)
-    '', // Belegfeld 2
-    '', // Skonto
-    `Pflege ${b.name} ${b.datum}`.slice(0, 60), // Buchungstext
-  ])
+  const zeilen = buchungen.map((b, i) => {
+    // Privatversicherte auf die PKV-Konten buchen; fehlen sie, gelten die
+    // Standardkonten (Fallback = bisheriges Verhalten).
+    const istPrivat = b.kostentraegerArt === 'privat'
+    const debitor = (istPrivat ? konfig.debitorKontoPrivat : undefined) ?? konfig.debitorKonto ?? ''
+    const erloes = (istPrivat ? konfig.erloesKontoPrivat : undefined) ?? konfig.erloesKonto ?? ''
+    return [
+      euro(b.betragEuro), // Umsatz
+      'S', // Soll/Haben: Debitor im Soll
+      'EUR',
+      '', // Kurs
+      '', // Basis-Umsatz
+      '', // WKZ Basis-Umsatz
+      debitor, // Konto (Debitor)
+      erloes, // Gegenkonto (Erlöse)
+      '', // BU-Schlüssel
+      ttmm(b.datum), // Belegdatum DDMM
+      `R${i + 1}`, // Belegfeld 1 (Referenz)
+      '', // Belegfeld 2
+      '', // Skonto
+      `Pflege ${b.name} ${b.datum}`.slice(0, 60), // Buchungstext
+    ]
+  })
 
   return `${kopf}\r\n${spaltenZeile}\r\n${schreibeCsv(zeilen)}`
 }

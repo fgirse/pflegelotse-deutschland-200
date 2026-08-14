@@ -367,6 +367,8 @@ export interface Abrechnungskonfig {
   sachkontenlaenge?: number
   erloesKonto?: string
   debitorKonto?: string
+  erloesKontoPrivat?: string
+  debitorKontoPrivat?: string
 }
 
 export async function ladeAbrechnungskonfig(tenantId: string): Promise<Abrechnungskonfig | null> {
@@ -389,6 +391,8 @@ export async function ladeAbrechnungskonfig(tenantId: string): Promise<Abrechnun
     sachkontenlaenge: typeof d.sachkontenlaenge === 'number' ? d.sachkontenlaenge : undefined,
     erloesKonto: d.erloesKonto ?? undefined,
     debitorKonto: d.debitorKonto ?? undefined,
+    erloesKontoPrivat: d.erloesKontoPrivat ?? undefined,
+    debitorKontoPrivat: d.debitorKontoPrivat ?? undefined,
   }
 }
 

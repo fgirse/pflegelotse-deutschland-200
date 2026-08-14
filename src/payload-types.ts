@@ -482,6 +482,8 @@ export interface Abrechnungskonfiguration {
   sachkontenlaenge?: number | null;
   erloesKonto?: string | null;
   debitorKonto?: string | null;
+  erloesKontoPrivat?: string | null;
+  debitorKontoPrivat?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1143,6 +1145,8 @@ export interface AbrechnungskonfigurationSelect<T extends boolean = true> {
   sachkontenlaenge?: T;
   erloesKonto?: T;
   debitorKonto?: T;
+  erloesKontoPrivat?: T;
+  debitorKontoPrivat?: T;
   updatedAt?: T;
   createdAt?: T;
 }

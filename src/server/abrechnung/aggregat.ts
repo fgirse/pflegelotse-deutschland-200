@@ -31,6 +31,7 @@ export interface Buchung {
   datum: string
   betragEuro: number
   leistungen: string[]
+  kostentraegerArt?: string // für die Kontenwahl im DATEV-Stapel (GKV/PKV)
 }
 
 export interface Aggregat {
@@ -87,6 +88,7 @@ export function aggregiere(
       datum: n.datum,
       betragEuro: besuchBetrag,
       leistungen: [...zaehler.keys()],
+      kostentraegerArt: info.kostentraegerArt,
     })
   }
 

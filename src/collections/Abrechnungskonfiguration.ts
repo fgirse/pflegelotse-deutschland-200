@@ -26,5 +26,7 @@ export const Abrechnungskonfiguration: CollectionConfig = {
     { name: 'sachkontenlaenge', type: 'number', defaultValue: 4 },
     { name: 'erloesKonto', type: 'text' }, // Erlöskonto (Haben)
     { name: 'debitorKonto', type: 'text' }, // Sammel-Debitor (Soll)
+    { name: 'erloesKontoPrivat', type: 'text' }, // Erlöskonto PKV (optional)
+    { name: 'debitorKontoPrivat', type: 'text' }, // Sammel-Debitor Privatpatienten (optional)
   ],
 }
