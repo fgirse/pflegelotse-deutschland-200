@@ -16,3 +16,6 @@ infra/osrm/.env
 
 # Lokale Env-Dateien (z. B. von `vercel env pull`), aber .env.example bleibt versioniert.
 .env*.local
+
+# Kombai-Design-Tool: lokale Arbeitsartefakte, nicht versionieren
+.kombai/
