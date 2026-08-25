@@ -1,6 +1,8 @@
-import { env } from '@/lib/env'
 import type { Geo } from '@/shared/domain'
 import { waehleRoutingKern } from './waehleRouting'
+import { routingKonfig } from './konfig'
+import { istKonfiguriert } from './status'
+import { meldeDegradierung } from './degradierung'
 
 export interface RouteGeometrie {
   geometrie: Geo[]
@@ -14,20 +16,21 @@ export interface RouteGeometrie {
 export async function ladeRouteGeometrie(points: Geo[]): Promise<RouteGeometrie> {
   if (points.length < 2) return { geometrie: points, quelle: 'luftlinie' }
 
-  const provider = waehleRoutingKern({
-    provider: env.ROUTING_PROVIDER,
-    osrmBaseUrl: env.OSRM_BASE_URL,
-    osrmProfile: env.OSRM_PROFILE,
-    osrmApiKey: env.OSRM_API_KEY,
-    hereApiKey: env.HERE_API_KEY,
-  })
+  const cfg = routingKonfig()
+  const provider = waehleRoutingKern(cfg)
 
   if (provider.routeGeometrie) {
     try {
       const geometrie = await provider.routeGeometrie(points)
       if (geometrie.length >= 2) return { geometrie, quelle: 'osrm' }
-    } catch {
-      // stiller Fallback auf Luftlinie
+    } catch (err) {
+      // Der Rückfall auf die Luftlinie war früher still. Ist ein Straßen-
+      // Provider konfiguriert, ist ein Fehler hier ein echter Störfall und
+      // gehört gemeldet — sonst zeigt die Karte dauerhaft Geraden, ohne dass
+      // jemand erfährt, dass der Routing-Server klemmt.
+      if (istKonfiguriert(cfg)) {
+        meldeDegradierung('nichtErreichbar', err instanceof Error ? err.message : String(err))
+      }
     }
   }
   return { geometrie: points, quelle: 'luftlinie' }

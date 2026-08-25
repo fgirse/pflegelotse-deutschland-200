@@ -5,6 +5,7 @@ import { planeTour, berechneFitScore, berechneSollIst } from '@/server/matching/
 import { listeBedarfeFuerDienst } from '@/server/marketplace/service'
 import { requireDienstSeite } from '@/server/auth/page'
 import { DienstShell } from '../DienstShell'
+import { RoutingHinweis } from '../RoutingHinweis'
 import { DashboardClient } from './DashboardClient'
 import { DashboardImport } from './DashboardImport'
 import { WochenplanButton } from './WochenplanButton'
@@ -110,6 +111,9 @@ export default async function DashboardPage({
           </Link>
         </div>
       </header>
+
+      {/* Worauf beruhen die Fahrzeiten? Erscheint nur im Luftlinien-Modus. */}
+      <RoutingHinweis />
 
       {/* Marktplatz-Eingänge + Einzugsgebiet. */}
       <section className="mb-6 grid gap-4 sm:grid-cols-2">

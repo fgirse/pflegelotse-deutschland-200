@@ -1,5 +1,6 @@
 import type { RoutingProvider } from '@/server/routing/RoutingProvider'
 import { waehleRoutingKern } from '@/server/routing/waehleRouting'
+import { routingKonfig } from '@/server/routing/konfig'
 import { CachedRoutingProvider, InMemoryMatrixCache } from './matrixCache'
 import { fitScore, qualifikationErfuellt } from './fitScore'
 import { planeAblauf } from './tourPlan'
@@ -8,7 +9,6 @@ import { LocalSearchTourOptimizer } from './tourOptimizer'
 import { umverteile } from '@/server/planning/umverteilung'
 import { sollIst, type SollIstBericht } from '@/server/planning/sollist'
 import { ladeTour, ladeTouren, speichereEinsaetze, aktualisiereTour } from '@/server/repo'
-import { env } from '@/lib/env'
 import type { FitScoreRequest, FitMatch, Tour, Einsatz } from '@/shared/domain'
 
 // Grund, warum kein Treffer zustande kam (für konkrete UI-Meldung).
@@ -19,13 +19,7 @@ export type KeinTrefferGrund = 'keineTouren' | 'qualifikation' | 'zeitfenster'
 // (interaktive Antwortzeit). Die Auswahllogik selbst liegt testbar in
 // routing/waehleRouting.ts.
 function baueRouting(): RoutingProvider {
-  const kern = waehleRoutingKern({
-    provider: env.ROUTING_PROVIDER,
-    osrmBaseUrl: env.OSRM_BASE_URL,
-    osrmProfile: env.OSRM_PROFILE,
-    osrmApiKey: env.OSRM_API_KEY,
-    hereApiKey: env.HERE_API_KEY,
-  })
+  const kern = waehleRoutingKern(routingKonfig())
   return new CachedRoutingProvider(kern, new InMemoryMatrixCache())
 }
 

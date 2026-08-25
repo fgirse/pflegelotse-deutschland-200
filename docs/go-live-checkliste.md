@@ -32,6 +32,9 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
 - [ ] ⚙️ **Vercel Analytics** und **Speed Insights** im Projekt-Dashboard
       einschalten (Tabs „Analytics" / „Speed Insights").
 - [ ] **Uptime-Check** auf `GET /api/v1/health` einrichten (liefert 200/503).
+      Der Body enthält zusätzlich `routing.modus` — einen zweiten Check darauf
+      setzen, damit ein Ausfall des Routing-Servers auffällt (er führt nicht zu
+      503, die App plant ja weiter, nur mit Luftlinie).
 
 ## Payment
 
@@ -47,6 +50,25 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
 
 ## Routing
 
-- [ ] OSRM-Server erreichbar und in Vercel verdrahtet
-      (`ROUTING_PROVIDER=osrm`, `OSRM_BASE_URL`, `OSRM_API_KEY`).
-      Bei Ausfall greift automatisch der Haversine-Fallback.
+Ohne Straßenrouting rechnet die Planung mit Luftlinie — das Kernversprechen
+(„passgenaue Zusatzmarge auf die real gefahrene Route") ist dann nicht
+belastbar. **Schritt-für-Schritt-Anleitung: `infra/osrm/README.md`**
+(Compose-Dateien, `prepare.sh` und Caddy-Proxy liegen fertig daneben).
+
+- [ ] ▶️ Eigenen OSRM-Server aufsetzen: VPS bei einem EU-Hoster,
+      `pnpm run osrm:prepare` (Graph bauen), `pnpm run osrm:up:prod`
+      (Caddy + TLS + API-Key). Entscheidung gegen HERE: Klientenkoordinaten sind
+      faktisch Wohnadressen Pflegebedürftiger und sollen die eigene
+      Infrastruktur nicht verlassen.
+- [ ] ⚙️ In Vercel verdrahten: `ROUTING_PROVIDER=osrm`, `OSRM_BASE_URL`,
+      `OSRM_API_KEY` (Production **und** Preview), danach neu deployen.
+- [ ] ▶️ Verifizieren: `GET /api/v1/health` meldet `"routing":{"modus":"strasse"}`.
+      Steht dort `luftlinie`, nennt das Feld `grund` die Ursache. Im
+      Luftlinien-Modus zeigen Tourenplanung und Berichte zusätzlich ein Banner.
+- [ ] AVV mit dem OSRM-Hoster abschließen, Proxy-Access-Logs mit kurzer
+      Löschfrist (die URLs enthalten Koordinaten).
+- [ ] Monatlichen Karten-Refresh als Cron einrichten (Anleitung, Abschnitt
+      „Betrieb").
+
+Bei Ausfall greift automatisch der Haversine-Fallback — er wird ins Log und an
+Sentry gemeldet, statt still zu bleiben.

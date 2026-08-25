@@ -38,3 +38,24 @@ test('Karte besitzt eine Tabellenalternative', async ({ page }) => {
   // In der Tabellenansicht erscheint mindestens eine Tabelle.
   await expect(page.locator('table').first()).toBeVisible()
 })
+
+// Der Disponent muss erkennen können, worauf die Fahrzeiten beruhen. Fällt das
+// Straßenrouting aus (oder ist keins verbunden), rechnet die App still mit
+// Luftlinie weiter — dann MUSS das Banner erscheinen, sonst hält der Dienst
+// Schätzwerte für echte Fahrzeiten.
+test('Luftlinien-Modus wird im Dashboard sichtbar gemacht', async ({ page, request }) => {
+  // Gegen den tatsächlichen Zustand prüfen, nicht gegen eine Annahme über die
+  // Testumgebung — so bleibt der Test gültig, sobald OSRM verdrahtet ist.
+  const health = await (await request.get('/api/v1/health')).json()
+  const luftlinie = health.routing?.modus === 'luftlinie'
+
+  await page.goto('/de/dashboard')
+  const banner = page.getByText(/Fahrzeiten sind Schätzwerte/)
+
+  if (luftlinie) {
+    await expect(banner).toBeVisible()
+  } else {
+    // Bei echtem Straßenrouting darf das Banner die Oberfläche nicht stören.
+    await expect(banner).toHaveCount(0)
+  }
+})

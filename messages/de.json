@@ -767,5 +767,11 @@
     "gekuendigt": "gekündigt",
     "fehlgeschlagen": "fehlgeschlagen",
     "hinweisErstzahlung": "Die erste Zahlung schaltet das Abo frei; danach zieht Mollie monatlich automatisch ein."
+  },
+  "routing": {
+    "luftlinieTitel": "Fahrzeiten sind Schätzwerte (Luftlinie).",
+    "grund_nichtKonfiguriert": "Es ist kein Straßen-Routing verbunden. Mehrweg, Auslastung und Kilometer werden aus der Luftlinie geschätzt und weichen von der tatsächlich gefahrenen Strecke ab.",
+    "grund_fehlkonfiguriert": "Straßen-Routing ist ausgewählt, aber unvollständig eingerichtet. Bis das behoben ist, werden Mehrweg, Auslastung und Kilometer aus der Luftlinie geschätzt.",
+    "grund_nichtErreichbar": "Der Routing-Dienst antwortet gerade nicht. Bis er wieder erreichbar ist, werden Mehrweg, Auslastung und Kilometer aus der Luftlinie geschätzt."
   }
 }

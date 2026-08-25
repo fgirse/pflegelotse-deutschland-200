@@ -158,15 +158,76 @@ Env-Änderungen greifen erst mit einem neuen Deployment:
 npx vercel --prod
 ```
 
-Danach nutzt der Fit-Score echte Fahrzeiten. Fällt der OSRM-Server aus, schaltet
-die App automatisch auf die Haversine-Heuristik zurück — der Betrieb bricht
-nicht ab, wird im Störfall nur gröber.
+### 8. Prüfen, dass es wirklich greift
+
+Die App prüft den Routing-Server aktiv (kleine Testanfrage, 60 s gecacht) und
+weist das Ergebnis im Health-Check aus:
+
+```bash
+curl https://deine-app.vercel.app/api/v1/health
+```
+
+Erwartet: `"routing":{"modus":"strasse"}`.
+
+Steht dort `"modus":"luftlinie"`, nennt das Feld `grund` die Ursache:
+
+| grund | Bedeutung |
+|---|---|
+| `nichtKonfiguriert` | `ROUTING_PROVIDER` steht noch auf `haversine` |
+| `fehlkonfiguriert` | `osrm` gewählt, aber `OSRM_BASE_URL` fehlt |
+| `nichtErreichbar` | Server antwortet nicht — Container, Caddy, DNS, Firewall oder API-Key prüfen |
+
+Zusätzlich zeigen Tourenplanung und Berichte im Luftlinien-Modus ein Banner, das
+den Disponenten warnt, dass die Fahrzeiten Schätzwerte sind. Verschwindet das
+Banner, läuft echtes Straßenrouting.
+
+Diese Prüfung ist wichtig, weil der Fallback sonst *unsichtbar* wäre: Fällt der
+Server aus, schaltet die App automatisch auf die Haversine-Heuristik zurück —
+der Betrieb bricht nicht ab, wird nur gröber. Ohne Anzeige würde der Dienst
+weiter disponieren und die Luftlinien-Zahlen für echte Fahrzeiten halten. Der
+Rückfall geht deshalb auch ins Server-Log und (bei gesetztem
+`NEXT_PUBLIC_SENTRY_DSN`) als Warnung an Sentry, entprellt auf eine Meldung je
+5 Minuten.
+
+Fürs Monitoring: einen Uptime-Check auf `routing.modus` im Health-Body setzen.
+Ein Routing-Ausfall führt bewusst **nicht** zu HTTP 503 — die App ist ja
+funktionsfähig —, wäre sonst also unbemerkt.
 
 ## Karte aktualisieren
 
-Geofabrik veröffentlicht täglich neue Extrakte. Zum Aktualisieren `prepare.sh`
-erneut laufen lassen (die alte `.osm.pbf` in `infra/osrm/data/` vorher löschen,
-damit neu geladen wird) und den Server mit `osrm:down`/`osrm:up` neu starten.
+Geofabrik veröffentlicht täglich neue Extrakte. Neubaugebiete, geänderte
+Einbahnstraßen und dauerhafte Sperrungen wandern laufend in OpenStreetMap — eine
+veraltete Karte liefert still falsche Fahrzeiten. Einmal im Monat genügt.
+
+Zum Aktualisieren `prepare.sh` erneut laufen lassen (die alte `.osm.pbf` in
+`infra/osrm/data/` vorher löschen, damit neu geladen wird) und den Server neu
+starten. Als Cron auf der VM, nachts am Monatsersten:
+
+```cron
+0 3 1 * * cd /root/pflegelotse-deutschland-200 && rm -f infra/osrm/data/*.osm.pbf && \
+  PBF_URL=https://download.geofabrik.de/europe/germany/baden-wuerttemberg-latest.osm.pbf \
+  bash infra/osrm/prepare.sh && \
+  docker compose -f infra/osrm/docker-compose.prod.yml up -d --force-recreate osrm
+```
+
+Während der Aufbereitung ist der Server kurz weg — die App fällt in dieser Zeit
+automatisch auf Luftlinie zurück (und meldet das). Deshalb nachts laufen lassen.
+
+## Datenschutz
+
+Der OSRM-Server bekommt **nur Koordinatenlisten** — keine Namen, keine
+Pseudonyme, keine Zuordnung zu einer Person. Trotzdem sind Wohnkoordinaten
+Pflegebedürftiger schutzwürdig (mit dem Kontext „wird ambulant gepflegt"
+faktisch Gesundheitsdaten, Art. 9 DSGVO). Genau deshalb hosten wir selbst statt
+einen Dienst wie HERE zu nutzen. Zu beachten bleibt:
+
+- Der VPS-Hoster ist **Auftragsverarbeiter** → AVV abschließen, ins
+  Verarbeitungsverzeichnis eintragen, Standort EU.
+- Zugriff nur über HTTPS + API-Key (Caddy, siehe oben); Port 5000 nie offen.
+- **Caddys Access-Logs enthalten die Koordinaten in der URL.** Entweder
+  URL-Logging abschalten oder eine kurze Löschfrist setzen (z. B. 7 Tage).
+- Die Statusprüfung der App sendet bewusst nur zwei feste Testpunkte in Berlin,
+  nie echte Klientendaten (`PROBE_PUNKTE` in `src/server/routing/status.ts`).
 
 ## Profil wechseln (z. B. Fahrrad)
 

@@ -264,7 +264,6 @@
     "arbzgWarnung": "Over 10 h working time (ArbZG)",
     "assign": "Add to tour",
     "assigned": "Added",
-    
     "noMatch": "No matching tour (time window or qualification violated)",
     "noMatch_qualifikation": "Fits no tour professionally — the carer lacks the required qualification",
     "noMatch_zeitfenster": "Fits no tour in time — no free time slot",
@@ -768,5 +767,11 @@
     "gekuendigt": "cancelled",
     "fehlgeschlagen": "failed",
     "hinweisErstzahlung": "The first payment activates the subscription; Mollie then charges monthly automatically."
+  },
+  "routing": {
+    "luftlinieTitel": "Travel times are estimates (straight-line).",
+    "grund_nichtKonfiguriert": "No street routing is connected. Detour, utilisation and distances are estimated from straight-line distance and will differ from the route actually driven.",
+    "grund_fehlkonfiguriert": "Street routing is selected but not fully configured. Until this is fixed, detour, utilisation and distances are estimated from straight-line distance.",
+    "grund_nichtErreichbar": "The routing service is not responding. Until it is reachable again, detour, utilisation and distances are estimated from straight-line distance."
   }
 }
