@@ -26,6 +26,12 @@
     "user:tenant": "node --env-file=.env --import tsx scripts/set-tenant.ts",
     "check:encryption": "node --env-file=.env --import tsx scripts/check-encryption.ts",
     "generate:types": "payload generate:types",
+    "dev:test": "node --env-file=.env.test node_modules/next/dist/bin/next dev --port 3001",
+    "test:db:up": "docker compose up -d mongo && node --env-file=.env.test scripts/wait-for-mongo.mjs",
+    "test:db:down": "docker compose down",
+    "test:db:init": "node --env-file=.env.test --import tsx scripts/db-init.ts",
+    "test:db:seed": "node --env-file=.env.test --import tsx scripts/seed.ts",
+    "test:db:reset": "node --env-file=.env.test --import tsx scripts/db-reset.ts && pnpm run test:db:seed",
     "test": "vitest run && playwright test",
     "test:unit": "vitest run",
     "test:e2e": "playwright test"

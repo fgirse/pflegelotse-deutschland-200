@@ -13,10 +13,17 @@ while (Date.now() < deadline) {
   const client = new MongoClient(uri, { serverSelectionTimeoutMS: 2000 })
   try {
     await client.connect()
-    // Ein Ping als Primary beweist, dass das Replica-Set wählbar ist.
-    await client.db('admin').command({ hello: 1 })
+    // `hello` allein beweist nur, dass der Server ANTWORTET. Beim ersten
+    // Hochfahren initiiert der Compose-Healthcheck das Replica-Set erst — bis
+    // zur Wahl ist der Knoten weder Primary noch Secondary und lehnt jeden
+    // Schreibvorgang mit NotPrimaryOrSecondary ab. Deshalb warten wir explizit
+    // auf isWritablePrimary, sonst scheitert das direkt folgende db:init.
+    const hello = await client.db('admin').command({ hello: 1 })
+    if (!hello.isWritablePrimary) {
+      throw new Error(`Replica-Set noch nicht wählbar (Status: ${hello.setName ?? 'kein RS'})`)
+    }
     await client.close()
-    console.log('MongoDB-Replica-Set ist bereit.')
+    console.log('MongoDB-Replica-Set ist bereit (Primary, schreibfähig).')
     process.exit(0)
   } catch (e) {
     lastErr = e

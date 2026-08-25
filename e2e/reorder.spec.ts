@@ -21,11 +21,25 @@ test('Reihenfolge anpassen aktualisiert die Kennzahlen sofort', async ({ page })
 
   // Das Umsortier-Panel erscheint mit der Fahrzeit-Kennzahl (Live-Vorschau).
   await expect(page.getByText('Reihenfolge per Ziehen anpassen')).toBeVisible()
-  const kennzahl = page.getByText(/Fahrzeit \d+ Min/).first()
-  await expect(kennzahl).toBeVisible()
-  const vorher = (await kennzahl.textContent()) ?? ''
+  await expect(page.getByText(/Fahrzeit \d+ Min/).first()).toBeVisible()
 
-  // Ersten Stopp nach unten schieben → Server-Vorschau → Kennzahl ändert sich.
-  await page.getByRole('button', { name: 'Nach unten' }).first().click()
-  await expect(kennzahl).not.toHaveText(vorher)
+  // Die Zeitfenster-Labels der Stopps geben die Reihenfolge wieder.
+  const stopps = page.getByText(/^\d{2}:\d{2}–\d{2}:\d{2}$/)
+  const vorher = await stopps.allTextContents()
+
+  // Ersten Stopp nach unten schieben. Geprüft wird die Neuberechnung an der
+  // Quelle: der Klick MUSS eine Server-Vorschau auslösen. Die angezeigte
+  // Fahrzeit taugt dafür nicht als Signal — sie ist auf ganze Minuten gerundet,
+  // und bei eng beieinanderliegenden Stopps liefern zwei Reihenfolgen
+  // denselben Wert. Der Test wäre dann datenabhängig statt deterministisch.
+  const [antwort] = await Promise.all([
+    page.waitForResponse(
+      (r) => r.url().includes('/reorder') && r.request().method() === 'POST',
+    ),
+    page.getByRole('button', { name: 'Nach unten' }).first().click(),
+  ])
+  expect(antwort.ok()).toBeTruthy()
+
+  // …und die neue Reihenfolge steht sichtbar in der Liste.
+  await expect.poll(() => stopps.allTextContents()).not.toEqual(vorher)
 })

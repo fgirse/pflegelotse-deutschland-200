@@ -5,10 +5,22 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
 
 ## Sicherheit / Zugänge
 
-- [ ] ▶️ **Demo-Zugang entfernen.** Der Seed-Account `disponent@pflegelotse.local`
-      (Passwort `demo12345`) darf in Produktion nicht bleiben. Eigenen Admin
-      anlegen und Demo löschen:
-      `ADMIN_EMAIL=du@example.de pnpm run admin:create`
+- [x] ▶️ **Demo-Zugang entfernt** (2026-08-25). Der Seed-Account
+      `disponent@pflegelotse.local` (Passwort `demo12345`) ist aus der
+      Produktivdatenbank gelöscht. Betreiber-Zugang bleibt
+      `admin@pflegelotse-deutschland.de` (plattform_admin).
+      **Achtung:** `pnpm run db:seed` legt den Demo-Zugang wieder an — nie gegen
+      die produktive `DATABASE_URI` laufen lassen. Falls doch nötig, danach
+      erneut löschen. Neuen Betreiber-Admin anlegen geht mit
+      `ADMIN_EMAIL=du@example.de pnpm run admin:create` (entfernt den Demo-Zugang
+      gleich mit).
+- [x] ▶️ **E2E-Tests von der Produktivdatenbank getrennt** (2026-08-25). Sie
+      liefen bisher über `.env` gegen dasselbe Atlas-Cluster wie die Produktion,
+      schreiben aber Daten und setzen bei jedem Lauf das 2FA-Geheimnis des
+      Testkontos zurück. Jetzt: eigene lokale Wegwerf-DB über `.env.test`,
+      Testserver auf Port 3001, und `playwright.config.ts` bricht ab, wenn
+      `DATABASE_URI` nicht auf `localhost` zeigt. Ablauf im README, Abschnitt
+      „Tests".
 - [ ] ⚙️ **Starke Admin-Passwörter** für alle Betreiber-/Inhaber-Konten.
 - [ ] ⚙️ Prüfen, dass `PAYLOAD_SECRET`, `ENCRYPTION_MASTER_KEY`, `AUDIT_PEPPER`
       in Vercel echte, lange Zufallswerte sind (nicht die `.env.example`-Platzhalter).

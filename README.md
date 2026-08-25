@@ -26,6 +26,11 @@ pnpm run dev            # http://localhost:3000
 Anmeldung (Dienst-Bereich): <http://localhost:3000/de/login> — `disponent@pflegelotse.local`
 / `demo12345`, danach **2FA einrichten** (Geheimnis/otpauth-Link in eine Authenticator-App,
 6-stelligen Code bestätigen). Erst dann sind Dashboard/Eingänge/Abo erreichbar.
+
+> ⚠️ Dieser Demo-Zugang gilt **nur für lokale Entwicklung** und wird von
+> `pnpm run db:seed` angelegt. In der Produktivdatenbank darf er nicht
+> existieren — dort wurde er entfernt (2026-08-25). `db:seed` **niemals** gegen
+> eine produktive `DATABASE_URI` laufen lassen, sonst kommt er zurück.
 Dashboard: <http://localhost:3000/de/dashboard> · Payload-Admin: <http://localhost:3000/admin>
 
 Voraussetzung Atlas: Die eigene IP muss im Atlas-Projekt unter *Network Access*
@@ -105,9 +110,30 @@ freigegeben sein.
 ```bash
 pnpm run typecheck
 pnpm run lint
-pnpm run test:unit      # vitest (Fit-Score, Encryption, PII-Sperre)
+pnpm run test:unit      # vitest (Fit-Score, Encryption, PII-Sperre) — braucht keine DB
+```
+
+Die **e2e-Tests** laufen gegen eine eigene, lokale Wegwerf-Datenbank
+(`.env.test`), nicht gegen die DB aus `.env`. Sie schreiben Daten und setzen bei
+jedem Lauf das 2FA-Geheimnis des Testkontos zurück — das darf eine Datenbank mit
+echten Mandanten nicht treffen. Einmalig Docker starten, dann:
+
+```bash
+pnpm run test:db:up     # lokale MongoDB (Replica-Set) auf Port 27018
+pnpm run test:db:init   # $jsonSchema-Validatoren + Indizes
+pnpm run test:db:reset  # Demodaten + Demo-Disponent anlegen
 pnpm run test:e2e       # Playwright (Dashboard-Nutzerreise)
-pnpm test               # beides
+```
+
+Der Testserver läuft auf **Port 3001**, ein paralleler `pnpm dev` auf 3000 bleibt
+also unberührt und wird nie als Testserver wiederverwendet. `playwright.config.ts`
+bricht ab, wenn `DATABASE_URI` in `.env.test` nicht auf `localhost` zeigt.
+
+`.env.test` ist absichtlich versioniert — die Werte darin schützen nichts außer
+einer leeren lokalen Datenbank. **Nie in `.env` oder Vercel übernehmen.**
+
+```bash
+pnpm test               # Unit + e2e (e2e setzt die Schritte oben voraus)
 ```
 
 ## Bewusst (noch) nicht enthalten
