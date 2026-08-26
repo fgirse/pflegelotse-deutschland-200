@@ -64,9 +64,24 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
 
 ## Monitoring / Fehler-Tracking
 
-- [ ] ⚙️ **Sentry**: Projekt (EU-Region) anlegen und `NEXT_PUBLIC_SENTRY_DSN`
-      in Vercel setzen. Ohne DSN ist Sentry inaktiv. Optional `SENTRY_ORG`,
-      `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` für Source-Maps.
+- [x] ⚙️ **Sentry aktiv** (2026-08-26). Projekt in der **EU-Region** angelegt
+      (DSN auf `ingest.de.sentry.io` — die Region wird einmalig beim Anlegen der
+      Organisation gewählt und ist nachträglich nicht änderbar).
+      `NEXT_PUBLIC_SENTRY_DSN` ist in Vercel für Production und Preview gesetzt,
+      als Typ „Config" (nicht sensitiv): Der DSN muss im Browser-Bundle stehen,
+      damit clientseitige Fehler gemeldet werden, und er erlaubt nur das
+      Einsenden von Events, kein Lesen. Übertragung mit einem Testereignis
+      verifiziert.
+      Damit sind auch die Degradierungs-Meldungen scharf, die vorher ins Leere
+      liefen: Routing-Ausfall und `krypto`-Schlüsselfehler.
+      Die lokale `.env` bleibt bewusst **ohne** DSN — sonst landet jeder
+      Entwicklungsfehler im selben Projekt.
+- [ ] ⚙️ Optional für lesbare Stacktraces: `SENTRY_ORG`, `SENTRY_PROJECT` und
+      `SENTRY_AUTH_TOKEN` (Scope `project:releases`) in Vercel setzen. Dann
+      lädt der Build die Source Maps hoch und löscht sie danach aus dem
+      Deployment (`deleteSourcemapsAfterUpload`).
+- [ ] ⚙️ Nach dem ersten Deployment prüfen, ob der SLA-Cron als Sentry Cron
+      Monitor erscheint (`automaticVercelMonitors`).
 - [ ] ⚙️ **Vercel Analytics** und **Speed Insights** im Projekt-Dashboard
       einschalten (Tabs „Analytics" / „Speed Insights").
 - [ ] **Uptime-Check** auf `GET /api/v1/health` einrichten. Der Statuscode
@@ -109,7 +124,12 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
 ## Recht / DSGVO (separater Block, vor echtem Publikumsstart)
 
 - [ ] Datenschutzerklärung, Impressum.
-- [ ] AVV mit Auftragsverarbeitern: Mollie, Sentry, Resend, MongoDB Atlas, Vercel.
+- [ ] AVV mit Auftragsverarbeitern: Mollie, Sentry, Resend, MongoDB Atlas, Vercel,
+      OSRM-Hoster. Bei **Sentry** liegen die Daten in der EU-Region (Frankfurt);
+      das DPA gibt es online im Sentry-Konto. Das PII-Scrubbing in
+      `src/lib/sentry-options.ts` entfernt Request-Bodies, Cookies, Auth-Header,
+      Query-Strings und die Nutzeridentität vor dem Versand — Session Replay ist
+      bewusst nicht aktiv.
 - [ ] Verzeichnis von Verarbeitungstätigkeiten; Lösch-/Auskunftskonzept.
 
 ## Routing
