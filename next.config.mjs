@@ -23,4 +23,15 @@ export default withSentryConfig(baseConfig, {
   project: process.env.SENTRY_PROJECT,
   silent: !process.env.CI,
   widenClientFileUpload: true,
+  // Source Maps nach dem Upload aus dem Build löschen. Ohne das liegen sie im
+  // Deployment und sind öffentlich abrufbar — der komplette Client-Quelltext
+  // wäre damit lesbar. Sentry braucht sie nicht mehr, sobald sie hochgeladen
+  // sind. Greift nur, wenn überhaupt hochgeladen wird.
+  sourcemaps: { deleteSourcemapsAfterUpload: true },
+  // Sentry-eigene Debug-Logs aus dem Client-Bundle entfernen.
+  disableLogger: true,
+  // Überwacht den stündlichen SLA-Cron (vercel.json) als Sentry Cron Monitor.
+  // Ein stiller Ausfall wäre fachlich teuer: an dem Job hängt die 24-Stunden-
+  // Rückmeldefrist samt Auto-Absage.
+  automaticVercelMonitors: true,
 })
