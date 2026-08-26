@@ -21,6 +21,26 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
       Testserver auf Port 3001, und `playwright.config.ts` bricht ab, wenn
       `DATABASE_URI` nicht auf `localhost` zeigt. Ablauf im README, Abschnitt
       „Tests".
+- [ ] **Preview-Deployments von der Produktivdatenbank trennen.** `DATABASE_URI`
+      ist in Vercel für „Production, Preview" gesetzt — jeder Branch-Deploy
+      schreibt damit in die Live-Datenbank mit echten Mandanten. Bisher folgenlos
+      (es gab noch nie ein Preview-Deployment), aber eine Falle beim ersten
+      Feature-Branch. Stand 2026-08-26:
+      - [x] Datenbank `pflege_preview` angelegt, initialisiert (Validatoren +
+            Indizes) und mit Demodaten geseedet — mit **eigenen** Secrets, damit
+            ein Preview-Deployment Produktionsdaten selbst bei Zugriff nicht
+            entschlüsseln könnte. Werte in `~/pflegelotse-preview.env`.
+      - [ ] ⚙️ Atlas-Nutzer anlegen, der **nur** auf `pflege_preview`
+            readWrite+dbAdmin hat (ein anderer Datenbankname allein ist kein
+            Zugriffsschutz — die heutigen Zugangsdaten kämen weiterhin an
+            `pflege_dev`).
+      - [ ] ⚙️ In Vercel bei `DATABASE_URI` den Haken „Preview" entfernen
+            (Production unangetastet lassen) und eine neue `DATABASE_URI` nur
+            für Preview anlegen; dazu `PAYLOAD_SECRET`,
+            `ENCRYPTION_MASTER_KEY`, `AUDIT_PEPPER`, `AUDIT_PEPPER_VERSION`,
+            `CRON_SECRET` für Preview überschreiben.
+      - Vercel Authentication ist aktiv (Deployment-URLs leiten auf SSO), der
+        Demo-Zugang in `pflege_preview` ist daher unkritisch.
 - [ ] ⚙️ **Starke Admin-Passwörter** für alle Betreiber-/Inhaber-Konten.
 - [ ] ⚙️ Prüfen, dass `PAYLOAD_SECRET`, `ENCRYPTION_MASTER_KEY`, `AUDIT_PEPPER`
       in Vercel echte, lange Zufallswerte sind (nicht die `.env.example`-Platzhalter).
