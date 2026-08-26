@@ -167,7 +167,9 @@ weist das Ergebnis im Health-Check aus:
 curl https://deine-app.vercel.app/api/v1/health
 ```
 
-Erwartet: `"routing":{"modus":"strasse"}`.
+Erwartet: `"status":"ok"` mit `"routing":{"modus":"strasse"}`. (Der Body enthält
+daneben `krypto` — den Selbsttest der Säule-1-Verschlüsselung, unabhängig vom
+Routing.)
 
 Steht dort `"modus":"luftlinie"`, nennt das Feld `grund` die Ursache:
 

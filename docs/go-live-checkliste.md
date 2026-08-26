@@ -31,7 +31,13 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
       mit dem die Daten verschlüsselt wurden — sonst sind Säule-1-Daten nicht
       lesbar.
 - [ ] ▶️ Verifizieren: `pnpm run check:encryption` (liest eine Klienten-Identität
-      und meldet, ob der Schlüssel passt).
+      und meldet, ob der Schlüssel passt) — prüft die Umgebung, in der es läuft,
+      also die lokale `.env`.
+- [ ] Für die **Produktion** prüft das der Health-Check dauerhaft und ohne
+      Login: `GET /api/v1/health` meldet `"krypto":"ok"`. `"schluesselFehler"`
+      heißt, dass `ENCRYPTION_MASTER_KEY` in Vercel nicht zu den gespeicherten
+      Daten passt — die App läuft dann weiter und zeigt nur keine Namen mehr.
+      `"keineDaten"` heißt lediglich, dass noch keine Identität angelegt ist.
 - [ ] CSFLE: in Produktion bewusst `CSFLE_ENABLED=false` (App-Crypto), da
       Vercel-Serverless kein mongocrypt hosten kann. Echtes Atlas-CSFLE braucht
       eine andere Laufzeit (Container) — separates Thema.
@@ -43,10 +49,13 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
       `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN` für Source-Maps.
 - [ ] ⚙️ **Vercel Analytics** und **Speed Insights** im Projekt-Dashboard
       einschalten (Tabs „Analytics" / „Speed Insights").
-- [ ] **Uptime-Check** auf `GET /api/v1/health` einrichten (liefert 200/503).
-      Der Body enthält zusätzlich `routing.modus` — einen zweiten Check darauf
-      setzen, damit ein Ausfall des Routing-Servers auffällt (er führt nicht zu
-      503, die App plant ja weiter, nur mit Luftlinie).
+- [ ] **Uptime-Check** auf `GET /api/v1/health` einrichten. Der Statuscode
+      spiegelt nur die Datenbank (200/503). Der Body fasst unter `status`
+      zusammen: `ok` | `degraded` | `error` — ein Check auf
+      `status == "ok"` deckt damit alles ab. `degraded` bedeutet: die App läuft,
+      ist aber fachlich beeinträchtigt (Routing-Server weg → Luftlinien-
+      Fahrzeiten, oder `ENCRYPTION_MASTER_KEY` passt nicht → keine Namen).
+      Details stehen in `routing.modus`/`routing.grund` und `krypto`.
 
 ## Payment
 
