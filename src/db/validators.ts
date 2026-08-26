@@ -1,14 +1,39 @@
 import type { Db, Document } from 'mongodb'
 import { UUID_V4_PATTERN } from '@/lib/pseudonym'
 
-// Serverseitiger $jsonSchema-Validator für Säule 2 (klienten_operativ).
-// Zweite Verteidigungslinie neben dem App-RBAC: MongoDB weist PII-Schreib-
-// vorgänge selbst dann ab, wenn die Anwendung fehlerhaft wäre.
+// Serverseitige $jsonSchema-Validatoren für Säule 2. Zweite Verteidigungslinie
+// neben dem App-RBAC: MongoDB weist PII-Schreibvorgänge selbst dann ab, wenn
+// die Anwendung fehlerhaft wäre.
 //
 // WICHTIG: Payload speichert Feldnamen in camelCase (pseudonymId, tenantId),
 // daher prüft der Validator diese Namen — nicht die snake_case-Form aus dem
 // illustrativen Pflichtenheft-Beispiel. Die PII-Blackbox-Felder
 // (vorname/nachname/adresse/telefon) heißen ohnehin gleich.
+
+// Ein Feld, das es unter diesem Namen nicht geben darf. `not` über die
+// relevanten BSON-Typen: fehlt das Feld, greift die Regel nicht — erlaubt ist
+// also nur seine Abwesenheit.
+const nichtPii = { not: { bsonType: ['string', 'object', 'array', 'null'] } }
+
+// Feldnamen, unter denen personenbezogene Daten typischerweise landen. Zentral
+// gepflegt, damit jede Säule-2-Collection dieselbe Sperre bekommt — eine
+// Collection, die nur die Hälfte davon abweist, ist eine offene Flanke.
+const PII_FELDER = [
+  'vorname',
+  'nachname',
+  'geburtsdatum',
+  'adresse',
+  'telefon',
+  'email',
+  'kvnr',
+  'versichertennummer',
+] as const
+
+// Die PII-Blackbox als properties-Objekt.
+function piiSperren(): Document {
+  return Object.fromEntries(PII_FELDER.map((f) => [f, nichtPii]))
+}
+
 // Baut einen $jsonSchema-Validator mit PII-Blackbox. Pflichtfelder und der
 // Status-Enum unterscheiden sich je Collection (klienten_operativ ist
 // mandantengebunden, bedarfe ist marktplatzweit ohne tenantId).
@@ -18,6 +43,7 @@ function piiValidator(required: string[], statusEnum: string[]) {
       bsonType: 'object',
       required,
       properties: {
+        ...piiSperren(),
         pseudonymId: {
           bsonType: 'string',
           pattern: UUID_V4_PATTERN.source,
@@ -35,12 +61,6 @@ function piiValidator(required: string[], statusEnum: string[]) {
         // Zahlentypen tolerant (Mongoose schreibt Zahlen als double).
         pflegegrad: { bsonType: ['int', 'double'], minimum: 1, maximum: 5 },
         status: { enum: statusEnum },
-        // PII-BLACKBOX: identifizierende Felder werden serverseitig abgewiesen.
-        vorname: { not: { bsonType: ['string', 'object', 'array', 'null'] } },
-        nachname: { not: { bsonType: ['string', 'object', 'array', 'null'] } },
-        geburtsdatum: { not: { bsonType: ['string', 'object', 'array', 'null'] } },
-        adresse: { not: { bsonType: ['string', 'object', 'array', 'null'] } },
-        telefon: { not: { bsonType: ['string', 'object', 'array', 'null'] } },
       },
     },
   }
@@ -58,27 +78,62 @@ const bedarfValidator = piiValidator(
 // Validator für pflegekraft_stamm: verknüpft über pflegekraftId (Kürzel, keine
 // UUID), daher eigene Variante. Gleiche PII-Blackbox — Personaldaten bleiben in
 // Säule 1; hier nur operatives Profil (Qualifikation/Zeiten).
-const nichtPii = { not: { bsonType: ['string', 'object', 'array', 'null'] } }
-// PII-Sperre für über pflegekraftId (Kürzel) verknüpfte Säule-2-Collections.
 function kuerzelValidator() {
   return {
     $jsonSchema: {
       bsonType: 'object',
       required: ['tenantId', 'pflegekraftId'],
       properties: {
+        ...piiSperren(),
         tenantId: { bsonType: 'string' },
         pflegekraftId: { bsonType: 'string' },
-        vorname: nichtPii,
-        nachname: nichtPii,
-        email: nichtPii,
-        adresse: nichtPii,
-        telefon: nichtPii,
       },
     },
   }
 }
 const stammValidator = kuerzelValidator()
 const abwesenheitValidator = kuerzelValidator()
+
+// Reine PII-Blackbox — ohne Pflichtfelder und ohne Strukturvorgaben.
+//
+// Die übrigen Säule-2-Collections unterscheiden sich stark im Aufbau (Touren,
+// Zahlungen, Audit-Log, Verordnungen …). Ein Validator, der ihre Struktur
+// vorschreibt, würde bei jeder Schema-Erweiterung brechen und wäre damit ein
+// Risiko statt eines Schutzes. Diese Variante prüft deshalb ausschließlich die
+// Invariante, die für alle gilt: hier darf niemals PII landen.
+function blackboxValidator(zusatz?: Document) {
+  return {
+    $jsonSchema: {
+      bsonType: 'object',
+      properties: { ...piiSperren(), ...zusatz },
+    },
+  }
+}
+
+// Touren und Stammtouren tragen ihre Klientenbezüge in einem einsaetze-Array.
+// Ohne diese verschachtelte Sperre wäre die Blackbox trivial zu umgehen: ein
+// Name in einsaetze[0].vorname bliebe unbemerkt.
+const einsatzSperre: Document = {
+  einsaetze: {
+    bsonType: 'array',
+    items: { bsonType: 'object', properties: piiSperren() },
+  },
+}
+
+// Säule-2-Collections mit reiner PII-Blackbox. Bewusst NICHT dabei:
+// leistungskatalog und abrechnungskonfiguration — das sind Mandanten-
+// Stammdaten ohne Personenbezug, deren DATEV-Kopfdaten legitim eine
+// Firmenanschrift enthalten dürfen.
+const BLACKBOX_COLLECTIONS = [
+  'leistungsnachweise',
+  'verordnungen',
+  'praeventionsempfehlungen',
+  'angebote',
+  'abos',
+  'zahlungen',
+  'klienten_keys',
+  'gdpr_audit_log',
+] as const
 
 // Wendet einen Validator auf eine Collection an (createCollection oder
 // collMod). Idempotent.
@@ -119,6 +174,15 @@ export async function applyValidators(db: Db): Promise<void> {
   await applyPiiValidator(db, 'abwesenheiten', abwesenheitValidator)
   // Abwesenheiten je Pflegekraft (mehrere Zeiträume) — kein Unique-Index.
   await db.collection('abwesenheiten').createIndex({ tenantId: 1, pflegekraftId: 1 })
+
+  // Touren tragen Klientenbezüge in einsaetze[] — Sperre reicht dort hinein.
+  await applyPiiValidator(db, 'touren', blackboxValidator(einsatzSperre))
+  await applyPiiValidator(db, 'stammtouren', blackboxValidator(einsatzSperre))
+
+  // Übrige Säule-2-Collections: reine PII-Blackbox.
+  for (const name of BLACKBOX_COLLECTIONS) {
+    await applyPiiValidator(db, name, blackboxValidator())
+  }
 
   // Indizes (/L500/): mandantengescopte Lookups + Geo-Abfragen.
   const operativ = db.collection('klienten_operativ')

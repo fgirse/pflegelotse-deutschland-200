@@ -36,6 +36,8 @@ afterAll(async () => {
   if (db) {
     await db.collection('klienten_operativ').deleteMany({ tenantId: 'test-tenant' })
     await db.collection('bedarfe').deleteMany({ pseudonymId: bedarfUuid })
+    await db.collection('touren').deleteMany({ tenantId: 'test-tenant' })
+    await db.collection('leistungsnachweise').deleteMany({ tenantId: 'test-tenant' })
   }
   await client?.close()
 })
@@ -112,5 +114,76 @@ describe('Marktplatz-Bedarfe-PII-Sperre ($jsonSchema)', () => {
     await expect(
       col.insertOne({ pseudonymId: bedarfUuid, geo: { lat: 48.0, lng: 7.8 }, status: 'foo' }),
     ).rejects.toThrow()
+  })
+})
+
+// Touren tragen ihre Klientenbezüge in einsaetze[]. Ohne verschachtelte Sperre
+// wäre die PII-Blackbox trivial zu umgehen — genau das prüfen diese Tests.
+describe('Touren-PII-Sperre ($jsonSchema, verschachtelt)', () => {
+  it.skipIf(!verfuegbar)('weist einen Klarnamen INNERHALB eines Einsatzes ab', async () => {
+    const col = db!.collection('touren')
+    await expect(
+      col.insertOne({
+        tenantId: 'test-tenant',
+        datum: '2026-09-01',
+        einsaetze: [
+          {
+            pseudonymId: gueltigeUuid,
+            zeitfenster: { von: 480, bis: 540 },
+            // PII im verschachtelten Einsatz — muss abgewiesen werden:
+            vorname: 'Max',
+            adresse: 'Musterstr. 1',
+          },
+        ],
+      }),
+    ).rejects.toThrow()
+  })
+
+  it.skipIf(!verfuegbar)('weist PII auch auf oberster Ebene ab', async () => {
+    const col = db!.collection('touren')
+    await expect(
+      col.insertOne({ tenantId: 'test-tenant', datum: '2026-09-01', telefon: '0761-123456' }),
+    ).rejects.toThrow()
+  })
+
+  it.skipIf(!verfuegbar)('akzeptiert eine saubere, pseudonyme Tour', async () => {
+    const col = db!.collection('touren')
+    const res = await col.insertOne({
+      tenantId: 'test-tenant',
+      datum: '2026-09-01',
+      einsaetze: [{ pseudonymId: gueltigeUuid, zeitfenster: { von: 480, bis: 540 }, dauerMin: 30 }],
+    })
+    expect(res.acknowledged).toBe(true)
+  })
+})
+
+// Stellvertretend für die übrigen Säule-2-Collections mit reiner Blackbox.
+describe('Leistungsnachweise-PII-Sperre ($jsonSchema)', () => {
+  it.skipIf(!verfuegbar)('weist PII ab', async () => {
+    const col = db!.collection('leistungsnachweise')
+    await expect(
+      col.insertOne({ tenantId: 'test-tenant', pseudonymId: gueltigeUuid, nachname: 'Schneider' }),
+    ).rejects.toThrow()
+  })
+
+  it.skipIf(!verfuegbar)('weist auch die neu gesperrten Felder ab (E-Mail, Versichertennummer)', async () => {
+    const col = db!.collection('leistungsnachweise')
+    await expect(
+      col.insertOne({ tenantId: 'test-tenant', pseudonymId: gueltigeUuid, email: 'a@b.de' }),
+    ).rejects.toThrow()
+    await expect(
+      col.insertOne({ tenantId: 'test-tenant', pseudonymId: gueltigeUuid, kvnr: 'A123456789' }),
+    ).rejects.toThrow()
+  })
+
+  it.skipIf(!verfuegbar)('akzeptiert einen sauberen Nachweis', async () => {
+    const col = db!.collection('leistungsnachweise')
+    const res = await col.insertOne({
+      tenantId: 'test-tenant',
+      pseudonymId: gueltigeUuid,
+      leistungen: ['LK01'],
+      hash: 'abc',
+    })
+    expect(res.acknowledged).toBe(true)
   })
 })

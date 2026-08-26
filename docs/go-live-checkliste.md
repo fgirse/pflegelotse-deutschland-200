@@ -83,6 +83,29 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
       Webhook-URL in Mollie auf die Produktions-Domain zeigen lassen.
 - [ ] Einen echten Checkout end-to-end testen (kleiner Betrag).
 
+## Datenschutz-Invariante (Säule 2)
+
+- [x] **PII-Sperre auf allen Säule-2-Collections** (2026-08-26). Vorher trugen
+      nur 4 Collections einen `$jsonSchema`-Validator (`klienten_operativ`,
+      `bedarfe`, `pflegekraft_stamm`, `abwesenheiten`); `touren`, `stammtouren`,
+      `leistungsnachweise`, `verordnungen`, `praeventionsempfehlungen`,
+      `angebote`, `abos`, `zahlungen`, `klienten_keys` und `gdpr_audit_log`
+      waren ungeschützt — obwohl CLAUDE.md die Sperre für alle zusichert.
+      Jetzt 14 Collections, in `pflege_dev` **und** `pflege_preview` angewendet.
+      - Bei `touren`/`stammtouren` reicht die Sperre in `einsaetze[]` hinein;
+        ohne das wäre sie über ein verschachteltes Feld umgehbar gewesen.
+      - Gesperrt sind: vorname, nachname, geburtsdatum, adresse, telefon,
+        email, kvnr, versichertennummer (zentrale Liste in
+        `src/db/validators.ts`, gilt für alle Collections gleich).
+      - Bewusst **ohne** Validator: `klienten_identitaet` und
+        `angehoerige_identitaet` (Säule 1 — dort gehört PII hin), `users`
+        (Auth) sowie `leistungskatalog` und `abrechnungskonfiguration`
+        (Mandanten-Stammdaten; deren DATEV-Kopfdaten dürfen legitim eine
+        Firmenanschrift enthalten).
+- [ ] Nach jeder neuen Säule-2-Collection `pnpm run db:init` laufen lassen und
+      die Collection in `BLACKBOX_COLLECTIONS` eintragen — sonst entsteht
+      wieder eine ungeschützte Flanke.
+
 ## Recht / DSGVO (separater Block, vor echtem Publikumsstart)
 
 - [ ] Datenschutzerklärung, Impressum.
