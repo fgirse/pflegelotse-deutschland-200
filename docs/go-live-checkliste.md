@@ -42,22 +42,28 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
       - Vercel Authentication ist aktiv (Deployment-URLs leiten auf SSO), der
         Demo-Zugang in `pflege_preview` ist daher unkritisch.
 - [ ] ⚙️ **Starke Admin-Passwörter** für alle Betreiber-/Inhaber-Konten.
-- [ ] ⚙️ Prüfen, dass `PAYLOAD_SECRET`, `ENCRYPTION_MASTER_KEY`, `AUDIT_PEPPER`
-      in Vercel echte, lange Zufallswerte sind (nicht die `.env.example`-Platzhalter).
+- [~] ⚙️ `PAYLOAD_SECRET`, `ENCRYPTION_MASTER_KEY`, `AUDIT_PEPPER` in Vercel:
+      **nicht direkt prüfbar** — sie sind als „Sensitive" angelegt, und solche
+      Werte gibt Vercel nicht mehr heraus (auch nicht im Dashboard, dort lassen
+      sie sich nur überschreiben). Indirekt belegt: Die lokalen Gegenstücke sind
+      44–64 Zeichen lang und entsprechen keinem `.env.example`-Platzhalter, der
+      Schlüssel entschlüsselt die Produktivdaten, und die Produktion läuft seit
+      über zwei Monaten mit echten Mandanten. Wer letzte Sicherheit will, setzt
+      die Werte einmal neu — Vorsicht: `ENCRYPTION_MASTER_KEY` darf dabei NICHT
+      geändert werden, sonst sind alle Säule-1-Daten unlesbar.
 
 ## Verschlüsselung
 
-- [ ] ⚙️ `ENCRYPTION_MASTER_KEY` in Vercel **identisch** zum lokalen `.env`-Wert,
-      mit dem die Daten verschlüsselt wurden — sonst sind Säule-1-Daten nicht
-      lesbar.
-- [ ] ▶️ Verifizieren: `pnpm run check:encryption` (liest eine Klienten-Identität
-      und meldet, ob der Schlüssel passt) — prüft die Umgebung, in der es läuft,
-      also die lokale `.env`.
-- [ ] Für die **Produktion** prüft das der Health-Check dauerhaft und ohne
-      Login: `GET /api/v1/health` meldet `"krypto":"ok"`. `"schluesselFehler"`
-      heißt, dass `ENCRYPTION_MASTER_KEY` in Vercel nicht zu den gespeicherten
-      Daten passt — die App läuft dann weiter und zeigt nur keine Namen mehr.
-      `"keineDaten"` heißt lediglich, dass noch keine Identität angelegt ist.
+- [x] ⚙️ `ENCRYPTION_MASTER_KEY` in Vercel passt zu den gespeicherten Daten
+      (verifiziert 2026-08-27). Sonst wären Säule-1-Daten nicht lesbar.
+- [x] ▶️ Lokal verifiziert: `pnpm run check:encryption` meldet OK — der Wert in
+      der lokalen `.env` entschlüsselt die Produktivdaten.
+- [x] Für die **Produktion** prüft das der Health-Check dauerhaft und ohne
+      Login: `GET /api/v1/health` meldet `"krypto":"ok"` (bestätigt).
+      `"schluesselFehler"` hieße, dass `ENCRYPTION_MASTER_KEY` in Vercel nicht
+      zu den gespeicherten Daten passt — die App liefe dann weiter und zeigte
+      nur keine Namen mehr. `"keineDaten"` heißt lediglich, dass noch keine
+      Identität angelegt ist.
 - [ ] CSFLE: in Produktion bewusst `CSFLE_ENABLED=false` (App-Crypto), da
       Vercel-Serverless kein mongocrypt hosten kann. Echtes Atlas-CSFLE braucht
       eine andere Laufzeit (Container) — separates Thema.
@@ -133,7 +139,14 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
 
 ## Recht / DSGVO (separater Block, vor echtem Publikumsstart)
 
-- [ ] Datenschutzerklärung, Impressum.
+- [ ] ⚠️ **Datenschutzerklärung und Impressum sind unausgefüllte Vorlagen** und
+      trotzdem öffentlich erreichbar (`/de/impressum`, `/de/datenschutz`, beide
+      HTTP 200). Sie enthalten `[…]`-Platzhalter und ein sichtbares Banner
+      „Vorlage". Ein Impressum mit Platzhaltern erfüllt § 5 DDG nicht und ist
+      abmahnfähig — das ist der härteste Blocker vor einem Publikumsstart.
+      Echte Angaben eintragen (`src/app/(frontend)/[locale]/impressum/page.tsx`
+      und `…/datenschutz/page.tsx`), Hinweisbanner entfernen, rechtlich prüfen
+      lassen.
 - [ ] AVV mit Auftragsverarbeitern: Mollie, Sentry, Resend, MongoDB Atlas, Vercel,
       OSRM-Hoster. Bei **Sentry** liegen die Daten in der EU-Region (Frankfurt);
       das DPA gibt es online im Sentry-Konto. Das PII-Scrubbing in
@@ -149,16 +162,15 @@ Ohne Straßenrouting rechnet die Planung mit Luftlinie — das Kernversprechen
 belastbar. **Schritt-für-Schritt-Anleitung: `infra/osrm/README.md`**
 (Compose-Dateien, `prepare.sh` und Caddy-Proxy liegen fertig daneben).
 
-- [ ] ▶️ Eigenen OSRM-Server aufsetzen: VPS bei einem EU-Hoster,
-      `pnpm run osrm:prepare` (Graph bauen), `pnpm run osrm:up:prod`
-      (Caddy + TLS + API-Key). Entscheidung gegen HERE: Klientenkoordinaten sind
-      faktisch Wohnadressen Pflegebedürftiger und sollen die eigene
+- [x] ▶️ Eigener OSRM-Server läuft. Entscheidung gegen HERE: Klientenkoordinaten
+      sind faktisch Wohnadressen Pflegebedürftiger und sollen die eigene
       Infrastruktur nicht verlassen.
-- [ ] ⚙️ In Vercel verdrahten: `ROUTING_PROVIDER=osrm`, `OSRM_BASE_URL`,
-      `OSRM_API_KEY` (Production **und** Preview), danach neu deployen.
-- [ ] ▶️ Verifizieren: `GET /api/v1/health` meldet `"routing":{"modus":"strasse"}`.
-      Steht dort `luftlinie`, nennt das Feld `grund` die Ursache. Im
-      Luftlinien-Modus zeigen Tourenplanung und Berichte zusätzlich ein Banner.
+- [x] ⚙️ In Vercel verdrahtet: `ROUTING_PROVIDER`, `OSRM_BASE_URL`,
+      `OSRM_API_KEY` für Production **und** Preview gesetzt.
+- [x] ▶️ Verifiziert (2026-08-27): `GET /api/v1/health` meldet
+      `"routing":{"modus":"strasse"}`. Steht dort `luftlinie`, nennt das Feld
+      `grund` die Ursache; dann zeigen Tourenplanung und Berichte zusätzlich ein
+      Banner.
 - [ ] AVV mit dem OSRM-Hoster abschließen, Proxy-Access-Logs mit kurzer
       Löschfrist (die URLs enthalten Koordinaten).
 - [ ] Monatlichen Karten-Refresh als Cron einrichten (Anleitung, Abschnitt
