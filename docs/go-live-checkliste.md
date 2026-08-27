@@ -71,9 +71,11 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
       zu den gespeicherten Daten passt — die App liefe dann weiter und zeigte
       nur keine Namen mehr. `"keineDaten"` heißt lediglich, dass noch keine
       Identität angelegt ist.
-- [ ] CSFLE: in Produktion bewusst `CSFLE_ENABLED=false` (App-Crypto), da
-      Vercel-Serverless kein mongocrypt hosten kann. Echtes Atlas-CSFLE braucht
-      eine andere Laufzeit (Container) — separates Thema.
+- [x] CSFLE: in Produktion bewusst `CSFLE_ENABLED=false` (App-Crypto), da
+      Vercel-Serverless kein mongocrypt hosten kann. Bestätigt 2026-08-27 —
+      die Produktivdaten sind mit App-Crypto geschrieben. Echtes Atlas-CSFLE
+      bräuchte eine andere Laufzeit (Container) und ist ein eigenes Thema, kein
+      offener Punkt dieser Liste.
 
 ## Monitoring / Fehler-Tracking
 
