@@ -6,6 +6,7 @@
 // Aufruf:  pnpm run check:encryption
 import { getPayload } from 'payload'
 import config from '../src/payload.config'
+import { siehtVerschluesseltAus } from '../src/server/identity/kryptoStatus'
 
 async function main() {
   const payload = await getPayload({ config })
@@ -22,13 +23,24 @@ async function main() {
       console.log('Keine Klienten-Identität vorhanden — nichts zu prüfen (das ist ok).')
       process.exit(0)
     }
-    const lesbar = typeof doc.vorname === 'string' && doc.vorname.length > 0
-    if (lesbar) {
-      console.log('✓ OK: Entschlüsselung erfolgreich — der Schlüssel passt zu den Daten.')
-      process.exit(0)
+    // Ein „nicht leer"-Test genügt NICHT: Bleibt der Wert unentschlüsselt, ist
+    // er ebenfalls ein nicht-leerer String — der App-Crypto-Ciphertext
+    // (iv:tag:data) besteht sogar ausschließlich aus druckbaren Zeichen. Genau
+    // deshalb meldete diese Prüfung früher fälschlich OK.
+    if (typeof doc.vorname !== 'string' || doc.vorname.length === 0) {
+      console.log('⚠ Vorname leer — Schlüssel passt möglicherweise nicht.')
+      process.exit(1)
     }
-    console.log('⚠ Vorname leer/unlesbar — Schlüssel passt möglicherweise nicht.')
-    process.exit(1)
+    if (siehtVerschluesseltAus(doc.vorname)) {
+      console.error(
+        '✗ FEHLER: Der gelesene Wert ist noch verschlüsselt.\n' +
+          '  Mögliche Ursachen: falscher ENCRYPTION_MASTER_KEY, oder CSFLE_ENABLED\n' +
+          '  passt nicht zu dem Verfahren, mit dem die Daten geschrieben wurden.',
+      )
+      process.exit(1)
+    }
+    console.log('✓ OK: Entschlüsselung erfolgreich — der Schlüssel passt zu den Daten.')
+    process.exit(0)
   } catch (e) {
     console.error(
       '✗ Entschlüsselung fehlgeschlagen — ENCRYPTION_MASTER_KEY passt vermutlich nicht zu den vorhandenen Daten:',

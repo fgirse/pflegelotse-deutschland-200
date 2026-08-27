@@ -56,10 +56,17 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
 
 - [x] ⚙️ `ENCRYPTION_MASTER_KEY` in Vercel passt zu den gespeicherten Daten
       (verifiziert 2026-08-27). Sonst wären Säule-1-Daten nicht lesbar.
-- [x] ▶️ Lokal verifiziert: `pnpm run check:encryption` meldet OK — der Wert in
-      der lokalen `.env` entschlüsselt die Produktivdaten.
+- [x] ▶️ Lokal verifiziert: `pnpm run check:encryption` meldet OK.
+      **Achtung — die lokale `.env` steht auf `CSFLE_ENABLED=true`, die
+      Produktivdaten sind aber mit App-Crypto geschrieben.** Lokale Skripte
+      gegen die Produktivdatenbank deshalb mit `CSFLE_ENABLED=false` aufrufen,
+      sonst lesen sie Binärmüll — und ein Schreiben würde die Daten zerstören.
+      (Bis 2026-08-27 meldeten die Prüfwerkzeuge in diesem Fall fälschlich OK;
+      sie erkennen unentschlüsselte Werte jetzt.)
 - [x] Für die **Produktion** prüft das der Health-Check dauerhaft und ohne
-      Login: `GET /api/v1/health` meldet `"krypto":"ok"` (bestätigt).
+      Login: `GET /api/v1/health` meldet `"krypto":"ok"` (bestätigt). Der Test
+      prüft seit 2026-08-27 echten Klartext — vorher nur „String nicht leer",
+      was auch ein unentschlüsselter Wert erfüllt hätte.
       `"schluesselFehler"` hieße, dass `ENCRYPTION_MASTER_KEY` in Vercel nicht
       zu den gespeicherten Daten passt — die App liefe dann weiter und zeigte
       nur keine Namen mehr. `"keineDaten"` heißt lediglich, dass noch keine

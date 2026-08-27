@@ -24,7 +24,11 @@ export function resetKryptoCache(): void {
 // dauerhafter Fehlstand nicht bei jedem Health-Abruf ein Event erzeugt.
 // Sentry wird lazy geladen; ohne DSN ist alles ein No-Op.
 function melde(): void {
-  const text = '[krypto] Säule-1-Daten nicht entschlüsselbar — ENCRYPTION_MASTER_KEY passt nicht'
+  // Ursache offen lassen: Es kann der falsche ENCRYPTION_MASTER_KEY sein, oder
+  // ein CSFLE_ENABLED, das nicht zu dem Verfahren passt, mit dem die Daten
+  // geschrieben wurden. Beides sieht von hier gleich aus.
+  const text =
+    '[krypto] Säule-1-Daten nicht entschlüsselbar — ENCRYPTION_MASTER_KEY oder CSFLE_ENABLED passt nicht zu den gespeicherten Daten'
   console.warn(text)
   const jetzt = Date.now()
   if (zuletztGemeldet != null && jetzt - zuletztGemeldet < MELDE_FENSTER_MS) return
@@ -61,13 +65,10 @@ export async function pruefeKrypto(): Promise<KryptoStatus> {
       overrideAccess: true,
     })
     const doc = res.docs[0] as { vorname?: unknown } | undefined
-    status = bewerteKrypto({
-      gefunden: Boolean(doc),
-      vornameLesbar: typeof doc?.vorname === 'string' && doc.vorname.length > 0,
-    })
+    status = bewerteKrypto({ gefunden: Boolean(doc), probewert: doc?.vorname })
   } catch {
     // Wirft der afterRead-Hook, passt der Schlüssel nicht zu den Daten.
-    status = bewerteKrypto({ gefunden: true, vornameLesbar: false, fehlgeschlagen: true })
+    status = bewerteKrypto({ gefunden: true, fehlgeschlagen: true })
   }
 
   cache = { status, bis: jetzt + (status.modus === 'ok' ? CACHE_OK_MS : CACHE_FEHLER_MS) }
