@@ -76,10 +76,20 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
       liefen: Routing-Ausfall und `krypto`-Schlüsselfehler.
       Die lokale `.env` bleibt bewusst **ohne** DSN — sonst landet jeder
       Entwicklungsfehler im selben Projekt.
-- [ ] ⚙️ Optional für lesbare Stacktraces: `SENTRY_ORG`, `SENTRY_PROJECT` und
-      `SENTRY_AUTH_TOKEN` (Scope `project:releases`) in Vercel setzen. Dann
-      lädt der Build die Source Maps hoch und löscht sie danach aus dem
-      Deployment (`deleteSourcemapsAfterUpload`).
+- [x] ⚙️ **Source-Map-Upload aktiv** (2026-08-27). `SENTRY_AUTH_TOKEN`
+      (Organization Token, als Secret), `SENTRY_ORG=pflegelotse-deutschland` und
+      `SENTRY_PROJECT` in Vercel für Production und Preview gesetzt. Der Build
+      lädt die Maps hoch und löscht sie danach aus dem Deployment
+      (`deleteSourcemapsAfterUpload`), sodass der Client-Quelltext nicht
+      öffentlich abrufbar bleibt.
+      - `SENTRY_PROJECT` trägt die **Projekt-ID** aus dem DSN, nicht den Slug:
+        Sentry akzeptiert beides, und die ID bleibt stabil, wenn das Projekt
+        umbenannt wird.
+      - Organization Tokens haben eng gefasste CI-Rechte — sie können Releases
+        anlegen, aber weder Projekte auflisten noch Releases löschen. Ein
+        403 auf solche Aufrufe ist erwartetes Verhalten, kein Fehler.
+      - Die Region steckt im Token selbst (`de.sentry.io`); `SENTRY_URL` muss
+        nirgends gesetzt werden.
 - [ ] ⚙️ Nach dem ersten Deployment prüfen, ob der SLA-Cron als Sentry Cron
       Monitor erscheint (`automaticVercelMonitors`).
 - [ ] ⚙️ **Vercel Analytics** und **Speed Insights** im Projekt-Dashboard
