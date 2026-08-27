@@ -57,12 +57,12 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
 - [x] ⚙️ `ENCRYPTION_MASTER_KEY` in Vercel passt zu den gespeicherten Daten
       (verifiziert 2026-08-27). Sonst wären Säule-1-Daten nicht lesbar.
 - [x] ▶️ Lokal verifiziert: `pnpm run check:encryption` meldet OK.
-      **Achtung — die lokale `.env` steht auf `CSFLE_ENABLED=true`, die
-      Produktivdaten sind aber mit App-Crypto geschrieben.** Lokale Skripte
-      gegen die Produktivdatenbank deshalb mit `CSFLE_ENABLED=false` aufrufen,
-      sonst lesen sie Binärmüll — und ein Schreiben würde die Daten zerstören.
-      (Bis 2026-08-27 meldeten die Prüfwerkzeuge in diesem Fall fälschlich OK;
-      sie erkennen unentschlüsselte Werte jetzt.)
+      Die lokale `.env` stand bis 2026-08-27 auf `CSFLE_ENABLED=true`, während
+      die Produktivdaten mit App-Crypto geschrieben sind — lokale Skripte lasen
+      damit Binärmüll, und ein Schreiben hätte die Daten zerstört. Lokal steht
+      jetzt ebenfalls `false`, Entwicklung und Produktion nutzen also dasselbe
+      Verfahren. Die Prüfwerkzeuge erkennen unentschlüsselte Werte seitdem
+      zuverlässig (vorher meldeten sie fälschlich OK).
 - [x] Für die **Produktion** prüft das der Health-Check dauerhaft und ohne
       Login: `GET /api/v1/health` meldet `"krypto":"ok"` (bestätigt). Der Test
       prüft seit 2026-08-27 echten Klartext — vorher nur „String nicht leer",
