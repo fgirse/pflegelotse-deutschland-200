@@ -17,47 +17,56 @@ export default async function ImpressumPage({
       <span className="eyebrow">Rechtliches</span>
       <h1 className="mt-2 text-3xl font-bold">Impressum</h1>
 
+      {/* Der Hinweis bleibt stehen, solange Pflichtangaben fehlen: Für eine
+          GmbH sind Registergericht und Registernummer nach § 5 Abs. 1 Nr. 4 DDG
+          vorgeschrieben. Sobald sie eingetragen sind, kann dieser Block weg. */}
       <div className="card mt-4 border-l-4 border-l-[var(--color-accent)] p-4 text-sm text-[var(--color-muted)]">
-        Hinweis: Vorlage. Bitte die Platzhalter <code>[…]</code> mit euren echten
-        Angaben ausfüllen und vor Veröffentlichung rechtlich prüfen lassen.
+        Hinweis: Es fehlen noch die Registerangaben (Amtsgericht und
+        HRB-Nummer). Sie sind für eine GmbH gesetzlich vorgeschrieben. Vor der
+        Veröffentlichung bitte ergänzen und das Impressum rechtlich prüfen
+        lassen.
       </div>
 
       <div className="mt-6 flex flex-col gap-6 leading-relaxed text-[var(--color-ink)]">
         <section>
           <h2 className="font-display text-lg font-semibold">Angaben gemäß § 5 DDG</h2>
           <p className="mt-2 text-[var(--color-muted)]">
-            [Name des Betreibers / Firma]
+            Pflegelotse Deutschland GmbH
             <br />
-            [Straße und Hausnummer]
+            Staufener Straße 79
             <br />
-            [PLZ Ort]
+            79189 Bad Krozingen
             <br />
-            [Land]
+            Deutschland
           </p>
         </section>
 
         <section>
           <h2 className="font-display text-lg font-semibold">Vertreten durch</h2>
-          <p className="mt-2 text-[var(--color-muted)]">[Vertretungsberechtigte Person]</p>
+          <p className="mt-2 text-[var(--color-muted)]">
+            Geschäftsführer: Michael Schreck
+          </p>
         </section>
 
         <section>
           <h2 className="font-display text-lg font-semibold">Kontakt</h2>
           <p className="mt-2 text-[var(--color-muted)]">
-            E-Mail: [kontakt@deine-domain.de]
-            <br />
-            Telefon: [+49 …]
+            E-Mail:{' '}
+            <a
+              href="mailto:info@pflegelotse-deutschland.gmx.de"
+              className="text-[var(--color-accent)] hover:underline"
+            >
+              info@pflegelotse-deutschland.gmx.de
+            </a>
           </p>
         </section>
 
         <section>
-          <h2 className="font-display text-lg font-semibold">Registereintrag (falls vorhanden)</h2>
+          <h2 className="font-display text-lg font-semibold">Registereintrag</h2>
           <p className="mt-2 text-[var(--color-muted)]">
-            Registergericht: […]
+            Registergericht: [Amtsgericht …]
             <br />
-            Registernummer: […]
-            <br />
-            Umsatzsteuer-ID gemäß § 27a UStG: […]
+            Registernummer: [HRB …]
           </p>
         </section>
 

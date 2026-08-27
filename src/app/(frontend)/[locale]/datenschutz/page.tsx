@@ -19,10 +19,10 @@ export default async function DatenschutzPage({
       <h1 className="mt-2 text-3xl font-bold">Datenschutzerklärung</h1>
 
       <div className="card mt-4 border-l-4 border-l-[var(--color-accent)] p-4 text-sm text-[var(--color-muted)]">
-        Hinweis: Vorlage, zugeschnitten auf die Datenverarbeitung dieser Anwendung.
-        Platzhalter <code>[…]</code> ausfüllen und vor Veröffentlichung rechtlich
+        Hinweis: Dieser Text beschreibt die tatsächliche Datenverarbeitung dieser
+        Anwendung, ist aber noch nicht anwaltlich geprüft. Vor der Veröffentlichung
         prüfen lassen — besonders die Rechtsgrundlage für Gesundheitsdaten (Art. 9
-        DSGVO).
+        DSGVO) und die Verträge mit den Auftragsverarbeitern (Art. 28).
       </div>
 
       <div className="mt-6 flex flex-col gap-6 leading-relaxed text-[var(--color-muted)]">
@@ -31,9 +31,16 @@ export default async function DatenschutzPage({
             1. Verantwortlicher
           </h2>
           <p className="mt-2">
-            [Name/Firma], [Anschrift], E-Mail: [kontakt@deine-domain.de]. Einen
-            Datenschutzbeauftragten erreichst du unter [datenschutz@deine-domain.de] (sofern
-            bestellt).
+            Pflegelotse Deutschland GmbH, Staufener Straße 79, 79189 Bad Krozingen,
+            Deutschland, vertreten durch den Geschäftsführer Michael Schreck.
+            <br />
+            E-Mail:{' '}
+            <a
+              href="mailto:info@pflegelotse-deutschland.gmx.de"
+              className="text-[var(--color-accent)] hover:underline"
+            >
+              info@pflegelotse-deutschland.gmx.de
+            </a>
           </p>
         </section>
 
@@ -137,8 +144,10 @@ export default async function DatenschutzPage({
             </li>
           </ul>
           <p className="mt-2">
-            Bei Übermittlungen in Drittländer bestehen geeignete Garantien (z. B. EU-Standard-
-            vertragsklauseln). [Konkrete Anbieter, Standorte und Garantien rechtlich prüfen.]
+            Sentry verarbeitet die Daten in der EU-Region (Frankfurt). Soweit einzelne
+            der genannten Dienste Daten außerhalb der EU verarbeiten, geschieht das auf
+            Grundlage der EU-Standardvertragsklauseln. Mit allen Auftragsverarbeitern
+            bestehen Verträge nach Art. 28 DSGVO.
           </p>
         </section>
 
@@ -162,13 +171,20 @@ export default async function DatenschutzPage({
             Du hast das Recht auf Auskunft (Art. 15), Berichtigung (Art. 16), Löschung (Art. 17),
             Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und
             Widerspruch (Art. 21). Eine erteilte Einwilligung kannst du jederzeit mit Wirkung für
-            die Zukunft widerrufen. Wende dich dazu an [kontakt@deine-domain.de]. Außerdem hast du
-            ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde (z. B. [zuständige
-            Landesbehörde]).
+            die Zukunft widerrufen. Wende dich dazu an{' '}
+            <a
+              href="mailto:info@pflegelotse-deutschland.gmx.de"
+              className="text-[var(--color-accent)] hover:underline"
+            >
+              info@pflegelotse-deutschland.gmx.de
+            </a>
+            . Außerdem hast du ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde.
+            Zuständig ist für uns der Landesbeauftragte für den Datenschutz und die
+            Informationsfreiheit Baden-Württemberg (Sitz des Verantwortlichen).
           </p>
         </section>
 
-        <p className="text-xs text-[var(--color-faint)]">Stand: [Datum]. Version: Vorlage 1.0.</p>
+        <p className="text-xs text-[var(--color-faint)]">Stand: 27. August 2026.</p>
       </div>
     </main>
   )

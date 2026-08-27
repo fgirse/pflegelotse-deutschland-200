@@ -148,14 +148,21 @@ bzw. in den Env-Variablen, Punkte mit ▶️ per Befehl auf deinem Rechner.
 
 ## Recht / DSGVO (separater Block, vor echtem Publikumsstart)
 
-- [ ] ⚠️ **Datenschutzerklärung und Impressum sind unausgefüllte Vorlagen** und
-      trotzdem öffentlich erreichbar (`/de/impressum`, `/de/datenschutz`, beide
-      HTTP 200). Sie enthalten `[…]`-Platzhalter und ein sichtbares Banner
-      „Vorlage". Ein Impressum mit Platzhaltern erfüllt § 5 DDG nicht und ist
-      abmahnfähig — das ist der härteste Blocker vor einem Publikumsstart.
-      Echte Angaben eintragen (`src/app/(frontend)/[locale]/impressum/page.tsx`
-      und `…/datenschutz/page.tsx`), Hinweisbanner entfernen, rechtlich prüfen
-      lassen.
+- [~] **Impressum und Datenschutzerklärung** (2026-08-27). Betreiberangaben
+      eingetragen: Pflegelotse Deutschland GmbH, Staufener Straße 79,
+      79189 Bad Krozingen, Geschäftsführer Michael Schreck,
+      `info@pflegelotse-deutschland.gmx.de`. In der Datenschutzerklärung
+      zusätzlich der Verantwortliche, die zuständige Aufsichtsbehörde (LfDI
+      Baden-Württemberg, Sitz des Verantwortlichen) und der Stand.
+      **Noch offen — ohne diese Angaben ist das Impressum unvollständig:**
+      - [ ] ⚙️ Registergericht (Amtsgericht) und HRB-Nummer. Für eine GmbH
+            Pflichtangabe nach § 5 Abs. 1 Nr. 4 DDG. Bis dahin steht ein
+            sichtbarer Hinweis auf der Seite.
+      - [ ] ⚙️ Umsatzsteuer-Identifikationsnummer (§ 27a UStG), falls
+            vorhanden — die `DE`-Nummer, nicht die Steuernummer. Die Zeile ist
+            derzeit ausgelassen.
+      - [ ] Beide Texte anwaltlich prüfen lassen, besonders die Rechtsgrundlage
+            für Gesundheitsdaten (Art. 9 DSGVO).
 - [ ] AVV mit Auftragsverarbeitern: Mollie, Sentry, Resend, MongoDB Atlas, Vercel,
       OSRM-Hoster. Bei **Sentry** liegen die Daten in der EU-Region (Frankfurt);
       das DPA gibt es online im Sentry-Konto. Das PII-Scrubbing in
