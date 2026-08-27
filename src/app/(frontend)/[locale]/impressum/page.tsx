@@ -61,17 +61,6 @@ export default async function ImpressumPage({
           </p>
         </section>
 
-        <section>
-          <h2 className="font-display text-lg font-semibold">
-            Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV
-          </h2>
-          <p className="mt-2 text-[var(--color-muted)]">
-            [Name]
-            <br />
-            [Anschrift]
-          </p>
-        </section>
-
         {/* Der frühere Verweis auf die EU-Plattform zur Online-Streitbeilegung
             (OS/ODR) ist entfallen: Sie wurde zum 20.07.2025 eingestellt und die
             zugrundeliegende Verordnung (EU) 524/2013 durch (EU) 2024/3228
