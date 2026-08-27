@@ -638,7 +638,7 @@
     "hausnummer": "House number",
     "adressePruefen": "Check address",
     "adressePruefenHinweis": "Please check the address — you can only continue afterwards.",
-    "adresseNichtGefunden": "Address not found — please specify street and house number more precisely.",
+    "adresseNichtGefunden": "Address not found — please check street, number, postal code and city.",
     "stadtteil": "District",
     "alter": "Age",
     "wohnsituation": "Living situation",
@@ -678,7 +678,9 @@
     "kontaktart_telefon": "Phone",
     "kontaktart_email": "E-mail",
     "kontaktzeitraum": "Preferred time to be contacted",
-    "absenden": "Submit form"
+    "absenden": "Submit form",
+    "plz": "Postal code",
+    "ort": "City"
   },
   "markt": {
     "title": "Find a care service",

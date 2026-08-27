@@ -48,6 +48,10 @@ export function BedarfForm() {
   // Schritt 1 — Person
   const [strasse, setStrasse] = useState('')
   const [hausnummer, setHausnummer] = useState('')
+  // PLZ und Ort gehören zur Adresse: Ohne sie ist „Hauptstr. 5" bundesweit
+  // hundertfach vorhanden, und die Geokodierung träfe die falsche Stelle.
+  const [plz, setPlz] = useState('')
+  const [ort, setOrt] = useState('')
   // Adresse muss vor dem Fortfahren geokodiert (bestätigt) werden.
   const [geocodedGeo, setGeocodedGeo] = useState<{ lat: number; lng: number } | null>(null)
   const [geoStadtteil, setGeoStadtteil] = useState<string | undefined>(undefined)
@@ -88,12 +92,16 @@ export function BedarfForm() {
 
   // Adresse geokodieren und bestätigen. Der grobe Stadtteil (für die anonyme
   // Dienst-Anzeige) wird aus dem Treffer abgeleitet, sofern erkennbar.
+  // Vollständige Adresse für Geokodierung und Anzeige. PLZ vor Ort entspricht
+  // der deutschen Schreibweise und ist das, was Nominatim am besten auflöst.
+  const adresseVoll = () => `${strasse} ${hausnummer}, ${plz} ${ort}`.replace(/\s+/g, ' ').trim()
+
   async function adresseSuchen() {
-    if (strasse.trim().length < 2 || hausnummer.trim().length < 1) return
+    if (!adresseKomplett) return
     setGeoBusy(true)
     setGeoLabel(null)
     try {
-      const q = `${strasse} ${hausnummer}, Freiburg`
+      const q = adresseVoll()
       const res = await fetch(`/api/v1/geo/geocode?q=${encodeURIComponent(q)}`)
       if (!res.ok) {
         setGeocodedGeo(null)
@@ -128,8 +136,16 @@ export function BedarfForm() {
     setGeoLabel(null)
   }
 
+  // Erst wenn die Adresse vollständig ist, lässt sie sich sinnvoll prüfen.
+  // PLZ auf 5 Ziffern: eine unvollständige PLZ liefert Treffer im falschen Ort.
+  const adresseKomplett =
+    strasse.trim().length >= 2 &&
+    hausnummer.trim().length >= 1 &&
+    /^\d{5}$/.test(plz.trim()) &&
+    ort.trim().length >= 2
+
   const step1Ok =
-    strasse && hausnummer && geocodedGeo && Number(alter) >= 1 && pflegegrad && startDatum
+    adresseKomplett && geocodedGeo && Number(alter) >= 1 && pflegegrad && startDatum
   const step3Ok = name.trim() && email.trim() && kontaktart.length > 0 && datenschutz
 
   async function absenden() {
@@ -203,7 +219,7 @@ export function BedarfForm() {
             nachname,
             telefon: telefon || undefined,
             email,
-            adresse: `${strasse} ${hausnummer}, Freiburg`,
+            adresse: adresseVoll(),
             beratungsstelle: beratungsstelle || undefined,
             kontaktart,
             kontaktzeitraum: kontaktzeitraum || undefined,
@@ -304,12 +320,38 @@ export function BedarfForm() {
               />
             </label>
           </div>
+          <div className="flex gap-3">
+            <label className="label w-32">
+              {t('bedarf.plz')} *
+              <input
+                value={plz}
+                onChange={(e) =>
+                  // Nur Ziffern zulassen und auf 5 begrenzen — spart die
+                  // Fehlermeldung für den häufigsten Vertipper.
+                  adresseGeaendert(setPlz, e.target.value.replace(/\D/g, '').slice(0, 5))
+                }
+                inputMode="numeric"
+                autoComplete="postal-code"
+                maxLength={5}
+                className={inputCls}
+              />
+            </label>
+            <label className="label flex-1">
+              {t('bedarf.ort')} *
+              <input
+                value={ort}
+                onChange={(e) => adresseGeaendert(setOrt, e.target.value)}
+                autoComplete="address-level2"
+                className={inputCls}
+              />
+            </label>
+          </div>
           {/* Adresse verpflichtend bestätigen (geokodieren) — sonst kein Weiter. */}
           <div>
             <button
               type="button"
               onClick={adresseSuchen}
-              disabled={geoBusy || strasse.trim().length < 2 || hausnummer.trim().length < 1}
+              disabled={geoBusy || !adresseKomplett}
               className="btn btn-outline"
             >
               {t('bedarf.adressePruefen')}

@@ -26,6 +26,8 @@ test('Reverse Bidding: Bedarf → Angebot → Auswahl → Kontaktfreigabe', asyn
   // werden, sonst bleibt „Weiter" gesperrt.
   await page.getByLabel('Straße').fill('Kaiser-Joseph-Str.')
   await page.getByLabel('Hausnummer').fill('200')
+  await page.getByLabel('PLZ').fill('79098')
+  await page.getByLabel('Ort').fill('Freiburg im Breisgau')
   await page.getByRole('button', { name: 'Adresse prüfen' }).click()
   await expect(page.getByText(/✓ Innenstadt/)).toBeVisible()
   await page.getByLabel('Alter').fill('78')

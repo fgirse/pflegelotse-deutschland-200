@@ -638,7 +638,7 @@
     "hausnummer": "Hausnummer",
     "adressePruefen": "Adresse prüfen",
     "adressePruefenHinweis": "Bitte die Adresse prüfen — erst danach kannst du fortfahren.",
-    "adresseNichtGefunden": "Adresse nicht gefunden — bitte Straße und Hausnummer genauer angeben.",
+    "adresseNichtGefunden": "Adresse nicht gefunden — bitte Straße, Hausnummer, PLZ und Ort prüfen.",
     "stadtteil": "Stadtteil",
     "alter": "Alter",
     "wohnsituation": "Wohnsituation",
@@ -678,7 +678,9 @@
     "kontaktart_telefon": "Telefon",
     "kontaktart_email": "E-Mail",
     "kontaktzeitraum": "gewünschter Zeitraum der Kontaktaufnahme",
-    "absenden": "Formular abschicken"
+    "absenden": "Formular abschicken",
+    "plz": "PLZ",
+    "ort": "Ort"
   },
   "markt": {
     "title": "Pflegedienst finden",
