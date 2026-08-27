@@ -72,18 +72,18 @@ export default async function ImpressumPage({
           </p>
         </section>
 
+        {/* Der frühere Verweis auf die EU-Plattform zur Online-Streitbeilegung
+            (OS/ODR) ist entfallen: Sie wurde zum 20.07.2025 eingestellt und die
+            zugrundeliegende Verordnung (EU) 524/2013 durch (EU) 2024/3228
+            aufgehoben. Ein Link darauf wäre heute irreführend. Der Hinweis nach
+            § 36 VSBG bleibt. */}
         <section>
-          <h2 className="font-display text-lg font-semibold">Streitschlichtung</h2>
+          <h2 className="font-display text-lg font-semibold">
+            Verbraucherstreitbeilegung
+          </h2>
           <p className="mt-2 text-[var(--color-muted)]">
-            Die EU-Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:{' '}
-            <a
-              href="https://ec.europa.eu/consumers/odr/"
-              className="text-[var(--color-accent)] hover:underline"
-            >
-              ec.europa.eu/consumers/odr
-            </a>
-            . Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor
-            einer Verbraucherschlichtungsstelle teilzunehmen. [Bei Bedarf anpassen.]
+            Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren
+            vor einer Verbraucherschlichtungsstelle teilzunehmen (§ 36 VSBG).
           </p>
         </section>
       </div>
