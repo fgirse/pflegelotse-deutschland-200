@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
 import { ORTE } from '@/shared/orte'
+import { baueAdresse, adresseVollstaendig } from '@/shared/adresse'
 import { hhmmToMin } from '@/shared/time'
 import { kassenFuerArt, type KostentraegerArt } from '@/shared/krankenkassen'
 import { BUNDESLAENDER, type Bundesland } from '@/shared/leistungskomplexe'
@@ -92,9 +93,9 @@ export function BedarfForm() {
 
   // Adresse geokodieren und bestätigen. Der grobe Stadtteil (für die anonyme
   // Dienst-Anzeige) wird aus dem Treffer abgeleitet, sofern erkennbar.
-  // Vollständige Adresse für Geokodierung und Anzeige. PLZ vor Ort entspricht
-  // der deutschen Schreibweise und ist das, was Nominatim am besten auflöst.
-  const adresseVoll = () => `${strasse} ${hausnummer}, ${plz} ${ort}`.replace(/\s+/g, ' ').trim()
+  // Vollständige Adresse für Geokodierung und Anzeige — aus einer Quelle, die
+  // sich die Klienten-Anlage mit diesem Formular teilt (shared/adresse.ts).
+  const adresseVoll = () => baueAdresse({ strasse, hausnummer, plz, ort })
 
   async function adresseSuchen() {
     if (!adresseKomplett) return
@@ -137,12 +138,7 @@ export function BedarfForm() {
   }
 
   // Erst wenn die Adresse vollständig ist, lässt sie sich sinnvoll prüfen.
-  // PLZ auf 5 Ziffern: eine unvollständige PLZ liefert Treffer im falschen Ort.
-  const adresseKomplett =
-    strasse.trim().length >= 2 &&
-    hausnummer.trim().length >= 1 &&
-    /^\d{5}$/.test(plz.trim()) &&
-    ort.trim().length >= 2
+  const adresseKomplett = adresseVollstaendig({ strasse, hausnummer, plz, ort })
 
   const step1Ok =
     adresseKomplett && geocodedGeo && Number(alter) >= 1 && pflegegrad && startDatum

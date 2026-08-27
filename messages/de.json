@@ -56,7 +56,11 @@
     "speichern": "Speichern",
     "abbrechen": "Abbrechen",
     "erfolg": "Klient gespeichert: {name}",
-    "fehlerAllgemein": "Speichern fehlgeschlagen. Bitte erneut versuchen."
+    "fehlerAllgemein": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
+    "strasse": "Straße",
+    "hausnummer": "Hausnummer",
+    "plz": "PLZ",
+    "ort": "Ort"
   },
   "leistungen": {
     "title": "Leistungskatalog",

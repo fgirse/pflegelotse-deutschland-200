@@ -56,7 +56,11 @@
     "speichern": "Save",
     "abbrechen": "Cancel",
     "erfolg": "Client saved: {name}",
-    "fehlerAllgemein": "Save failed. Please try again."
+    "fehlerAllgemein": "Save failed. Please try again.",
+    "strasse": "Street",
+    "hausnummer": "Number",
+    "plz": "Postal code",
+    "ort": "City"
   },
   "leistungen": {
     "title": "Service catalog",

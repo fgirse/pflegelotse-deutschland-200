@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { KlientListenZeile } from '@/server/klienten/liste'
+import { baueAdresse, zerlegeAdresse, adresseVollstaendig } from '@/shared/adresse'
 
 // CSV-Feld für den Export: bei ; " oder Zeilenumbruch in Anführungszeichen
 // setzen und "-Zeichen verdoppeln (RFC 4180, Trenner ;).
@@ -40,7 +41,14 @@ export function KlientenTabelle({
   const [vorname, setVorname] = useState('')
   const [nachname, setNachname] = useState('')
   const [geburtsdatum, setGeburtsdatum] = useState('')
-  const [adresse, setAdresse] = useState('')
+  // Adresse in Einzelfeldern erfassen (gespeichert wird weiterhin ein String).
+  // Ohne PLZ und Ort ist die Geokodierung beim Anlegen vieldeutig und trifft
+  // im Zweifel still den falschen Ort.
+  const [strasse, setStrasse] = useState('')
+  const [hausnummer, setHausnummer] = useState('')
+  const [plz, setPlz] = useState('')
+  const [ort, setOrt] = useState('')
+  const adresse = baueAdresse({ strasse, hausnummer, plz, ort })
   const [telefon, setTelefon] = useState('')
   const [email, setEmail] = useState('')
   const [kostentraeger, setKostentraeger] = useState('')
@@ -79,11 +87,33 @@ export function KlientenTabelle({
     }
   }
 
+  // Übernimmt eine gespeicherte Adresse in die Einzelfelder. Bestandsdaten
+  // wurden als Freitext erfasst (oft ohne PLZ) — was sich nicht sicher
+  // zuordnen lässt, bleibt sichtbar stehen, statt geraten zu werden.
+  function setAdresseFelder(gespeichert: string | null | undefined) {
+    const teile = zerlegeAdresse(gespeichert)
+    setStrasse(teile.strasse)
+    setHausnummer(teile.hausnummer)
+    setPlz(teile.plz)
+    setOrt(teile.ort)
+    setGeo(null)
+    setGeoLabel(null)
+  }
+
+  // Änderung an der Adresse verwirft eine frühere Geo-Bestätigung.
+  function adresseGeaendert(setter: (v: string) => void, wert: string) {
+    setter(wert)
+    setGeo(null)
+    setGeoLabel(null)
+  }
+
+  const adresseKomplett = adresseVollstaendig({ strasse, hausnummer, plz, ort })
+
   function felderLeeren() {
     setVorname('')
     setNachname('')
     setGeburtsdatum('')
-    setAdresse('')
+    setAdresseFelder('')
     setTelefon('')
     setEmail('')
     setKostentraeger('')
@@ -106,7 +136,7 @@ export function KlientenTabelle({
     setVorname(k.vorname)
     setNachname(k.nachname)
     setGeburtsdatum(k.geburtsdatum ?? '')
-    setAdresse(k.adresse ?? '')
+    setAdresseFelder(k.adresse)
     setTelefon(k.telefon ?? '')
     setEmail(k.email ?? '')
     setKostentraeger(k.kostentraegerArt ?? '')
@@ -129,7 +159,7 @@ export function KlientenTabelle({
   }
 
   async function adresseSuchen() {
-    if (adresse.trim().length < 3) return
+    if (!adresseKomplett) return
     setGeoBusy(true)
     setGeoLabel(null)
     setGeo(null)
@@ -554,10 +584,51 @@ export function KlientenTabelle({
                 onChange={(e) => setGeburtsdatum(e.target.value)}
               />
             </label>
-            <label className="label">
-              {t('adresse')}
-              <input className="input" value={adresse} onChange={(e) => setAdresse(e.target.value)} />
-            </label>
+            <div className="flex gap-3 sm:col-span-2">
+              <label className="label flex-1">
+                {t('strasse')}
+                <input
+                  className="input"
+                  value={strasse}
+                  autoComplete="address-line1"
+                  onChange={(e) => adresseGeaendert(setStrasse, e.target.value)}
+                />
+              </label>
+              <label className="label w-28">
+                {t('hausnummer')}
+                <input
+                  className="input"
+                  value={hausnummer}
+                  onChange={(e) => adresseGeaendert(setHausnummer, e.target.value)}
+                />
+              </label>
+            </div>
+            <div className="flex gap-3 sm:col-span-2">
+              <label className="label w-28">
+                {t('plz')}
+                <input
+                  className="input"
+                  value={plz}
+                  inputMode="numeric"
+                  autoComplete="postal-code"
+                  maxLength={5}
+                  // Nur Ziffern, höchstens fünf — fängt den häufigsten
+                  // Vertipper ab, bevor er zur Fehlermeldung wird.
+                  onChange={(e) =>
+                    adresseGeaendert(setPlz, e.target.value.replace(/\D/g, '').slice(0, 5))
+                  }
+                />
+              </label>
+              <label className="label flex-1">
+                {t('ort')}
+                <input
+                  className="input"
+                  value={ort}
+                  autoComplete="address-level2"
+                  onChange={(e) => adresseGeaendert(setOrt, e.target.value)}
+                />
+              </label>
+            </div>
 
             {/* Nur beim Anlegen: Adresse → Koordinaten + Zeitfenster. */}
             {neu && (
@@ -568,7 +639,7 @@ export function KlientenTabelle({
                     <button
                       type="button"
                       onClick={adresseSuchen}
-                      disabled={geoBusy || adresse.trim().length < 3}
+                      disabled={geoBusy || !adresseKomplett}
                       className="btn btn-outline shrink-0"
                     >
                       {t('suchen')}
