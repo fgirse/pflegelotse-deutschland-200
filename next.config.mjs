@@ -28,10 +28,12 @@ export default withSentryConfig(baseConfig, {
   // wäre damit lesbar. Sentry braucht sie nicht mehr, sobald sie hochgeladen
   // sind. Greift nur, wenn überhaupt hochgeladen wird.
   sourcemaps: { deleteSourcemapsAfterUpload: true },
-  // Sentry-eigene Debug-Logs aus dem Client-Bundle entfernen.
-  disableLogger: true,
-  // Überwacht den stündlichen SLA-Cron (vercel.json) als Sentry Cron Monitor.
-  // Ein stiller Ausfall wäre fachlich teuer: an dem Job hängt die 24-Stunden-
-  // Rückmeldefrist samt Auto-Absage.
-  automaticVercelMonitors: true,
+  webpack: {
+    // Sentry-eigene Debug-Logs aus dem Client-Bundle entfernen.
+    treeshake: { removeDebugLogging: true },
+    // Überwacht den stündlichen SLA-Cron (vercel.json) als Sentry Cron Monitor.
+    // Ein stiller Ausfall wäre fachlich teuer: an dem Job hängt die 24-Stunden-
+    // Rückmeldefrist samt Auto-Absage.
+    automaticVercelMonitors: true,
+  },
 })
